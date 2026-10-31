@@ -410,6 +410,8 @@
     "astig_alto": "cil_max >= 1",
     "graduacion_baja": "receta and potencia < 0.75 and not add > 0",
     "menor_miope": "edad < 18 and miopia",
+    "nino_miope": "edad <= 12 and miopia",
+    "adolescente_miope": "menor_miope and edad > 12",
     "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)"
   },
   "productos": [
@@ -689,8 +691,12 @@
           "texto": "Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."
         },
         {
-          "si": "menor_miope",
-          "texto": "Para chicos y adolescentes con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."
+          "si": "nino_miope",
+          "texto": "Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."
+        },
+        {
+          "si": "adolescente_miope",
+          "texto": "Con miopía y menos de 18 años, va sin filtro azul."
         }
       ],
       "soluciones": [
@@ -720,7 +726,7 @@
                 },
                 {
                   "id": "control_miopia",
-                  "si": "menor_miope"
+                  "si": "nino_miope"
                 },
                 {
                   "id": "policarbonato",
@@ -888,11 +894,16 @@
     {
       "id": "lc_miopia",
       "momento": "dia",
-      "nombre": "Lentes de contacto de control de miopía",
+      "nombre": "Control de miopía",
       "cuando": "menor_miope and edad >= 8",
       "puntos": [
         {
+          "si": "nino_miope",
           "n": 6
+        },
+        {
+          "si": "adolescente_miope",
+          "n": 3
         },
         {
           "si": "deporte_activo",
@@ -901,10 +912,16 @@
       ],
       "motivos": [
         {
+          "si": "nino_miope",
           "texto": "Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."
         },
         {
-          "texto": "Otra opción para frenar el avance de la miopía, además del cristal de control de miopía."
+          "si": "nino_miope",
+          "texto": "Los lentes de contacto de control de miopía son otra opción, además del cristal."
+        },
+        {
+          "si": "adolescente_miope",
+          "texto": "Con {edad} años el control de miopía todavía se puede usar, aunque rinde más hasta los 12."
         },
         {
           "texto": "Siempre con indicación y control del oftalmólogo."
@@ -912,8 +929,25 @@
       ],
       "soluciones": [
         {
-          "id": "uno",
-          "nombre": "Lentes de contacto",
+          "id": "cristal",
+          "si": "adolescente_miope",
+          "nombre": "Cristal de control de miopía",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "control_miopia"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lc",
+          "nombre": "Lentes de contacto de control de miopía",
           "pares": [
             {
               "tecnologias": [

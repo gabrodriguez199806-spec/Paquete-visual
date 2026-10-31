@@ -407,6 +407,8 @@ const DEFAULT_CONFIG = {
     astig_alto: 'cil_max >= 1',
     graduacion_baja: 'receta and potencia < 0.75 and not add > 0',
     menor_miope: 'edad < 18 and miopia',
+    nino_miope: 'edad <= 12 and miopia',
+    adolescente_miope: 'menor_miope and edad > 12',
     lc_candidato: 'lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)'
   },
   productos: [
@@ -461,9 +463,10 @@ const DEFAULT_CONFIG = {
         {si:"filtro_azul", texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas: suma filtro de luz azul."},
         {si:"oscurece", texto:"Querés que se oscurezca al sol: va fotocromático."},
         {si:"potencia >= 6", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
-        {si:"menor_miope", texto:"Para chicos y adolescentes con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."}
+        {si:"nino_miope", texto:"Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."},
+        {si:"adolescente_miope", texto:"Con miopía y menos de 18 años, va sin filtro azul."}
       ],
-      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"},{id:"control_miopia",si:"menor_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
+      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"},{id:"control_miopia",si:"nino_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
       motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
@@ -482,10 +485,16 @@ const DEFAULT_CONFIG = {
         {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"},{id:"lc_diarias"}]}]}]},
-    {id:"lc_miopia", momento:"dia", nombre:"Lentes de contacto de control de miopía", cuando:'menor_miope and edad >= 8',
-      puntos:[{n:6},{si:"deporte_activo", n:1}],
-      motivos:[{texto:"Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."},{texto:"Otra opción para frenar el avance de la miopía, además del cristal de control de miopía."},{texto:"Siempre con indicación y control del oftalmólogo."}],
-      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_control_miopia"}]}]}]},
+    {id:"lc_miopia", momento:"dia", nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
+      puntos:[{si:"nino_miope", n:6},{si:"adolescente_miope", n:3},{si:"deporte_activo", n:1}],
+      motivos:[
+        {si:"nino_miope", texto:"Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."},
+        {si:"nino_miope", texto:"Los lentes de contacto de control de miopía son otra opción, además del cristal."},
+        {si:"adolescente_miope", texto:"Con {edad} años el control de miopía todavía se puede usar, aunque rinde más hasta los 12."},
+        {texto:"Siempre con indicación y control del oftalmólogo."}],
+      soluciones:[
+        {id:"cristal", si:"adolescente_miope", nombre:"Cristal de control de miopía", pares:[{tecnologias:[{id:"control_miopia"},{id:"ar"}]}]},
+        {id:"lc", nombre:"Lentes de contacto de control de miopía", pares:[{tecnologias:[{id:"lc_control_miopia"}]}]}]},
 
     {id:"ocup", momento:"trabajo", nombre:"Anteojo ocupacional para la compu", cuando:"add > 0 and usa_pc",
       puntos:[{n:2},{si:'pantallas in ["5-8","8+"]', n:3},{si:'pantallas == "8+"', n:1},{si:'"fatiga" in luz', n:2},{si:'"pc" in trabajo', n:1}],
