@@ -190,8 +190,9 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
           <img id="rxImg" alt="Foto de la receta" hidden>
           <div class="txt" id="dropTxt">Sacale una foto a la receta y la leemos con IA. Después revisá los números contra el papel.</div>
           <div class="actions">
-            <label class="btn primary" for="rxFile" id="rxFileLbl">Subir foto de receta</label>
-            <input id="rxFile" type="file" accept="image/*" capture="environment" hidden>
+            <span id="rxFileLbl" style="display:inline-flex;gap:8px;flex-wrap:wrap"><label class="btn primary" for="rxCam">Sacar foto</label><label class="btn" for="rxFile">Elegir de la galería</label></span>
+            <input id="rxCam" type="file" accept="image/*" capture="environment" hidden>
+            <input id="rxFile" type="file" accept="image/*" hidden>
           </div>
         </div>
         <div id="aiStatus" class="status" hidden></div>
@@ -1068,10 +1069,10 @@ async function readWithApi(file){
 }
 (async()=>{
   try{ sampleFn = await window.claude?.use?.("sample"); }catch(_){ sampleFn=null; }
-  if(sampleFn){ try{ const lim = await sampleFn.limits(); canImg = !!lim?.images; if(canImg) $("rxFile").accept = lim.images.mediaTypes.join(","); }catch(_){} }
+  if(sampleFn){ try{ const lim = await sampleFn.limits(); canImg = !!lim?.images; if(canImg){ $("rxFile").accept = $("rxCam").accept = lim.images.mediaTypes.join(","); } }catch(_){} }
   if(!canImg && !AI.key){ $("rxFileLbl").hidden=true; $("dropTxt").textContent="La lectura con IA no está disponible acá. Cargá los valores a mano, o poné tu clave de API en Configuración."; }
 })();
-$("rxFile").onchange = async e=>{
+$("rxCam").onchange = $("rxFile").onchange = async e=>{
   const f=e.target.files[0]; if(!f) return;
   const img=$("rxImg"); img.src=URL.createObjectURL(f); img.hidden=false;
   const st=$("aiStatus"); st.hidden=false; st.className="status"; st.textContent="Leyendo la receta…";
