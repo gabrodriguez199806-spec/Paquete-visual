@@ -33,7 +33,7 @@ Para probar cambios, entrá en **modo óptica**: tocá "Acceso óptica" al pie d
 
 Desde Configuración podés editar:
 
-- Nombre de la óptica, saludo del mensaje de WhatsApp y texto legal.
+- Nombre de la óptica, **número de WhatsApp** (el botón "Contactar a la óptica" le abre al paciente un mensaje con su nombre, edad, por dónde quiere empezar, el resto del plan y su receta), saludos y texto legal.
 - **Tipos de cristal y productos** con los nombres que usa tu óptica.
 - **Momentos** del día (en el JSON) y a qué momento pertenece cada sugerencia.
 - **Sugerencias:** nombre, prioridad y la condición que las hace aparecer.

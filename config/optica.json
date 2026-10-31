@@ -2,6 +2,8 @@
   "version": 5,
   "optica": {
     "nombre": "Óptica Rodriguez",
+    "whatsapp": "5491162762199",
+    "contacto": "Hola! Me llamo {nombre}, tengo {edad} años y este es mi plan visual que armé en la web de {optica}.",
     "intro": "Así como no usás el mismo calzado para una fiesta, para correr y para caminar, tu vista también rinde mejor con la solución justa para cada momento.",
     "saludo": "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
     "legal": "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día."

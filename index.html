@@ -235,7 +235,8 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
         <div class="items" id="items"></div>
         <div class="totals" id="totals"></div>
         <div class="actions">
-          <button class="btn primary" id="copyBtn" type="button">Copiar plan para WhatsApp</button>
+          <a class="btn primary" id="waBtn" href="#" target="_blank" rel="noopener">Contactar a la óptica por WhatsApp</a>
+          <button class="btn" id="copyBtn" type="button">Copiar plan para enviar al paciente</button>
         </div>
         <textarea class="out" id="outTxt" readonly hidden></textarea>
         <div class="legal" id="legal"></div>
@@ -267,7 +268,11 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
         <label class="f">Nombre<input id="c-nombre"></label>
       </div>
       <label class="f">Frase de presentación del plan<textarea id="c-intro" rows="2"></textarea></label>
-      <label class="f">Saludo del mensaje de WhatsApp<input id="c-saludo"></label>
+      <div class="row">
+        <label class="f">WhatsApp de la óptica (con código de país, sin + ni espacios)<input id="c-whatsapp" inputmode="numeric" placeholder="5491112345678"></label>
+      </div>
+      <label class="f">Inicio del mensaje del paciente a la óptica ({nombre}, {edad} y {optica} se completan solos)<textarea id="c-contacto" rows="2"></textarea></label>
+      <label class="f">Saludo del mensaje de la óptica al paciente<input id="c-saludo"></label>
       <label class="f">Texto legal al pie del plan<textarea id="c-legal" rows="2"></textarea></label>
     </section>
 
@@ -335,6 +340,8 @@ const DEFAULT_CONFIG = {
   version: 5,
   optica: {
     nombre: "Óptica Rodriguez",
+    whatsapp: "5491162762199",
+    contacto: "Hola! Me llamo {nombre}, tengo {edad} años y este es mi plan visual que armé en la web de {optica}.",
     intro: "Así como no usás el mismo calzado para una fiesta, para correr y para caminar, tu vista también rinde mejor con la solución justa para cada momento.",
     saludo: "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
     legal: "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día."
@@ -745,19 +752,44 @@ function waText(){
   t += C.optica.legal || "";
   return t.trim();
 }
+function contactText(){
+  const act = lastItems.filter(i=>!S.off[i.s.id]);
+  const nombre = (S.pac.nombre||"").replace(/\s*\(ejemplo\)/,"").trim(), edad = String(S.pac.edad||"").trim();
+  let head = C.optica.contacto || "Hola! Este es mi plan visual.";
+  head = head.replace("{optica}", C.optica.nombre||"la óptica");
+  head = nombre ? head.replace("{nombre}", nombre) : head.replace(/\s*Me llamo \{nombre\},?/i,"").replace("{nombre}","");
+  head = edad ? head.replace("{edad}", edad) : head.replace(/,?\s*tengo \{edad\} años/i,"").replace("{edad}","");
+  head = head.replace(/!\s+y /,"! ").replace(/\s{2,}/g," ");
+  const what = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.chosen?p.chosen.nombre:""}`).join(" + ");
+  const desc = i => (i.alts.length>1 ? (i.picked ? `${i.s.nombre}: ${i.sol.nombre} (${what(i.pares)})` : `${i.s.nombre} (${i.alts.map(a=>a.sol.nombre).join(", ")})`) : `${i.s.nombre}: ${what(i.pares)}`);
+  let start = act.filter(i=>S.hoy[i.s.id]);
+  if(!start.length) start = act.filter(i=>i.pr==="ess").slice(0,1);
+  const rest = act.filter(i=>!start.includes(i));
+  let t = head + "\n\n";
+  if(start.length) t += "*Quiero empezar con:*\n" + start.map(i=>"• "+desc(i)).join("\n") + "\n\n";
+  if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(i=>"• "+desc(i)).join("\n") + "\n\n";
+  const rx = ["od","oi"].map(k=>{ const r=S.rx[k]; const v=[r.esf&&`esf ${r.esf}`, r.cil&&`cil ${r.cil}`, r.eje&&`eje ${r.eje}`, r.add&&`add ${r.add}`].filter(Boolean).join(" "); return v?`${k.toUpperCase()} ${v}`:""; }).filter(Boolean);
+  if(rx.length) t += "Mi receta: " + rx.join(" / ") + (S.rx.fecha?` (${S.rx.fecha})`:"") + "\n";
+  return t.trim();
+}
+function updateWa(){
+  const n = String(C.optica.whatsapp||"").replace(/\D/g,""), a=$("waBtn");
+  a.hidden = !n || !lastItems.length;
+  a.href = n ? "https://wa.me/"+n+"?text="+encodeURIComponent(contactText()) : "#";
+}
 function fillForm(){
   $("p-nombre").value=S.pac.nombre; $("p-edad").value=S.pac.edad; $("p-tel").value=S.pac.tel;
   ["od","oi"].forEach(e=>["esf","cil","eje","add"].forEach(f=>$(`${e}-${f}`).value=S.rx[e][f]??""));
   $("rx-fecha").value=S.rx.fecha||""; $("rx-tipo").value=S.rx.tipo||"anteojos"; $("rx-medico").value=S.rx.medico||"";
 }
 function header(){ $("opName").textContent = C.optica.nombre||"Óptica"; $("planIntro").textContent = C.optica.intro||""; $("planIntro").hidden=!C.optica.intro; $("legal").textContent = C.optica.legal||""; }
-function all(){ header(); renderRead(); renderPlan(); save(); }
+function all(){ header(); renderRead(); renderPlan(); updateWa(); $("copyBtn").hidden = !isStaff(); save(); }
 
 /* =========================================================
    RENDER: CONFIGURACIÓN
    ========================================================= */
 function renderCfg(){
-  $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
+  $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-whatsapp").value=C.optica.whatsapp||""; $("c-contacto").value=C.optica.contacto||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
   $("c-key").value=AI.key||""; $("c-model").value=AI.model||"";
   $("prodRows").innerHTML = C.productos.map((p,i)=>`<tr>
     <td style="width:120px"><input class="code" id="pr-id-${i}" data-pi="${i}" data-pf="id" value="${esc(p.id)}"></td>
