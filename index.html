@@ -444,12 +444,12 @@ const DEFAULT_CONFIG = {
       ],
       soluciones:[
         {id:"multi", nombre:"Multifocal", explicacion:"Un solo anteojo para lejos, intermedio y cerca, sin línea. Es lo más cómodo; lleva unos días de adaptación.",
-          pares:[{nombre:"Multifocal", tecnologias:[{id:"multifocal"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]}]},
+          pares:[{nombre:"Multifocal", tecnologias:[{id:"multifocal"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]}]},
         {id:"bifocal", nombre:"Bifocal", explicacion:"Un solo anteojo con dos zonas: lejos arriba y cerca abajo. Se ve la línea y no tiene zona para la compu.",
-          pares:[{nombre:"Bifocal", tecnologias:[{id:"bifocal"},{id:"ar"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]}]},
+          pares:[{nombre:"Bifocal", tecnologias:[{id:"bifocal"},{id:"ar"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]}]},
         {id:"dos", nombre:"Dos anteojos (lejos + cerca)", explicacion:"Uno para lejos y otro para cerca. Campo amplio en cada uno, pero hay que cambiarlos según lo que hagas.",
           pares:[
-            {nombre:"Lejos", tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]},
+            {nombre:"Lejos", tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]},
             {nombre:"Cerca", tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}
           ]}
       ]},
@@ -460,10 +460,10 @@ const DEFAULT_CONFIG = {
         {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
         {si:"filtro_azul", texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas: suma filtro de luz azul."},
         {si:"oscurece", texto:"Querés que se oscurezca al sol: va fotocromático."},
-        {si:"potencia >= 4", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
+        {si:"potencia >= 6", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
         {si:"menor_miope", texto:"Para chicos y adolescentes con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."}
       ],
-      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"},{id:"control_miopia",si:"menor_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
+      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"},{id:"control_miopia",si:"menor_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
       motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
@@ -514,7 +514,7 @@ const DEFAULT_CONFIG = {
         {si:"oscurece", texto:"Los fotocromáticos se oscurecen poco dentro del auto, porque el parabrisas filtra el UV."}
       ],
       soluciones:[{id:"uno", nombre:"Manejo", pares:[
-        {nombre:"De día", tecnologias:[{id:"polar"},{id:"alto_indice",si:"potencia >= 4"}]},
+        {nombre:"De día", tecnologias:[{id:"polar"},{id:"alto_indice",si:"potencia >= 6"}]},
         {nombre:"De noche", si:"maneja_noche", tecnologias:[{id:"ar"},{id:"contraste"}]}
       ]}]},
 
@@ -689,7 +689,7 @@ function renderRead(){
   if(r.hipermetropia && r.add) L.push(["Tiene graduación positiva de lejos además de la de cerca."]);
   if(r.astigmatismo) L.push(["Corrige <b>astigmatismo</b>: las imágenes se ven algo deformadas o con sombra."]);
   if(r.add) L.push([`Tiene <b>adición +${r.add.toFixed(2)}</b> para cerca (presbicia o vista cansada). Para ver bien de lejos y de cerca necesitás <b>dos anteojos, un bifocal o un multifocal</b>.`]);
-  if(r.potencia>=4) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
+  if(r.potencia>=6) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
   if(r.anisometropia) L.push(["Hay bastante diferencia entre un ojo y el otro: hay que cuidar mucho el centrado del cristal.","warn"]);
   if(r.receta_meses!=null && r.receta_meses>12) L.push(["La receta tiene más de un año. Conviene revisarla con tu oftalmólogo antes de hacer cristales nuevos.","warn"]);
   if(S.rx.tipo==="anteojos" && ["uso","interes"].includes(S.a.lc)) L.push(["Para lentes de contacto hace falta que tu oftalmólogo los indique en la receta.","warn"]);

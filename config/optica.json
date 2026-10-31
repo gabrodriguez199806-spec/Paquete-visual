@@ -578,7 +578,7 @@
                 },
                 {
                   "id": "alto_indice",
-                  "si": "potencia >= 4"
+                  "si": "potencia >= 6"
                 }
               ]
             }
@@ -604,7 +604,7 @@
                 },
                 {
                   "id": "alto_indice",
-                  "si": "potencia >= 4"
+                  "si": "potencia >= 6"
                 }
               ]
             }
@@ -634,7 +634,7 @@
                 },
                 {
                   "id": "alto_indice",
-                  "si": "potencia >= 4"
+                  "si": "potencia >= 6"
                 }
               ]
             },
@@ -685,7 +685,7 @@
           "texto": "Querés que se oscurezca al sol: va fotocromático."
         },
         {
-          "si": "potencia >= 4",
+          "si": "potencia >= 6",
           "texto": "Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."
         },
         {
@@ -716,7 +716,7 @@
                 },
                 {
                   "id": "alto_indice",
-                  "si": "potencia >= 4"
+                  "si": "potencia >= 6"
                 },
                 {
                   "id": "control_miopia",
@@ -1146,7 +1146,7 @@
                 },
                 {
                   "id": "alto_indice",
-                  "si": "potencia >= 4"
+                  "si": "potencia >= 6"
                 }
               ]
             },
