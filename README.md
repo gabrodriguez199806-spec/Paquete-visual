@@ -25,7 +25,13 @@ Los datos y la configuración se guardan en el navegador de esa computadora (loc
 
 ## Configurar tu óptica
 
-Entrá a **Configuración** dentro de la app:
+La configuración oficial es el archivo **`config/optica.json`**: es la que ven todos los pacientes. Para cambiarla para todos, editá ese archivo en GitHub (o pedíselo a quien te instaló la app).
+
+Para probar cambios, entrá en **modo óptica**: tocá "Acceso óptica" al pie de la página y poné el PIN (de fábrica `1234`, cambialo apenas entres). En modo óptica aparece el botón **Configuración**, y lo que cambies queda guardado solo en esa compu. Los pacientes no ven el botón y siempre usan `config/optica.json`.
+
+> El PIN evita que un paciente entre por curiosidad, pero no es una seguridad fuerte: la app no tiene servidor. Lo que de verdad protege tu configuración es que solo vos podés editar el repositorio.
+
+Desde Configuración podés editar:
 
 - Nombre de la óptica, saludo del mensaje de WhatsApp y texto legal.
 - **Tipos de cristal y productos** con los nombres que usa tu óptica.
@@ -33,7 +39,7 @@ Entrá a **Configuración** dentro de la app:
 - **Sugerencias:** nombre, prioridad y la condición que las hace aparecer.
 - **JSON completo:** preguntas, productos, sugerencias, soluciones y motivos. Se puede copiar, descargar e importar para pasarlo a otra computadora.
 
-`config/optica-rodriguez.json` es una configuración de ejemplo completa.
+Para pasar tus cambios al archivo oficial: en Configuración tocá **Copiar** en el JSON completo y pegalo en `config/optica.json`. El `pinHash` que aparece ahí es tu PIN cifrado: incluilo para que el PIN nuevo sirva en todas las compus.
 
 ### Condiciones
 
