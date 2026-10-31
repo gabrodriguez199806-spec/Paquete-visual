@@ -680,9 +680,12 @@ const EXAMPLE = {
   sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{lejos_cerca:true}, example:true
 };
 const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{}, example:false});
-let S = LS.get("pv-state2") || (isStaff() ? clone(EXAMPLE) : BLANK());
+// El paciente se guarda solo en esta pestaña (sessionStorage) y vence a las 2 horas: cada vez que se abre el link arranca en blanco.
+const SS = {get(k){try{return JSON.parse(sessionStorage.getItem(k)||"null")}catch(e){return null}}, set(k,v){try{sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+try{ localStorage.removeItem("pv-state2"); }catch(_){}
+let S = (()=>{ const s=SS.get("pv-state3"); return s && s.t && Date.now()-s.t < 2*3600e3 ? s.S : null; })() || BLANK();
 ["sol","sel","own","off","hoy","a","force"].forEach(k=>S[k]=S[k]||{});
-const save = () => LS.set("pv-state2", S);
+const save = () => SS.set("pv-state3", {t:Date.now(), S});
 
 /* =========================================================
    RECETA → DATOS

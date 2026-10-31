@@ -23,7 +23,7 @@ Es un solo archivo: `index.html`. No necesita servidor ni base de datos.
 - **En una computadora:** abrí `index.html` con el navegador.
 - **En internet:** publicá el repositorio con GitHub Pages (Settings → Pages → rama `main`).
 
-Los datos y la configuración se guardan en el navegador de esa computadora (localStorage).
+Los datos del paciente quedan solo en esa pestaña y vencen a las 2 horas: cada vez que se abre el link arranca en blanco. La configuración local del modo óptica se guarda en el navegador.
 
 ## Configurar tu óptica
 
