@@ -752,6 +752,18 @@ function waText(){
   t += C.optica.legal || "";
   return t.trim();
 }
+function fmtD(v){ const n=num(v); if(n==null) return null; if(n===0) return "Neutro"; return (n>0?"+":"")+n.toFixed(2); }
+function rxLines(){
+  const L=[];
+  ["od","oi"].forEach(k=>{ const r=S.rx[k], e=fmtD(r.esf), c=num(r.cil), ax=num(r.eje);
+    if(e==null && !c) return;
+    let l = `${k.toUpperCase()} Esf ${e??"Neutro"}`;
+    if(c) l += ` ()${fmtD(r.cil)}` + (ax!=null?` en ${Math.round(ax)}°`:"");
+    L.push(l); });
+  const a1=num(S.rx.od.add), a2=num(S.rx.oi.add);
+  if(a1||a2){ L.push(a1 && a2 && a1===a2 ? `Add ${fmtD(a1)} AO` : `Add ${a1?"OD "+fmtD(a1):""}${a1&&a2?" / ":""}${a2?"OI "+fmtD(a2):""}`); }
+  return L;
+}
 function contactText(){
   const act = lastItems.filter(i=>!S.off[i.s.id]);
   const nombre = (S.pac.nombre||"").replace(/\s*\(ejemplo\)/,"").trim(), edad = String(S.pac.edad||"").trim();
@@ -768,8 +780,8 @@ function contactText(){
   let t = head + "\n\n";
   if(start.length) t += "*Quiero empezar con:*\n" + start.map(i=>"• "+desc(i)).join("\n") + "\n\n";
   if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(i=>"• "+desc(i)).join("\n") + "\n\n";
-  const rx = ["od","oi"].map(k=>{ const r=S.rx[k]; const v=[r.esf&&`esf ${r.esf}`, r.cil&&`cil ${r.cil}`, r.eje&&`eje ${r.eje}`, r.add&&`add ${r.add}`].filter(Boolean).join(" "); return v?`${k.toUpperCase()} ${v}`:""; }).filter(Boolean);
-  if(rx.length) t += "Mi receta: " + rx.join(" / ") + (S.rx.fecha?` (${S.rx.fecha})`:"") + "\n";
+  const rx = rxLines();
+  if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n";
   return t.trim();
 }
 function updateWa(){
