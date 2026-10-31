@@ -8,7 +8,9 @@ App web para ópticas que arma el **plan visual completo** de cada paciente, com
    - **Lo esencial: ver bien todo el día.** La prioridad. Si hay varias formas de resolverlo (por ejemplo multifocal, bifocal o dos anteojos), se muestran todas como alternativas válidas.
    - **Opcional y de especialidad,** agrupado por momento: estudiar y pantallas, manejar (día y noche), sol, deporte (deportivo graduado, protector, lentes de contacto, antiparras), salidas y eventos, lectura y hobbies, repuesto.
 
-   Cada sugerencia explica por qué y propone un tipo de cristal. Se marca "empezamos por este" y se genera un texto para WhatsApp.
+   Cada ítem dice **por qué es esencial, muy recomendado u opcional**, con las respuestas del paciente ("Nos dijiste que manejás todos los días"). Recomienda **funciones y tecnologías, sin marcas** (visión simple, antirreflejo, polarizado, control de miopía…): el producto exacto lo elige la óptica según la graduación. Se marca "empezamos por este" y se manda a la óptica por WhatsApp.
+
+   **Recomendaciones con criterio:** las preguntas de frecuencia aparecen solo si corresponden; cada sugerencia opcional suma puntos según las respuestas y la receta, y se muestran las 4 de más puntaje (el resto en "Ver más opciones"). Reglas incluidas: lentes de contacto con más peso si la graduación supera ±0.75; chicos con miopía sin filtro azul y con control de miopía (cristal o lente de contacto).
 
 Es una **orientación**: no calcula precios ni armazones, eso se resuelve en el mostrador. Sirve en el mostrador o como autogestión del paciente (los textos le hablan de vos).
 
@@ -34,7 +36,7 @@ Para probar cambios, entrá en **modo óptica**: tocá "Acceso óptica" al pie d
 Desde Configuración podés editar:
 
 - Nombre de la óptica, **número de WhatsApp** (el botón "Contactar a la óptica" le abre al paciente un mensaje con su nombre, edad, por dónde quiere empezar, el resto del plan y su receta), saludos y texto legal.
-- **Tipos de cristal y productos** con los nombres que usa tu óptica.
+- **Tecnologías** (por función, sin marcas) con los nombres que usa tu óptica.
 - **Momentos** del día (en el JSON) y a qué momento pertenece cada sugerencia.
 - **Sugerencias:** nombre, prioridad y la condición que las hace aparecer.
 - **JSON completo:** preguntas, productos, sugerencias, soluciones y motivos. Se puede copiar, descargar e importar para pasarlo a otra computadora.
@@ -47,7 +49,7 @@ Las sugerencias, motivos y prioridades usan condiciones simples, sin código:
 
 | Dato | Qué es |
 |---|---|
-| `add`, `potencia`, `edad`, `receta_meses` | números |
+| `add`, `potencia`, `esf_max`, `cil_max`, `edad`, `receta_meses` | números (`esf_max`/`cil_max`: el mayor valor absoluto entre los dos ojos) |
 | `lejos`, `miopia`, `hipermetropia`, `astigmatismo`, `anisometropia`, `receta` | sí / no |
 | `receta_tipo` | `"anteojos"`, `"lc"` o `"ambos"` |
 | el código de cada pregunta | la respuesta (`maneja == "noche"`) o la lista de respuestas (`"pc" in trabajo`) |
@@ -61,30 +63,29 @@ Ejemplo: `add > 0 and (lejos or "lejos" in dist)`
 
 ```json
 {
-  "id": "lejos_cerca",
-  "momento": "dia",
-  "nombre": "Ver bien de lejos y de cerca",
-  "prioridad": "ess",
-  "cuando": "add > 0 and (lejos or \"lejos\" in dist)",
-  "prioridadSi": [{ "si": "...", "prioridad": "rec" }],
-  "motivos": [{ "si": "pantallas == \"8+\"", "texto": "Pasás {pantallas} h por día frente a pantallas." }],
+  "id": "manejo",
+  "momento": "manejo",
+  "nombre": "Anteojos para manejar",
+  "cuando": "maneja_si",
+  "porque": "(opcional: reemplaza el texto general de por qué)",
+  "puntos": [{ "n": 1 }, { "si": "maneja_mucho", "n": 3 }, { "si": "graduacion_baja", "n": -3 }],
+  "motivos": [{ "si": "maneja_frec", "texto": "Nos dijiste que manejás {maneja_frec}." }],
   "soluciones": [
-    { "id": "multi", "nombre": "Multifocal", "explicacion": "...",
-      "pares": [{ "nombre": "Multifocal", "opciones": ["multi_dig", "multi_aa", "multi"], "destacada": "multi_aa" }] },
-    { "id": "dos", "nombre": "Dos anteojos",
+    { "id": "uno", "nombre": "Manejo",
       "pares": [
-        { "nombre": "Lejos", "opciones": ["digital", "antiage", "blue"],
-          "opcionesSi": [{ "si": "oscurece", "opciones": ["transitions", "fotoblue", "foto"], "destacada": "fotoblue" }] },
-        { "nombre": "Cerca", "opciones": ["antiage", "blue", "ar"] }
+        { "nombre": "De día", "tecnologias": [{ "id": "polar" }] },
+        { "nombre": "De noche", "si": "maneja_noche", "tecnologias": [{ "id": "ar" }, { "id": "contraste" }] }
       ] }
   ]
 }
 ```
 
 - `momento`: en qué grupo aparece (`dia`, `trabajo`, `manejo`, `sol`, `deporte`, `salidas`, `cerca`, `repuesto`, o los que definas).
-- Prioridades: `ess` (esencial: va en "Lo esencial"), `rec` (recomendado), `opt` (opcional).
-- Un par puede tener `si` para aparecer solo cuando corresponde (por ejemplo "De noche" solo si maneja de noche).
-- `opciones` son los tipos de cristal que se muestran; `destacada` es el que aparece como "Sugerido".
+- `prioridad: "ess"` la hace esencial ("Lo esencial: ver bien todo el día"). Las demás usan `puntos`: se suman los `n` cuyo `si` se cumple. Debajo de `puntosMinimos` va a "Ver más opciones"; desde `puntosRecomendado` es "Muy recomendado"; en el medio, "Opcional". Se muestran hasta `maxSugerencias`.
+- El texto general de "¿Por qué es…?" está en `optica.porque` (`ess`, `rec`, `opt`); debajo van los `motivos` que se cumplen, con las respuestas (`{pregunta}` se reemplaza por lo que contestó).
+- Si hay varias `soluciones` se muestran como alternativas A, B, C (por ejemplo multifocal, bifocal o dos anteojos).
+- Cada par lista `tecnologias`; cada una puede tener `si` (por ejemplo `{"id":"blue","si":"filtro_azul"}`).
+- Una pregunta puede tener `si` para aparecer solo cuando corresponde (`"si": "maneja_si"`).
 
 ## Lectura de recetas con IA
 

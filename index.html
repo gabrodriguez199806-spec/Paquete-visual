@@ -150,6 +150,16 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
 .help code{font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px}
 .help ul{margin:6px 0;padding-left:18px}
 @media (prefers-reduced-motion:no-preference){.item{transition:opacity .15s}}
+.tecs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+.tec{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 8px;min-width:0;flex:1 1 160px}
+.tec b{font-size:.84rem}.tec small{font-size:.75rem;line-height:1.3;color:var(--muted)}
+.porque{border-left:3px solid var(--pc);background:var(--ps);border-radius:0 8px 8px 0;padding:6px 10px;margin:6px 0}
+.porque-h{font-size:.78rem;font-weight:700;color:var(--pc);text-transform:uppercase;letter-spacing:.04em}
+.porque p{margin:2px 0;font-size:.86rem}.porque .why{margin:2px 0 0}
+.more{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+.more summary{cursor:pointer;font-weight:600}
+.more-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.hid{--pc:var(--opt);--ps:var(--opt-soft)}
 </style>
 
 <div class="wrap">
@@ -278,7 +288,7 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
     </section>
 
     <section class="card">
-      <div class="actions" style="justify-content:space-between"><h2>Tipos de cristal y productos</h2><button class="btn small" id="addProd" type="button">Agregar</button></div>
+      <div class="actions" style="justify-content:space-between"><h2>Tecnologías (por función, sin marcas)</h2><button class="btn small" id="addProd" type="button">Agregar</button></div>
       <p class="note" style="margin:0">Los nombres que usa tu óptica. El código es el que usan las sugerencias.</p>
       <div class="tbl-wrap"><table class="cfg"><thead><tr><th>Código</th><th>Nombre</th><th>Detalle</th><th></th></tr></thead><tbody id="prodRows"></tbody></table></div>
     </section>
@@ -338,14 +348,22 @@ const LS = {get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(
    CONFIGURACIÓN DE FÁBRICA (Óptica Rodriguez)
    ========================================================= */
 const DEFAULT_CONFIG = {
-  version: 5,
+  version: 6,
   optica: {
     nombre: "Óptica Rodriguez",
     whatsapp: "5491162762199",
     contacto: "Hola! Me llamo {nombre}, tengo {edad} años y este es mi plan visual que armé en la web de {optica}.",
     intro: "Así como no usás el mismo calzado para una fiesta, para correr y para caminar, tu vista también rinde mejor con la solución justa para cada momento.",
     saludo: "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
-    legal: "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día."
+    legal: "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día. Los productos exactos se eligen en la óptica según tu graduación.",
+    maxSugerencias: 4,
+    puntosMinimos: 3,
+    puntosRecomendado: 6,
+    porque: {
+      ess: "Es lo que te asegura ver bien en tu día a día.",
+      rec: "Por lo que nos contaste, te va a servir mucho.",
+      opt: "No es imprescindible, pero te suma según lo que nos contaste."
+    }
   },
   momentos: [
     {id:"dia", nombre:"Para todo el día"},
@@ -362,69 +380,77 @@ const DEFAULT_CONFIG = {
     {id:"trabajo", multiple:true, texto:"¿Qué hacés la mayor parte del día?", opciones:[["pc","Oficina / PC"],["aire","Trabajo al aire libre"],["chofer","Manejo (chofer, reparto)"],["taller","Taller, obra o laboratorio"],["publico","Docencia / atención al público"],["precision","Oficio de precisión (costura, electrónica)"],["estudio","Estudio"],["casa","Casa / jubilado"]]},
     {id:"dist", multiple:true, texto:"¿Dónde necesitás ver bien sí o sí?", opciones:[["lejos","Lejos (calle, tele, pizarrón)"],["inter","Intermedia (PC, tablero, cocina)"],["cerca","Cerca (celular, leer, coser)"]]},
     {id:"maneja", texto:"¿Manejás?", opciones:[["no","No"],["dia","Sí, de día"],["noche","También de noche"],["trabajo","Por trabajo"]]},
+    {id:"maneja_frec", si:"maneja_si", texto:"¿Cada cuánto manejás?", opciones:[["ocasional","De vez en cuando"],["semanal","Varias veces por semana"],["diario","Todos los días"]]},
     {id:"luz", multiple:true, texto:"¿Algo de la luz te molesta?", opciones:[["sol","El sol, me achino"],["noche","Las luces de noche me encandilan"],["fatiga","Termino el día con la vista cansada"],["nada","Nada"]], exclusivas:["nada"]},
     {id:"aire", texto:"¿Cuánto tiempo pasás al aire libre?", opciones:[["poco","Poco"],["medio","1 a 3 horas"],["mucho","Más de 3 horas"]]},
     {id:"osc", texto:"¿Te gustaría que tu anteojo de todos los días se oscurezca al sol?", opciones:[["si","Sí"],["no","No"],["nose","No sé"]]},
     {id:"deporte", multiple:true, texto:"¿Hacés deporte?", opciones:[["no","No"],["gym","Gimnasio"],["run","Running / caminata"],["bici","Bici"],["pelota","Fútbol / pádel / tenis"],["agua","Natación"],["nieve","Esquí / nieve"],["pesca","Pesca / náutica"]], exclusivas:["no"]},
+    {id:"deporte_frec", si:'deporte_activo or "agua" in deporte', texto:"¿Cada cuánto hacés deporte?", opciones:[["ocasional","De vez en cuando"],["semanal","1 o 2 veces por semana"],["seguido","3 veces o más por semana"]]},
     {id:"actividades", multiple:true, texto:"¿Qué más hacés en tu tiempo libre?", opciones:[["eventos","Salidas y eventos"],["playa","Playa, pileta y vacaciones"],["lectura","Leer mucho"],["manualidades","Manualidades, costura, maquetas"],["gaming","Videojuegos"],["nada","Nada en especial"]], exclusivas:["nada"]},
-    {id:"lc", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
+    {id:"lc", si:"lc_edad_ok", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
     {id:"tiene", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
     {id:"importa", texto:"¿Qué es lo que más te importa?", opciones:[["estetica","Verme bien"],["confort","Comodidad todo el día"],["dura","Que dure"],["precio","Cuidar el presupuesto"]]}
   ],
   derivados: {
     oscurece: 'osc == "si" or (osc != "no" and ("sol" in luz or aire == "mucho" or "aire" in trabajo))',
     usa_pc: '"pc" in trabajo or "estudio" in trabajo or pantallas in ["5-8","8+"] or "gaming" in actividades',
+    filtro_azul: '(usa_pc or "fatiga" in luz) and not menor_miope',
     maneja_si: 'maneja in ["dia","noche","trabajo"]',
     maneja_noche: 'maneja in ["noche","trabajo"] or (maneja_si and "noche" in luz)',
+    maneja_mucho: 'maneja == "trabajo" or maneja_frec in ["semanal","diario"]',
     necesita_lejos_y_cerca: 'add > 0 and (lejos or "lejos" in dist)',
     deporte_activo: 'deporte in ["run","bici","pelota","nieve","pesca","gym"]',
     deporte_exterior: 'deporte in ["run","bici","pelota","nieve","pesca"]',
-    quiere_lc: 'lc in ["uso","interes"]'
+    deporte_seguido: 'deporte_frec in ["semanal","seguido"]',
+    lc_edad_ok: 'edad == null or edad >= 12',
+    quiere_lc: 'lc_edad_ok and lc in ["uso","interes"]',
+    astig_alto: 'cil_max >= 1',
+    graduacion_baja: 'receta and potencia < 0.75 and not add > 0',
+    menor_miope: 'edad < 18 and miopia',
+    lc_candidato: 'lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)'
   },
   productos: [
-    {id:"ar", nombre:"Clara", detalle:"Orgánico con antirreflejo"},
-    {id:"blue", nombre:"Escudo Digital", detalle:"Blue Cut con antirreflejo"},
-    {id:"antiage", nombre:"Antiage", detalle:"Descanso visual + filtro azul"},
-    {id:"digital", nombre:"Precisión", detalle:"Tallado digital"},
-    {id:"foto", nombre:"Fotocromático AR", detalle:"Se oscurece al sol"},
-    {id:"fotoblue", nombre:"Fotoblue", detalle:"Fotocromático + filtro azul"},
-    {id:"transitions", nombre:"Transitions", detalle:"Se oscurece y aclara rápido"},
-    {id:"bifocal", nombre:"Bifocal", detalle:"Lejos arriba, cerca abajo"},
-    {id:"multi", nombre:"Total", detalle:"Multifocal"},
-    {id:"multi_aa", nombre:"Total Antiage", detalle:"Multifocal con antiage"},
-    {id:"multi_dig", nombre:"Total Precisión", detalle:"Multifocal tallado digital premium"},
-    {id:"control_miopia", nombre:"Control de miopía", detalle:"Cristal para chicos, sin filtro azul (según indicación médica)"},
-    {id:"ocup", nombre:"Ocupacional", detalle:"Intermedio y cerca, con filtro azul"},
-    {id:"drive", nombre:"Manejo nocturno", detalle:"Más contraste y menos encandilamiento"},
-    {id:"sol", nombre:"Sol polarizado graduado", detalle:"Corta el reflejo del asfalto y el agua"},
-    {id:"sol_espejado", nombre:"Sol espejado graduado", detalle:"Para mucha luz: playa, nieve"},
-    {id:"deportivo", nombre:"Deportivo graduado", detalle:"Envolvente, policarbonato irrompible"},
-    {id:"deportivo_foto", nombre:"Deportivo fotocromático", detalle:"Se adapta a sol y sombra"},
-    {id:"protector", nombre:"Protector deportivo graduado", detalle:"Con elástico, para deportes con pelota"},
-    {id:"mascara", nombre:"Máscara con clip óptico", detalle:"Tu graduación dentro de la máscara"},
-    {id:"seguridad", nombre:"Seguridad graduado", detalle:"Norma de seguridad, protecciones laterales"},
-    {id:"segundo", nombre:"Segundo anteojo", detalle:"Otro estilo de armazón, mismos cristales"},
-    {id:"lc", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario"},
+    {id:"vision_simple", nombre:"Visión simple", detalle:"Un solo foco: la graduación de tu receta en todo el cristal"},
+    {id:"vision_cerca", nombre:"Visión simple de cerca", detalle:"Toda la superficie para leer, el celular o coser"},
+    {id:"multifocal", nombre:"Multifocal", detalle:"Lejos, intermedio y cerca en un solo cristal, sin línea"},
+    {id:"bifocal", nombre:"Bifocal", detalle:"Dos zonas: lejos arriba y cerca abajo"},
+    {id:"ocupacional", nombre:"Ocupacional", detalle:"Campo ancho para la compu y el escritorio"},
+    {id:"ar", nombre:"Antirreflejo", detalle:"Menos reflejos y encandilamiento, mejor visión de noche"},
+    {id:"blue", nombre:"Filtro de luz azul", detalle:"Más descanso cuando pasás muchas horas frente a pantallas"},
+    {id:"foto", nombre:"Fotocromático", detalle:"Se oscurece al sol y se aclara adentro"},
+    {id:"polar", nombre:"Polarizado", detalle:"Corta el reflejo del asfalto, el agua y la nieve"},
+    {id:"espejado", nombre:"Espejado", detalle:"Para luz muy intensa: playa o nieve"},
+    {id:"alto_indice", nombre:"Alto índice", detalle:"Cristal más fino y liviano para graduaciones altas"},
+    {id:"contraste", nombre:"Mayor contraste", detalle:"Para manejar de noche o con poca luz"},
+    {id:"control_miopia", nombre:"Cristal de control de miopía", detalle:"Diseñado para ayudar a frenar el avance de la miopía en chicos, según indicación del oftalmólogo"},
+    {id:"lc_control_miopia", nombre:"Lentes de contacto de control de miopía", detalle:"Alternativa al cristal para frenar el avance de la miopía, según indicación del oftalmólogo"},
+    {id:"policarbonato", nombre:"Policarbonato", detalle:"Irrompible: para deporte, chicos y seguridad"},
+    {id:"envolvente", nombre:"Armazón envolvente", detalle:"No se mueve y protege de costado"},
+    {id:"proteccion_lateral", nombre:"Protecciones laterales", detalle:"Anteojo de seguridad con norma"},
+    {id:"clip", nombre:"Clip óptico", detalle:"Tu graduación adentro de la máscara o antiparra"},
+    {id:"antiparra", nombre:"Antiparra graduada", detalle:"Para ver bien en la pileta"},
+    {id:"mismas", nombre:"Mismas tecnologías que tu anteojo principal", detalle:"Otro estilo de armazón para combinar"},
     {id:"lc_diarias", nombre:"Lentes de contacto diarias", detalle:"Se usan un día y se descartan"},
-    {id:"antiparra", nombre:"Antiparras graduadas", detalle:"Para pileta"}
+    {id:"lc_mensuales", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario, con solución"},
+    {id:"lc_torica", nombre:"Lentes de contacto tóricas", detalle:"Para astigmatismo"}
   ],
   sugerencias: [
     {id:"lejos_cerca", momento:"dia", nombre:"Ver bien de lejos y de cerca", prioridad:"ess", cuando:"necesita_lejos_y_cerca",
       motivos:[
         {texto:"Tu receta tiene adición: necesitás una corrección para lejos y otra para cerca."},
         {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
-        {si:'pantallas in ["5-8","8+"]', texto:"Pasás {pantallas} h por día frente a pantallas."},
+        {si:'pantallas in ["5-8","8+"]', texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas."},
         {si:'tiene in ["viejo","ninguno"]', texto:"Hoy no tenés un anteojo en buen estado."}
       ],
       soluciones:[
         {id:"multi", nombre:"Multifocal", explicacion:"Un solo anteojo para lejos, intermedio y cerca, sin línea. Es lo más cómodo; lleva unos días de adaptación.",
-          pares:[{nombre:"Multifocal", opciones:["multi_dig","multi_aa","multi"], destacada:"multi_aa"}]},
+          pares:[{nombre:"Multifocal", tecnologias:[{id:"multifocal"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]}]},
         {id:"bifocal", nombre:"Bifocal", explicacion:"Un solo anteojo con dos zonas: lejos arriba y cerca abajo. Se ve la línea y no tiene zona para la compu.",
-          pares:[{nombre:"Bifocal", opciones:["bifocal"]}]},
+          pares:[{nombre:"Bifocal", tecnologias:[{id:"bifocal"},{id:"ar"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]}]},
         {id:"dos", nombre:"Dos anteojos (lejos + cerca)", explicacion:"Uno para lejos y otro para cerca. Campo amplio en cada uno, pero hay que cambiarlos según lo que hagas.",
           pares:[
-            {nombre:"Lejos", opciones:["digital","antiage","blue"], destacada:"antiage", opcionesSi:[{si:"oscurece", opciones:["transitions","fotoblue","foto"], destacada:"fotoblue"}]},
-            {nombre:"Cerca", opciones:["antiage","blue","ar"], destacada:"blue"}
+            {nombre:"Lejos", tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"}]},
+            {nombre:"Cerca", tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}
           ]}
       ]},
     {id:"principal", momento:"dia", nombre:"Anteojo para todo el día", prioridad:"ess", cuando:"receta and lejos and not add > 0",
@@ -432,95 +458,123 @@ const DEFAULT_CONFIG = {
         {si:"miopia", texto:"Lo necesitás para ver de lejos: calle, tele, caras."},
         {si:"not miopia", texto:"Es la corrección que indicó tu oftalmólogo, para usar todo el día."},
         {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
-        {si:'pantallas in ["5-8","8+"]', texto:"Pasás {pantallas} h por día frente a pantallas."},
-        {si:"potencia >= 4", texto:"Tu graduación es alta: conviene un cristal adelgazado (alto índice)."},
-        {si:"edad < 18 and miopia", texto:"Para chicos con miopía, el anteojo de todos los días va sin filtro azul; si el oftalmólogo lo indica, con cristal de control de miopía."}
+        {si:"filtro_azul", texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas: suma filtro de luz azul."},
+        {si:"oscurece", texto:"Querés que se oscurezca al sol: va fotocromático."},
+        {si:"potencia >= 4", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
+        {si:"menor_miope", texto:"Para chicos y adolescentes con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."}
       ],
-      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{opciones:["digital","antiage","blue"], destacada:"antiage", opcionesSi:[{si:"edad < 18 and miopia", opciones:["control_miopia","ar"], destacada:"control_miopia"},{si:"oscurece", opciones:["transitions","fotoblue","foto"], destacada:"fotoblue"}]}]}]},
+      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 4"},{id:"control_miopia",si:"menor_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
       motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
-      soluciones:[{id:"uno", nombre:"Cerca", pares:[{opciones:["antiage","blue","ar"], destacada:"blue"}]}]},
-    {id:"lc_diario", momento:"dia", nombre:"Lentes de contacto de uso diario", prioridad:"rec", cuando:'lc == "uso"',
-      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
-      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc","lc_diarias"], destacada:"lc"}]}]},
+      soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
+    {id:"lc_diario", momento:"dia", nombre:"Lentes de contacto de uso diario", cuando:'quiere_lc and lc == "uso"',
+      puntos:[{n:7}],
+      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"}]}]}]},
 
-    {id:"ocup", momento:"trabajo", nombre:"Anteojo ocupacional para la compu", prioridad:"rec", cuando:"add > 0 and usa_pc",
-      prioridadSi:[{si:'pantallas == "8+" or "fatiga" in luz', prioridad:"rec"}],
+    {id:"lc_alternativa", momento:"dia", nombre:"Lentes de contacto como alternativa al anteojo", cuando:'lc_candidato and lc != "no" and lc != "uso"',
+      puntos:[{n:3},{si:"quiere_lc", n:3},{si:"deporte_activo", n:1},{si:'"eventos" in actividades', n:1},{si:'importa == "estetica"', n:1},{si:"potencia >= 3", n:1}],
+      motivos:[
+        {texto:"Tu graduación supera 0.75: con lentes de contacto ves completo, sin el marco y sin que se empañen."},
+        {si:"deporte_activo", texto:"Ideales para hacer deporte sin anteojo."},
+        {si:'"eventos" in actividades', texto:"Para salidas y eventos, sin anteojo."},
+        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},
+        {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
+      ],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"},{id:"lc_diarias"}]}]}]},
+    {id:"lc_miopia", momento:"dia", nombre:"Lentes de contacto de control de miopía", cuando:'menor_miope and edad >= 8',
+      puntos:[{n:6},{si:"deporte_activo", n:1}],
+      motivos:[{texto:"Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."},{texto:"Otra opción para frenar el avance de la miopía, además del cristal de control de miopía."},{texto:"Siempre con indicación y control del oftalmólogo."}],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_control_miopia"}]}]}]},
+
+    {id:"ocup", momento:"trabajo", nombre:"Anteojo ocupacional para la compu", cuando:"add > 0 and usa_pc",
+      puntos:[{n:2},{si:'pantallas in ["5-8","8+"]', n:3},{si:'pantallas == "8+"', n:1},{si:'"fatiga" in luz', n:2},{si:'"pc" in trabajo', n:1}],
       motivos:[
         {texto:"Para la compu, el ocupacional da un campo ancho de pantalla y escritorio que el multifocal y el bifocal no tienen."},
-        {si:'pantallas == "8+"', texto:"Estás más de 8 horas por día frente a pantallas."},
+        {si:'pantallas in ["5-8","8+"]', texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas."},
         {si:'"fatiga" in luz', texto:"Terminás el día con la vista cansada."}
       ],
-      soluciones:[{id:"uno", nombre:"Ocupacional", pares:[{opciones:["ocup"]}]}]},
-    {id:"pantalla", momento:"trabajo", nombre:"Anteojo para pantallas", prioridad:"rec", cuando:'receta and lejos and not add > 0 and usa_pc and (oscurece or edad < 18)',
-      motivos:[{si:"edad < 18", texto:"Para las horas de estudio, compu o consola, un anteojo aparte con filtro azul. El de todos los días queda sin filtro."},{si:"oscurece and not edad < 18", texto:"Si tu anteojo de todos los días se oscurece al sol, conviene un segundo par con filtro azul para la compu."},{si:'"gaming" in actividades', texto:"Jugás videojuegos: muchas horas de pantalla seguidas."}],
-      soluciones:[{id:"uno", nombre:"Pantallas", pares:[{opciones:["antiage","blue"], destacada:"antiage"}]}]},
-    {id:"seguridad", momento:"trabajo", nombre:"Anteojo de seguridad graduado", prioridad:"rec", cuando:'receta and "taller" in trabajo',
+      soluciones:[{id:"uno", nombre:"Ocupacional", pares:[{tecnologias:[{id:"ocupacional"},{id:"ar"},{id:"blue"}]}]}]},
+    {id:"pantalla", momento:"trabajo", nombre:"Anteojo para pantallas", cuando:'receta and lejos and not add > 0 and usa_pc and oscurece and not menor_miope',
+      puntos:[{n:2},{si:'pantallas in ["5-8","8+"]', n:2},{si:'"gaming" in actividades', n:1},{si:"oscurece", n:1}],
+      motivos:[{si:"oscurece", texto:"Tu anteojo de todos los días se oscurece al sol: para la compu conviene un segundo par claro con filtro azul."},{si:'"gaming" in actividades', texto:"Jugás videojuegos: muchas horas de pantalla seguidas."}],
+      soluciones:[{id:"uno", nombre:"Pantallas", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue"}]}]}]},
+    {id:"seguridad", momento:"trabajo", nombre:"Anteojo de seguridad graduado", cuando:'receta and "taller" in trabajo',
+      puntos:[{n:8}],
       motivos:[{texto:"Trabajás en taller, obra o laboratorio: tu anteojo común no protege de golpes ni partículas."}],
-      soluciones:[{id:"uno", nombre:"Seguridad", pares:[{opciones:["seguridad"]}]}]},
+      soluciones:[{id:"uno", nombre:"Seguridad", pares:[{tecnologias:[{id:"policarbonato"},{id:"proteccion_lateral"},{id:"ar"}]}]}]},
 
-    {id:"manejo", momento:"manejo", nombre:"Anteojos para manejar", prioridad:"rec", cuando:"receta and maneja_si",
-
+    {id:"manejo", momento:"manejo", nombre:"Anteojos para manejar", cuando:"receta and maneja_si",
+      puntos:[{n:1},{si:"maneja_mucho", n:3},{si:'maneja == "trabajo" or maneja_frec == "diario"', n:2},{si:"maneja_noche", n:2},{si:'"noche" in luz or "sol" in luz', n:1},{si:"oscurece", n:1},{si:"graduacion_baja", n:-3}],
       motivos:[
+        {si:"maneja_frec", texto:"Nos dijiste que manejás {maneja_frec}."},
         {si:'maneja == "trabajo"', texto:"Manejás por trabajo: muchas horas al volante."},
         {texto:"De día, el polarizado corta el reflejo del asfalto y del parabrisas."},
-        {si:"maneja_noche", texto:"De noche, un cristal para manejo da más contraste y encandila menos."},
+        {si:"maneja_noche", texto:"De noche, un cristal con antirreflejo y mayor contraste encandila menos."},
         {si:"oscurece", texto:"Los fotocromáticos se oscurecen poco dentro del auto, porque el parabrisas filtra el UV."}
       ],
       soluciones:[{id:"uno", nombre:"Manejo", pares:[
-        {nombre:"De día", opciones:["sol"]},
-        {nombre:"De noche", si:"maneja_noche", opciones:["drive","antiage"], destacada:"drive"}
+        {nombre:"De día", tecnologias:[{id:"polar"},{id:"alto_indice",si:"potencia >= 4"}]},
+        {nombre:"De noche", si:"maneja_noche", tecnologias:[{id:"ar"},{id:"contraste"}]}
       ]}]},
 
-    {id:"sol", momento:"sol", nombre:"Anteojo de sol graduado", prioridad:"rec", cuando:'receta and not maneja_si and ("sol" in luz or aire in ["medio","mucho"] or "playa" in actividades or "aire" in trabajo)',
-      prioridadSi:[{si:'oscurece and not "playa" in actividades', prioridad:"opt"}],
+    {id:"sol", momento:"sol", nombre:"Anteojo de sol graduado", cuando:'receta and not maneja_si',
+      puntos:[{si:'"sol" in luz', n:2},{si:'aire == "mucho"', n:3},{si:'aire == "medio"', n:1},{si:'"playa" in actividades', n:2},{si:'"aire" in trabajo', n:3},{si:"oscurece", n:-3},{si:"graduacion_baja", n:-2}],
       motivos:[
-        {si:'"sol" in luz or aire == "mucho"', texto:"Pasás tiempo al sol o te molesta la luz."},
+        {si:'"sol" in luz', texto:"Nos dijiste que el sol te molesta."},
+        {si:'aire in ["medio","mucho"]', texto:"Pasás {aire} al aire libre por día."},
         {si:'"playa" in actividades', texto:"Playa, pileta y vacaciones: ver bien y proteger los ojos del sol."},
         {si:'"aire" in trabajo', texto:"Trabajás al aire libre."}
       ],
-      soluciones:[{id:"uno", nombre:"Sol", pares:[{opciones:["sol","sol_espejado"], destacada:"sol"}]}]},
+      soluciones:[{id:"uno", nombre:"Sol", pares:[{tecnologias:[{id:"polar"},{id:"espejado",si:'"playa" in actividades'}]}]}]},
 
-    {id:"deportivo", momento:"deporte", nombre:"Anteojo deportivo graduado", prioridad:"rec", cuando:'receta and deporte_exterior',
+    {id:"deportivo", momento:"deporte", nombre:"Anteojo deportivo graduado", cuando:'receta and deporte_exterior',
+      puntos:[{n:1},{si:"deporte_seguido", n:3},{si:'deporte_frec == "seguido"', n:1},{si:'"pelota" in deporte', n:3},{si:'"nieve" in deporte', n:2},{si:"quiere_lc", n:-2},{si:"graduacion_baja", n:-3}],
       motivos:[
+        {si:"deporte_frec", texto:"Nos dijiste que hacés deporte {deporte_frec}."},
         {si:'deporte in ["run","bici"]', texto:"Corrés, caminás o andás en bici: envolvente, liviano y que no se mueva."},
-        {si:'"pelota" in deporte', texto:"Jugás con pelota: tu anteojo común se puede romper y lastimarte."},
+        {si:'"pelota" in deporte', texto:"Jugás con pelota o raqueta: tu anteojo común se puede romper y lastimarte."},
         {si:'"nieve" in deporte', texto:"En la nieve la luz es muy fuerte: máscara con tu graduación adentro."},
         {si:'"pesca" in deporte', texto:"Pesca o náutica: el polarizado deja ver a través del reflejo del agua."}
       ],
       soluciones:[{id:"uno", nombre:"Deportivo", pares:[
-        {nombre:"Correr / bici", si:'deporte in ["run","bici"]', opciones:["deportivo_foto","deportivo"], destacada:"deportivo_foto"},
-        {nombre:"Deportes con pelota", si:'"pelota" in deporte', opciones:["protector"]},
-        {nombre:"Nieve", si:'"nieve" in deporte', opciones:["mascara"]},
-        {nombre:"Agua", si:'"pesca" in deporte', opciones:["sol"]}
+        {nombre:"Correr / bici", si:'deporte in ["run","bici"]', tecnologias:[{id:"envolvente"},{id:"policarbonato"},{id:"foto"}]},
+        {nombre:"Deportes con pelota", si:'"pelota" in deporte', tecnologias:[{id:"policarbonato"},{id:"envolvente"}]},
+        {nombre:"Nieve", si:'"nieve" in deporte', tecnologias:[{id:"clip"},{id:"espejado"}]},
+        {nombre:"Agua", si:'"pesca" in deporte', tecnologias:[{id:"polar"},{id:"envolvente"}]}
       ]}]},
-    {id:"lc_deporte", momento:"deporte", nombre:"Lentes de contacto para hacer deporte", prioridad:"opt", cuando:'deporte_activo and lc != "no"',
-      prioridadSi:[{si:'"pelota" in deporte and quiere_lc', prioridad:"rec"}],
+    {id:"lc_deporte", momento:"deporte", nombre:"Lentes de contacto para hacer deporte", cuando:'deporte_activo and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+      puntos:[{n:1},{si:"quiere_lc", n:2},{si:"deporte_seguido", n:2},{si:'"pelota" in deporte', n:2},{si:"graduacion_baja", n:-2}],
       motivos:[
         {texto:"Para entrenar sin anteojo: no se empañan, no se mueven y ves todo el campo."},
         {si:'"pelota" in deporte', texto:"Con pelota o raqueta son más seguros que un anteojo común."},
+        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},
         {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
       ],
-      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc_diarias","lc"], destacada:"lc_diarias"}]}]},
-    {id:"antiparra", momento:"deporte", nombre:"Antiparras graduadas", prioridad:"opt", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
-      prioridadSi:[{si:'"agua" in deporte', prioridad:"rec"}],
-      motivos:[{texto:"En la pileta ves bien y cuidás el anteojo."}],
-      soluciones:[{id:"uno", nombre:"Antiparras", pares:[{opciones:["antiparra"]}]}]},
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
+    {id:"antiparra", momento:"deporte", nombre:"Antiparras graduadas", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
+      puntos:[{si:'"agua" in deporte', n:3},{si:'"agua" in deporte and deporte_seguido', n:3},{si:'"playa" in actividades', n:1},{si:"graduacion_baja", n:-3}],
+      motivos:[{si:'"agua" in deporte', texto:"Nadás: en la pileta ves bien y cuidás el anteojo."},{si:'"playa" in actividades and not "agua" in deporte', texto:"Para la pileta en vacaciones."}],
+      soluciones:[{id:"uno", nombre:"Antiparras", pares:[{tecnologias:[{id:"antiparra"}]}]}]},
 
-    {id:"lc_salidas", momento:"salidas", nombre:"Lentes de contacto para salir", prioridad:"opt", cuando:'"eventos" in actividades and lc != "no"',
-      motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
-      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc_diarias"]}]}]},
-    {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", prioridad:"opt", cuando:'receta and ("eventos" in actividades or importa == "estetica")',
+    {id:"lc_salidas", momento:"salidas", nombre:"Lentes de contacto para salir", cuando:'"eventos" in actividades and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+      puntos:[{n:2},{si:"quiere_lc", n:2},{si:'importa == "estetica"', n:1}],
+      motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
+    {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", cuando:'receta and ("eventos" in actividades or importa == "estetica")',
+      puntos:[{si:'"eventos" in actividades', n:2},{si:'importa == "estetica"', n:2},{si:'tiene == "varios"', n:-2},{si:"graduacion_baja", n:-1}],
       motivos:[{texto:"Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."}],
-      soluciones:[{id:"uno", nombre:"Segundo anteojo", pares:[{opciones:["segundo"]}]}]},
+      soluciones:[{id:"uno", nombre:"Segundo anteojo", pares:[{tecnologias:[{id:"mismas"}]}]}]},
 
-    {id:"cerca_extra", momento:"cerca", nombre:"Anteojo de cerca para leer y hobbies", prioridad:"opt", cuando:'necesita_lejos_y_cerca and ("precision" in trabajo or actividades in ["lectura","manualidades"] or edad >= 60)',
-      motivos:[{si:'"precision" in trabajo or "manualidades" in actividades', texto:"Hacés trabajos de precisión o manualidades: un anteojo solo de cerca da el campo más amplio."},{si:'"lectura" in actividades', texto:"Leés mucho: el campo de lectura más cómodo, en la cama o el sillón."},{texto:"Ideal para la mesa de luz o la cartera."}],
-      soluciones:[{id:"uno", nombre:"Cerca", pares:[{opciones:["antiage","blue","ar"], destacada:"blue"}]}]},
+    {id:"cerca_extra", momento:"cerca", nombre:"Anteojo de cerca para leer y hobbies", cuando:'necesita_lejos_y_cerca',
+      puntos:[{si:'"precision" in trabajo or "manualidades" in actividades', n:4},{si:'"lectura" in actividades', n:3},{si:"edad >= 60", n:1}],
+      motivos:[{si:'"precision" in trabajo or "manualidades" in actividades', texto:"Hacés trabajos de precisión o manualidades: un anteojo solo de cerca da el campo más amplio."},{si:'"lectura" in actividades', texto:"Leés mucho: el campo de lectura más cómodo, en la cama o el sillón."},{texto:"Si elegiste dos anteojos, este ya está incluido."}],
+      soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"}]}]}]},
 
-    {id:"repuesto", momento:"repuesto", nombre:"Anteojo de repuesto", prioridad:"opt", cuando:'receta and potencia >= 3 and tiene != "varios"',
+    {id:"repuesto", momento:"repuesto", nombre:"Anteojo de repuesto", cuando:'receta',
+      puntos:[{si:"potencia >= 3", n:3},{si:"potencia >= 6", n:2},{si:'tiene in ["ninguno","uno","viejo"]', n:1},{si:'tiene == "varios"', n:-4},{si:"graduacion_baja", n:-5}],
       motivos:[{texto:"Sin anteojo no ves bien: si se rompe, te quedás sin ver."},{texto:"Puede ser tu marco actual con cristales nuevos."}],
-      soluciones:[{id:"uno", nombre:"Repuesto", pares:[{opciones:["blue","ar"], destacada:"blue"}]}]}
+      soluciones:[{id:"uno", nombre:"Repuesto", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"}]}]}]}
   ]
 };
 
@@ -590,7 +644,7 @@ const isStaff = () => LS.get("pv-staff")===true;
 const hashPin = pin => { let h=0x811c9dc5; for(const ch of "pv:"+pin){ h^=ch.charCodeAt(0); h=Math.imul(h,0x01000193)>>>0; } return h.toString(16); };
 let C = clone(DEFAULT_CONFIG);
 const localC = LS.get("pv-config");
-const hasLocal = () => isStaff() && localC && localC.version >= 5;
+const hasLocal = () => isStaff() && localC && localC.version >= 6;
 if(hasLocal()) C = localC;
 const saveCfg = () => { CC.clear(); if(isStaff()) LS.set("pv-config", C); };
 let AI = LS.get("pv-ai") || {key:"", model:""};
@@ -599,11 +653,11 @@ const EXAMPLE = {
   pac:{nombre:"Laura (ejemplo)", edad:"46", tel:""},
   rx:{od:{esf:"-1.50",cil:"-0.75",eje:"180",add:"+1.50"}, oi:{esf:"-1.25",cil:"-0.50",eje:"170",add:"+1.50"}, fecha:"2026-09-12", tipo:"anteojos", medico:""},
   a:{pantallas:"8+", trabajo:["pc"], dist:["lejos","inter","cerca"], maneja:"noche", luz:["noche","fatiga"], aire:"medio", osc:"no", deporte:["gym","run"], actividades:["eventos","lectura"], lc:"interes", tiene:"viejo", importa:"confort"},
-  sol:{}, sel:{}, own:{}, off:{}, hoy:{lejos_cerca:true}, example:true
+  sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{lejos_cerca:true}, example:true
 };
-const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, hoy:{}, example:false});
+const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{}, example:false});
 let S = LS.get("pv-state2") || (isStaff() ? clone(EXAMPLE) : BLANK());
-["sol","sel","own","off","hoy","a"].forEach(k=>S[k]=S[k]||{});
+["sol","sel","own","off","hoy","a","force"].forEach(k=>S[k]=S[k]||{});
 const save = () => LS.set("pv-state2", S);
 
 /* =========================================================
@@ -618,12 +672,13 @@ function rxInfo(){
   const potencia = Math.max(...e.map(x=>Math.abs(x.esf||0)+Math.abs(x.cil||0)));
   const lejos = e.some(x=>Math.abs(x.esf||0)>=0.25 || Math.abs(x.cil||0)>=0.25);
   let meses=null; if(S.rx.fecha){ const d=new Date(S.rx.fecha); if(!isNaN(d)) meses=Math.floor((Date.now()-d)/(864e5*30.4)); }
-  return {receta:any, add, lejos, potencia, miopia:esf.some(v=>v<=-0.25), hipermetropia:esf.some(v=>v>=0.25), astigmatismo:cil.some(v=>Math.abs(v)>=0.25), anisometropia:Math.abs(esf[0]-esf[1])>=2, receta_meses:meses};
+  return {receta:any, add, lejos, potencia, miopia:esf.some(v=>v<=-0.25), hipermetropia:esf.some(v=>v>=0.25), astigmatismo:cil.some(v=>Math.abs(v)>=0.25), anisometropia:Math.abs(esf[0]-esf[1])>=2, receta_meses:meses, esf_max:Math.max(...esf.map(Math.abs)), cil_max:Math.max(...cil.map(Math.abs))};
 }
 function facts(){
   const F = {...rxInfo(), receta_tipo:S.rx.tipo||"anteojos", edad:num(S.pac.edad)};
   C.preguntas.forEach(q=>{ const v=S.a[q.id]; F[q.id] = q.multiple ? (Array.isArray(v)?v:[]) : (v??null); });
-  Object.entries(C.derivados||{}).forEach(([k,ex])=>{ F[k]=test(ex,F); });
+  // dos pasadas: un derivado puede usar otro definido más abajo
+  for(let i=0;i<2;i++) Object.entries(C.derivados||{}).forEach(([k,ex])=>{ F[k]=test(ex,F); });
   return F;
 }
 function renderRead(){
@@ -650,26 +705,35 @@ const TAG = {ess:"Esencial", rec:"Recomendado", opt:"Opcional"};
 function fill(txt,F){ return String(txt).replace(/\{(\w+)\}/g,(m,k)=>{ const q=C.preguntas.find(x=>x.id===k); const v=F[k]; if(q){ const vals=Array.isArray(v)?v:[v]; return vals.map(x=>{ const l=String((q.opciones.find(o=>o[0]===x)||[,x])[1]); return l.charAt(0).toLowerCase()+l.slice(1); }).join(", "); } return v??""; }); }
 function build(){
   const F = facts(), out=[];
+  const minP = num(C.optica.puntosMinimos) ?? 3, recP = num(C.optica.puntosRecomendado) ?? 6;
   C.sugerencias.forEach(s=>{
     if(s.activa===false || !test(s.cuando,F)) return;
-    let pr = s.prioridad||"rec"; (s.prioridadSi||[]).forEach(x=>{ if(test(x.si,F)) pr=x.prioridad; });
     const motivos = (s.motivos||[]).filter(m=>test(m.si,F)).map(m=>fill(m.texto,F));
-    const mk = sol => sol.pares.map((p,i)=>[p,i]).filter(([p])=>test(p.si,F)).map(([p,i])=>{
-      let opts=p.opciones, dest=p.destacada; (p.opcionesSi||[]).some(x=>{ if(test(x.si,F)){ opts=x.opciones; dest=x.destacada; return true; } });
-      opts = opts.map(prod).filter(Boolean);
-      const key = `${s.id}:${sol.id}:${i}`;
-      const destP = opts.find(o=>o.id===dest) || (opts.length===3?opts[1]:opts[0]);
-      const chosen = opts.find(o=>o.id===S.sel[key]) || destP;
-      return {...p, key, opts, dest:destP, chosen};
-    });
+    const mk = sol => (sol.pares||[]).filter(p=>test(p.si,F)).map(p=>{
+      const tecs = (p.tecnologias||[]).filter(t=>test(t.si,F)).map(t=>prod(t.id)).filter(Boolean);
+      return {...p, tecs};
+    }).filter(p=>p.tecs.length);
     const alts = (s.soluciones||[]).filter(x=>test(x.si,F)).map(sol=>({sol, pares:mk(sol)})).filter(a=>a.pares.length);
     if(!alts.length) return;
     const picked = alts.find(a=>a.sol.id===S.sol[s.id]) || null;
     const main = picked || alts[0];
-    out.push({s, pr, motivos, alts, picked, sol:main.sol, pares:main.pares});
+    let pr, score = null;
+    if(s.prioridad==="ess"){ pr="ess"; }
+    else if(Array.isArray(s.puntos)){
+      score = s.puntos.reduce((a,x)=>a + (test(x.si,F) ? (num(x.n)||0) : 0), 0);
+      if(score < minP && !S.force[s.id]) { out.push({s, pr:"hid", score, motivos, alts, picked, sol:main.sol, pares:main.pares}); return; }
+      pr = score >= recP ? "rec" : "opt";
+    } else {
+      pr = s.prioridad || "rec"; (s.prioridadSi||[]).forEach(x=>{ if(test(x.si,F)) pr=x.prioridad; });
+    }
+    out.push({s, pr, score, motivos, alts, picked, sol:main.sol, pares:main.pares});
   });
+  // límite de sugerencias visibles: las de más puntaje
+  const max = num(C.optica.maxSugerencias) ?? 4;
+  const extra = out.filter(i=>i.pr==="rec"||i.pr==="opt").sort((a,b)=>(b.score??5)-(a.score??5));
+  extra.forEach((i,k)=>{ if(k>=max && !S.force[i.s.id]) i.pr="hid"; });
   const mo = id => { const i=(C.momentos||[]).findIndex(m=>m.id===id); return i<0?99:i; };
-  out.sort((a,b)=>(a.pr==="ess"?0:1)-(b.pr==="ess"?0:1) || mo(a.s.momento)-mo(b.s.momento) || ORDER[a.pr]-ORDER[b.pr]);
+  out.sort((a,b)=>(a.pr==="ess"?0:1)-(b.pr==="ess"?0:1) || mo(a.s.momento)-mo(b.s.momento) || (b.score??0)-(a.score??0));
   return out;
 }
 
@@ -677,14 +741,14 @@ function build(){
    RENDER: ATENCIÓN
    ========================================================= */
 function renderQs(){
-  $("qs").innerHTML = C.preguntas.map(q=>`<div class="q"><div class="lbl">${esc(q.texto)}${q.ayuda?`<em>${esc(q.ayuda)}</em>`:""}${q.multiple?`<em>(varias)</em>`:""}</div><div class="chips">${
+  const F0=facts(); $("qs").innerHTML = C.preguntas.filter(q=>test(q.si,F0)).map(q=>`<div class="q"><div class="lbl">${esc(q.texto)}${q.ayuda?`<em>${esc(q.ayuda)}</em>`:""}${q.multiple?`<em>(varias)</em>`:""}</div><div class="chips">${
     q.opciones.map(([v,l])=>{ const cur=S.a[q.id]; const on = q.multiple ? (cur||[]).includes(v) : cur===v; return `<button type="button" class="chip" data-q="${esc(q.id)}" data-v="${esc(v)}" aria-pressed="${on}">${esc(l)}</button>`; }).join("")}</div></div>`).join("");
 }
 let lastItems=[];
-function pairHtml(p, showName, off){
-  const lad = p.opts.length>1 ? `<div class="ladder" style="grid-template-columns:repeat(${p.opts.length},minmax(0,1fr))">${p.opts.map(o=>`<button type="button" class="opt-btn" data-key="${esc(p.key)}" data-opt="${esc(o.id)}" aria-pressed="${p.chosen&&p.chosen.id===o.id}">${p.dest&&o.id===p.dest.id?"<i>Sugerido</i>":""}<b>${esc(o.nombre)}</b><span>${esc(o.detalle||"")}</span></button>`).join("")}</div>`
-    : (p.chosen?`<div class="note">${esc(p.chosen.nombre)}${p.chosen.detalle?` · ${esc(p.chosen.detalle)}`:""}</div>`:"");
-  return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}${off?"":lad}</div>`;
+const tecText = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.tecs.map(t=>t.nombre).join(" + ")}`).join(" / ");
+function pairHtml(p, showName){
+  return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}
+    <div class="tecs">${p.tecs.map(t=>`<span class="tec" title="${esc(t.detalle||"")}"><b>${esc(t.nombre)}</b>${t.detalle?`<small>${esc(t.detalle)}</small>`:""}</span>`).join("")}</div></div>`;
 }
 function itemHtml(it){
   const id=it.s.id, off=!!S.off[id], hoy=!!S.hoy[id];
@@ -695,24 +759,32 @@ function itemHtml(it){
       return `${k?'<div class="or">o</div>':""}<div class="alt${sel?" sel":""}">
         <div class="alt-head"><b>${String.fromCharCode(65+k)}. ${esc(a.sol.nombre)}</b>${off?"":`<button type="button" class="btn small" data-sug="${esc(id)}" data-sol="${esc(a.sol.id)}" aria-pressed="${!!sel}">${sel?"Elegida ✓":"Elegir esta"}</button>`}</div>
         ${a.sol.explicacion?`<p class="sol-exp">${esc(a.sol.explicacion)}</p>`:""}
-        ${a.pares.map(p=>pairHtml(p, a.pares.length>1, off)).join("")}</div>`;
+        ${a.pares.map(p=>pairHtml(p, a.pares.length>1)).join("")}</div>`;
     }).join("");
   } else {
-    body = it.pares.map(p=>pairHtml(p, it.pares.length>1, off)).join("");
+    body = off ? "" : it.pares.map(p=>pairHtml(p, it.pares.length>1)).join("");
   }
+  const tag = it.pr==="ess" ? "Esencial" : it.pr==="rec" ? "Muy recomendado" : "Opcional";
   return `<div class="item ${it.pr}${off?" off":""}">
-    <div class="item-top"><div class="t"><span class="tag">${TAG[it.pr]}</span><h3>${esc(it.s.nombre)}</h3></div>
+    <div class="item-top"><div class="t"><span class="tag">${tag}</span><h3>${esc(it.s.nombre)}</h3></div>
       ${it.pares.length>1&&it.alts.length===1&&!off?`<div class="price"><small>${it.pares.length} anteojos</small></div>`:""}</div>
-    ${it.motivos.length?`<ul class="why">${it.motivos.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
+    ${porqueHtml(it)}
     ${body}
     <div class="toggles">
       <label><input type="checkbox" data-hoy="${esc(id)}" ${hoy&&!off?"checked":""} ${off?"disabled":""}> Empezamos por este</label>
       ${it.pr==="ess"?"":`<label><input type="checkbox" data-off="${esc(id)}" ${off?"checked":""}> No me interesa</label>`}
     </div></div>`;
 }
+const PQ = {ess:"esencial", rec:"muy recomendado", opt:"opcional"};
+const porqueBase = it => it.s.porque || ((C.optica.porque||{})[it.pr]) || "";
+function porqueHtml(it){
+  return `<div class="porque"><div class="porque-h">¿Por qué es ${PQ[it.pr]||"opcional"}?</div>${porqueBase(it)?`<p>${esc(porqueBase(it))}</p>`:""}
+    ${it.motivos.length?`<ul class="why">${it.motivos.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}</div>`;
+}
 const momentName = id => ((C.momentos||[]).find(m=>m.id===id)||{nombre:"Otros"}).nombre;
 function renderPlan(){
-  const items = build(); lastItems = items;
+  const all = build(); const items = all.filter(i=>i.pr!=="hid"); const hid = all.filter(i=>i.pr==="hid");
+  lastItems = items;
   $("planWho").textContent = (S.pac.nombre || "Paciente sin nombre") + (S.pac.edad? ` · ${S.pac.edad} años`:"");
   $("exTag").hidden = !S.example;
   if(!items.length){ $("items").innerHTML = '<p class="note">Cargá la receta y respondé la anamnesis: el plan se arma solo.</p>'; $("totals").innerHTML=""; return; }
@@ -720,25 +792,30 @@ function renderPlan(){
   let h = "";
   if(ess.length) h += `<div class="section"><h3>Lo esencial: ver bien todo el día</h3><p class="note">Es la prioridad. Esto te garantiza ver bien en tu día a día.</p></div>` + ess.map(itemHtml).join("");
   if(extra.length){
-    h += `<div class="section"><h3>Opcional y de especialidad</h3><p class="note">Como el calzado: un par para cada actividad.</p></div>`;
+    h += `<div class="section"><h3>Opcional y de especialidad</h3><p class="note">Como el calzado: un par para cada actividad. Te mostramos lo que más te sirve según lo que nos contaste.</p></div>`;
     let cm=null; extra.forEach(it=>{ if(it.s.momento!==cm){ cm=it.s.momento; h += `<div class="moment">${esc(momentName(cm))}</div>`; } h += itemHtml(it); });
+  }
+  if(hid.length){
+    h += `<details class="more"><summary>Ver más opciones (${hid.length})</summary><p class="note">Con lo que nos contaste no parecen prioritarias, pero podés sumarlas.</p>${
+      hid.map(i=>`<div class="more-row"><div><b>${esc(i.s.nombre)}</b><div class="note">${esc(momentName(i.s.momento))}${i.motivos[0]?` · ${esc(i.motivos[0])}`:""}</div></div><button type="button" class="btn small" data-force="${esc(i.s.id)}">Sumar al plan</button></div>`).join("")}</details>`;
   }
   $("items").innerHTML = h;
   const act = items.filter(i=>!S.off[i.s.id]);
   const hoyN = act.filter(i=>S.hoy[i.s.id]).length;
+  const ex = act.filter(i=>i.pr!=="ess");
   $("totals").innerHTML = `
     <div>Lo esencial</div><div class="v big">${ess.length}</div>
-    <div class="note">Opcional y de especialidad</div><div class="v note">${act.filter(i=>i.pr!=="ess").length} en ${new Set(act.filter(i=>i.pr!=="ess").map(i=>i.s.momento)).size} momentos</div>
+    <div class="note">Opcional y de especialidad</div><div class="v note">${ex.length} en ${new Set(ex.map(i=>i.s.momento)).size} momentos</div>
     <div class="note">Para empezar</div><div class="v note">${hoyN?hoyN+" elegida"+(hoyN>1?"s":""):"sin elegir"}</div>`;
 }
+const TAGW = {ess:"Esencial", rec:"Muy recomendado", opt:"Opcional"};
 function waText(){
   const act = lastItems.filter(i=>!S.off[i.s.id]);
-  const what = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.chosen?p.chosen.nombre:""}`).join(" + ");
   const line = i => {
     let w;
-    if(i.alts.length>1 && !i.picked) w = "\n  Opciones: " + i.alts.map(a=>`${a.sol.nombre} (${what(a.pares)})`).join(" / o / ");
-    else w = (i.alts.length>1?` ${i.sol.nombre} – `:": ") + what(i.pares);
-    return `• ${i.s.nombre}${S.hoy[i.s.id]?" ⭐ empezamos por acá":""}${w}${i.motivos[0]?`\n  ${i.motivos[0]}`:""}`;
+    if(i.alts.length>1 && !i.picked) w = "\n  Opciones: " + i.alts.map(a=>`${a.sol.nombre} (${tecText(a.pares)})`).join(" / o / ");
+    else w = (i.alts.length>1?` ${i.sol.nombre} – `:": ") + tecText(i.pares);
+    return `• ${i.s.nombre}${S.hoy[i.s.id]?" ⭐ empezamos por acá":""}${w}\n  _Por qué es ${PQ[i.pr]}:_ ${[porqueBase(i), ...i.motivos.slice(0,2)].filter(Boolean).join(" ")}`;
   };
   const nombre = (S.pac.nombre||"").replace(/\s*\(ejemplo\)/,"");
   let t = `Hola${nombre?" "+nombre:""}! ${C.optica.saludo||""}\n\n`;
@@ -773,8 +850,7 @@ function contactText(){
   head = nombre ? head.replace("{nombre}", nombre) : head.replace(/\s*Me llamo \{nombre\},?/i,"").replace("{nombre}","");
   head = edad ? head.replace("{edad}", edad) : head.replace(/,?\s*tengo \{edad\} años/i,"").replace("{edad}","");
   head = head.replace(/!\s+y /,"! ").replace(/\s{2,}/g," ");
-  const what = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.chosen?p.chosen.nombre:""}`).join(" + ");
-  const desc = i => (i.alts.length>1 ? (i.picked ? `${i.s.nombre}: ${i.sol.nombre} (${what(i.pares)})` : `${i.s.nombre} (${i.alts.map(a=>a.sol.nombre).join(", ")})`) : `${i.s.nombre}: ${what(i.pares)}`);
+  const desc = i => (i.alts.length>1 ? (i.picked ? `${i.s.nombre}: ${i.sol.nombre} (${tecText(i.pares)})` : `${i.s.nombre} (${i.alts.map(a=>a.sol.nombre).join(", ")})`) : `${i.s.nombre}: ${tecText(i.pares)}`);
   let start = act.filter(i=>S.hoy[i.s.id]);
   if(!start.length) start = act.filter(i=>i.pr==="ess").slice(0,1);
   const rest = act.filter(i=>!start.includes(i));
@@ -813,7 +889,7 @@ function renderCfg(){
   $("sugList").innerHTML = C.sugerencias.map((s,i)=>{ const err=checkExpr(s.cuando); return `<div class="sug ${s.prioridad||"rec"}">
     <div class="sug-head">
       <label class="f" style="flex:2 1 220px">Nombre<input id="sg-n-${i}" data-si="${i}" data-sf="nombre" value="${esc(s.nombre)}"></label>
-      <label class="f" style="flex:0 1 150px">Prioridad base<select id="sg-p-${i}" data-si="${i}" data-sf="prioridad">${Object.entries(TAG).map(([k,v])=>`<option value="${k}" ${s.prioridad===k?"selected":""}>${v}</option>`).join("")}</select></label>
+      ${Array.isArray(s.puntos)&&s.prioridad!=="ess"?`<div class="f note" style="flex:0 1 150px">Prioridad: por puntaje (${s.puntos.length} reglas)</div>`:`<label class="f" style="flex:0 1 150px">Prioridad base<select id="sg-p-${i}" data-si="${i}" data-sf="prioridad">${Object.entries(TAG).map(([k,v])=>`<option value="${k}" ${s.prioridad===k?"selected":""}>${v}</option>`).join("")}</select></label>`}
       <label class="toggles" style="padding-bottom:8px"><input type="checkbox" id="sg-a-${i}" data-si="${i}" data-sf="activa" ${s.activa===false?"":"checked"}> Activa</label>
     </div>
     <label class="f">Aparece cuando<input class="code${err?" bad":""}" id="sg-c-${i}" data-si="${i}" data-sf="cuando" value="${esc(s.cuando)}"></label>
@@ -827,12 +903,14 @@ function validateConfig(c){
   for(const k of ["optica","preguntas","productos","sugerencias"]) if(!c[k]) return `Falta "${k}".`;
   const ids = new Set(c.productos.map(p=>p.id));
   for(const [k,ex] of Object.entries(c.derivados||{})){ const e=checkExpr(ex); if(e) return `Derivado "${k}": ${e}`; }
+  for(const q of c.preguntas){ const e=checkExpr(q.si); if(e) return `Pregunta "${q.texto}": ${e}`; }
   for(const s of c.sugerencias){
     let e=checkExpr(s.cuando); if(e) return `Sugerencia "${s.nombre}": ${e}`;
     if(!Array.isArray(s.soluciones)||!s.soluciones.length) return `Sugerencia "${s.nombre}" no tiene soluciones.`;
     for(const m of s.motivos||[]){ e=checkExpr(m.si); if(e) return `Motivo de "${s.nombre}": ${e}`; }
     for(const so of s.soluciones) for(const p of so.pares||[]){ e=checkExpr(p.si); if(e) return `Par de "${s.nombre}": ${e}`; } 
-    for(const so of s.soluciones) for(const p of so.pares||[]) for(const o of [...(p.opciones||[]), ...((p.opcionesSi||[]).flatMap(x=>x.opciones))]) if(!ids.has(o)) return `"${s.nombre}" usa el producto "${o}", que no existe.`;
+    for(const x of s.puntos||[]){ e=checkExpr(x.si); if(e) return `Puntos de "${s.nombre}": ${e}`; }
+    for(const so of s.soluciones) for(const p of so.pares||[]) for(const t of p.tecnologias||[]){ if(!ids.has(t.id)) return `"${s.nombre}" usa la tecnología "${t.id}", que no existe.`; e=checkExpr(t.si); if(e) return `Tecnología de "${s.nombre}": ${e}`; }
   }
   return null;
 }
@@ -871,6 +949,7 @@ document.addEventListener("click", e=>{
     else S.a[q.id] = S.a[q.id]===v?undefined:v;
     S.example=false; renderQs(); all(); return; }
   const o=e.target.closest(".opt-btn"); if(o){ S.sel[o.dataset.key]=o.dataset.opt; all(); return; }
+  const fb=e.target.closest("[data-force]"); if(fb){ S.force[fb.dataset.force]=true; all(); return; }
   const sb=e.target.closest("[data-sol]"); if(sb){ const k=sb.dataset.sug; S.sol[k] = S.sol[k]===sb.dataset.sol ? undefined : sb.dataset.sol; all(); return; }
   const pd=e.target.closest("[data-pdel]"); if(pd){ C.productos.splice(+pd.dataset.pdel,1); saveCfg(); renderCfg(); return; }
 });
@@ -888,7 +967,7 @@ $("applyJson").onclick = ()=>{
   const m=$("cfgJsonMsg"); let c;
   try{ c=JSON.parse($("cfgJson").value); }catch(err){ m.className="bad-txt"; m.textContent="El JSON tiene un error: "+err.message; return; }
   const v=validateConfig(c); if(v){ m.className="bad-txt"; m.textContent=v; return; }
-  c.version = Math.max(5,c.version||5); C=c; saveCfg(); renderCfg(); renderQs(); m.className="ok"; m.textContent="Configuración aplicada.";
+  c.version = Math.max(6,c.version||6); C=c; saveCfg(); renderCfg(); renderQs(); m.className="ok"; m.textContent="Configuración aplicada.";
 };
 $("copyJson").onclick = async ()=>{ const ta=$("cfgJson"); try{ await navigator.clipboard.writeText(ta.value); $("copyJson").textContent="Copiado ✓"; }catch(_){ ta.focus(); ta.select(); $("copyJson").textContent="Seleccionado: copialo"; } setTimeout(()=>$("copyJson").textContent="Copiar",2500); };
 $("impJson").onchange = e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ $("cfgJson").value=String(r.result); $("applyJson").click(); }; r.readAsText(f); e.target.value=""; };
