@@ -486,22 +486,21 @@ const DEFAULT_CONFIG = {
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
       motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
-    {id:"lc_diario", momento:"dia", especialidad:"lc", nombre:"Lentes de contacto de uso diario", cuando:'quiere_lc and lc == "uso"',
+    {id:"lc_diario", momento:"dia", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto de uso diario", cuando:'quiere_lc and lc == "uso"',
       puntos:[{n:7}],
-      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"}]}]}]},
 
-    {id:"lc_alternativa", momento:"dia", especialidad:"lc", nombre:"Lentes de contacto como alternativa al anteojo", cuando:'lc_candidato and lc != "no" and lc != "uso"',
+    {id:"lc_alternativa", momento:"dia", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto como alternativa al anteojo", cuando:'lc_candidato and lc != "no" and lc != "uso"',
       puntos:[{n:3},{si:"quiere_lc", n:3},{si:"deporte_activo", n:1},{si:'"eventos" in actividades', n:1},{si:'importa == "estetica"', n:1},{si:"potencia >= 3", n:1}],
       motivos:[
         {texto:"Tu graduación supera 0.75: con lentes de contacto ves completo, sin el marco y sin que se empañen."},
         {si:"deporte_activo", texto:"Ideales para hacer deporte sin anteojo."},
         {si:'"eventos" in actividades', texto:"Para salidas y eventos, sin anteojo."},
-        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},
-        {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
+        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"},{id:"lc_diarias"}]}]}]},
-    {id:"lc_miopia", momento:"dia", especialidad:"control_miopia", nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
+    {id:"lc_miopia", momento:"dia", especialidad:"control_miopia", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
       puntos:[{si:"nino_miope", n:6},{si:"adolescente_miope", n:3},{si:"deporte_activo", n:1}],
       motivos:[
         {si:"nino_miope", texto:"Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."},
@@ -568,13 +567,12 @@ const DEFAULT_CONFIG = {
         {nombre:"Nieve", si:'"nieve" in deporte', tecnologias:[{id:"clip"},{id:"espejado"}]},
         {nombre:"Agua", si:'"pesca" in deporte', tecnologias:[{id:"polar"},{id:"envolvente"}]}
       ]}]},
-    {id:"lc_deporte", momento:"deporte", especialidad:"lc", nombre:"Lentes de contacto para hacer deporte", cuando:'deporte_activo and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+    {id:"lc_deporte", momento:"deporte", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto para hacer deporte", cuando:'deporte_activo and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
       puntos:[{n:1},{si:"quiere_lc", n:2},{si:"deporte_seguido", n:2},{si:'"pelota" in deporte', n:2},{si:"graduacion_baja", n:-2}],
       motivos:[
         {texto:"Para entrenar sin anteojo: no se empañan, no se mueven y ves todo el campo."},
         {si:'"pelota" in deporte', texto:"Con pelota o raqueta son más seguros que un anteojo común."},
-        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},
-        {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
+        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
     {id:"antiparra", momento:"deporte", especialidad:"antiparras", nombre:"Antiparras graduadas", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
@@ -582,9 +580,9 @@ const DEFAULT_CONFIG = {
       motivos:[{si:'"agua" in deporte', texto:"Nadás: en la pileta ves bien y cuidás el anteojo."},{si:'"playa" in actividades and not "agua" in deporte', texto:"Para la pileta en vacaciones."}],
       soluciones:[{id:"uno", nombre:"Antiparras", pares:[{tecnologias:[{id:"antiparra"}]}]}]},
 
-    {id:"lc_salidas", momento:"salidas", especialidad:"lc", nombre:"Lentes de contacto para salir", cuando:'"eventos" in actividades and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+    {id:"lc_salidas", momento:"salidas", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto para salir", cuando:'"eventos" in actividades and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
       puntos:[{n:2},{si:"quiere_lc", n:2},{si:'importa == "estetica"', n:1}],
-      motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
     {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", cuando:'receta and ("eventos" in actividades or importa == "estetica")',
       puntos:[{si:'"eventos" in actividades', n:2},{si:'importa == "estetica"', n:2},{si:'tiene == "varios"', n:-2},{si:"graduacion_baja", n:-1}],
@@ -719,7 +717,6 @@ function renderRead(){
   if(r.potencia>=6) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
   if(r.anisometropia) L.push(["Hay bastante diferencia entre un ojo y el otro: hay que cuidar mucho el centrado del cristal.","warn"]);
   if(r.receta_meses!=null && r.receta_meses>12) L.push(["La receta tiene más de un año. Conviene revisarla con tu oftalmólogo antes de hacer cristales nuevos.","warn"]);
-  if(ofrece("lc") && S.rx.tipo==="anteojos" && ["uso","interes"].includes(S.a.lc)) L.push(["Para lentes de contacto hace falta que tu oftalmólogo los indique en la receta.","warn"]);
   $("rxRead").innerHTML = L.map(([t,c])=>`<li${c?` class="${c}"`:""}>${t}</li>`).join("");
 }
 
@@ -779,6 +776,7 @@ function pairHtml(p, showName){
   return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}
     <div class="tecs">${p.tecs.map(t=>`<span class="tec" title="${esc(t.detalle||"")}"><b>${esc(t.nombre)}</b>${t.detalle?`<small>${esc(t.detalle)}</small>`:""}</span>`).join("")}</div></div>`;
 }
+const notas = it => (it.s.alElegir||[]).filter(n=>test(n.si,facts()));
 function itemHtml(it){
   const id=it.s.id, off=!!S.off[id], hoy=!!S.hoy[id];
   let body;
@@ -799,6 +797,7 @@ function itemHtml(it){
       ${it.pares.length>1&&it.alts.length===1&&!off?`<div class="price"><small>${it.pares.length} anteojos</small></div>`:""}</div>
     ${porqueHtml(it)}
     ${body}
+    ${hoy&&!off?notas(it).map(n=>`<p class="status">${esc(n.texto)}</p>`).join(""):""}
     <div class="toggles">
       <label><input type="checkbox" data-hoy="${esc(id)}" ${hoy&&!off?"checked":""} ${off?"disabled":""}> Empezamos por este</label>
       ${it.pr==="ess"?"":`<label><input type="checkbox" data-off="${esc(id)}" ${off?"checked":""}> No me interesa</label>`}
@@ -888,6 +887,8 @@ function contactText(){
   if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(i=>"• "+desc(i)).join("\n") + "\n\n";
   const rx = rxLines();
   if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n\n";
+  const ms = [...new Set(start.flatMap(i=>notas(i).map(n=>n.mensaje).filter(Boolean)))];
+  if(ms.length) t += ms.join("\n") + "\n\n";
   t += "*Envío la foto de la receta para revisión.*";
   return t.trim();
 }

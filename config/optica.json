@@ -813,6 +813,13 @@
       "id": "lc_diario",
       "momento": "dia",
       "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
       "nombre": "Lentes de contacto de uso diario",
       "cuando": "quiere_lc and lc == \"uso\"",
       "puntos": [
@@ -827,10 +834,6 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
-        },
-        {
-          "si": "receta_tipo == \"anteojos\"",
-          "texto": "Necesitás que tu oftalmólogo indique lentes de contacto en la receta."
         }
       ],
       "soluciones": [
@@ -858,6 +861,13 @@
       "id": "lc_alternativa",
       "momento": "dia",
       "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
       "nombre": "Lentes de contacto como alternativa al anteojo",
       "cuando": "lc_candidato and lc != \"no\" and lc != \"uso\"",
       "puntos": [
@@ -900,10 +910,6 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
-        },
-        {
-          "si": "receta_tipo == \"anteojos\"",
-          "texto": "Necesitás que tu oftalmólogo indique lentes de contacto en la receta."
         }
       ],
       "soluciones": [
@@ -934,6 +940,13 @@
       "id": "lc_miopia",
       "momento": "dia",
       "especialidad": "control_miopia",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
       "nombre": "Control de miopía",
       "cuando": "menor_miope and edad >= 8",
       "puntos": [
@@ -1435,6 +1448,13 @@
       "id": "lc_deporte",
       "momento": "deporte",
       "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
       "nombre": "Lentes de contacto para hacer deporte",
       "cuando": "deporte_activo and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
       "puntos": [
@@ -1469,10 +1489,6 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
-        },
-        {
-          "si": "receta_tipo == \"anteojos\"",
-          "texto": "Necesitás que tu oftalmólogo indique lentes de contacto en la receta."
         }
       ],
       "soluciones": [
@@ -1549,6 +1565,13 @@
       "id": "lc_salidas",
       "momento": "salidas",
       "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
       "nombre": "Lentes de contacto para salir",
       "cuando": "\"eventos\" in actividades and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
       "puntos": [
@@ -1571,10 +1594,6 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
-        },
-        {
-          "si": "receta_tipo == \"anteojos\"",
-          "texto": "Necesitás que tu oftalmólogo indique lentes de contacto en la receta."
         }
       ],
       "soluciones": [
