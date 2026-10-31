@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--
+  Paquete Visual - Copyright (C) 2026 Gabriel Rodriguez
+  Licencia: GNU Affero General Public License v3.0 o posterior (ver LICENSE).
+-->
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Paquete Visual Rodriguez</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: two columns on desktop — left the counter interview (receta + anamnesis), right a sticky treatment plan that rebuilds live. A second view (#config) edits the óptica's catalog and rules. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#14202e; --muted:#5b6878; --line:#dbe1e8;
+  --accent:#1f4fa3; --accent-soft:#e3ebf8; --accent-ink:#ffffff;
+  --ess:#b3261e; --ess-soft:#fbe9e7; --rec:#a35a00; --rec-soft:#fdf0dc; --opt:#2e6b45; --opt-soft:#e4f2e8;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f151d; --surface:#17202b; --ink:#e6ebf1; --muted:#9aa7b6; --line:#2a3644;
+  --accent:#7ea6ec; --accent-soft:#1d2b42; --accent-ink:#0f151d;
+  --ess:#f08a80; --ess-soft:#3a1d1b; --rec:#f0b35c; --rec-soft:#382a14; --opt:#7dc896; --opt-soft:#16301f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151d; --surface:#17202b; --ink:#e6ebf1; --muted:#9aa7b6; --line:#2a3644;
+  --accent:#7ea6ec; --accent-soft:#1d2b42; --accent-ink:#0f151d;
+  --ess:#f08a80; --ess-soft:#3a1d1b; --rec:#f0b35c; --rec-soft:#382a14; --opt:#7dc896; --opt-soft:#16301f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:1.9rem;line-height:1.1;margin:0;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.25rem;margin:0;text-wrap:balance}
+h3{font-size:.95rem;font-weight:600;margin:0}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 14px;cursor:pointer;display:inline-block}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:4px 10px;font-size:.82rem}
+.btn.danger{color:var(--ess)}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.opt-btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:default}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.step{display:flex;gap:10px;align-items:baseline}
+.step .n{font-family:var(--f-mono);font-size:.8rem;color:var(--accent);font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500;flex:1 1 140px;min-width:0}
+input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
+input.bad{border-color:var(--ess)}
+.rx-wrap,.tbl-wrap{overflow-x:auto}
+table.rx{border-collapse:collapse;width:100%;min-width:420px;font-family:var(--f-mono)}
+table.rx th,table.cfg th{font-family:var(--f-body);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:4px 6px}
+table.rx td{padding:4px 6px}
+table.rx td:first-child{font-weight:600;width:44px}
+table.rx input{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.drop img{max-height:90px;border-radius:6px;border:1px solid var(--line)}
+.drop .txt{flex:1 1 200px;min-width:0;font-size:.9rem;color:var(--muted)}
+.note{font-size:.85rem;color:var(--muted)}
+.status{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--accent-soft)}
+.status.err{background:var(--ess-soft);color:var(--ess)}
+ul.read{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+ul.read li{font-size:.92rem}
+ul.read li.warn{color:var(--rec)}
+.q{display:flex;flex-direction:column;gap:7px;padding-top:12px;border-top:1px solid var(--line)}
+.q:first-child{border-top:0;padding-top:0}
+.q .lbl{font-weight:600;font-size:.93rem}
+.q .lbl em{font-style:normal;font-weight:400;color:var(--muted);font-size:.8rem;margin-left:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.86rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* plan */
+.plan{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:900px){.plan{position:static}}
+.plan-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.plan-head .who{color:var(--muted);font-size:.9rem}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px 12px 12px 14px;display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden}
+.item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pc)}
+.ess{--pc:var(--ess);--ps:var(--ess-soft)} .rec{--pc:var(--rec);--ps:var(--rec-soft)} .opt{--pc:var(--opt);--ps:var(--opt-soft)}
+.item.off{opacity:.5}
+.item-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.item-top .t{min-width:0}
+.tag{display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pc);background:var(--ps);border-radius:4px;padding:1px 6px;margin-bottom:3px}
+.why{margin:0;padding-left:16px;font-size:.86rem;color:var(--muted)}
+.price{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;text-align:right}
+.price small{display:block;font-weight:400;color:var(--muted);font-size:.72rem}
+.seg{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content;max-width:100%}
+.seg button{font:inherit;font-size:.84rem;font-weight:600;border:0;border-right:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 12px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sol-exp{font-size:.85rem;margin:0}
+.pair{display:flex;flex-direction:column;gap:6px}
+.pair-name{font-size:.78rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.pair-name span+span{font-family:var(--f-mono);letter-spacing:0;text-transform:none}
+.ladder{display:grid;gap:6px}
+.opt-btn{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 8px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.opt-btn b{font-size:.84rem}
+.opt-btn span{font-size:.76rem;line-height:1.3;color:var(--muted)}
+.opt-btn i{font-style:normal;font-size:.68rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.opt-btn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+@media (max-width:480px){.ladder{grid-template-columns:minmax(0,1fr)!important}}
+.toggles{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.toggles input{width:auto}
+.totals{display:grid;grid-template-columns:1fr auto;gap:4px 12px;border-top:1px solid var(--line);padding-top:12px;font-variant-numeric:tabular-nums}
+.totals .big{font-family:var(--f-display);font-size:1.3rem;font-weight:700}
+.totals .v{font-family:var(--f-mono);text-align:right}
+.intro{margin:6px 0 0;font-size:.9rem;max-width:52ch}
+.section{display:flex;flex-direction:column;gap:2px;padding-top:4px}
+.section h3{font-family:var(--f-display);font-size:1.1rem}
+.section p{margin:0}
+.alt{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.alt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.alt-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.alt .opt-btn{background:var(--surface)}
+.or{text-align:center;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.moment{font-family:var(--f-display);font-weight:700;font-size:1rem;color:var(--accent);padding-top:6px;border-top:1px solid var(--line)}
+.moment:first-child{border-top:0;padding-top:0}
+.legal{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.example{align-self:center;font-size:.78rem;font-weight:600;color:var(--rec);background:var(--rec-soft);border-radius:999px;padding:2px 10px}
+textarea.out{min-height:160px;font-family:var(--f-mono);font-size:.8rem}
+/* config */
+.cfg-grid{display:flex;flex-direction:column;gap:16px;max-width:980px}
+table.cfg{border-collapse:collapse;width:100%;min-width:620px}
+table.cfg td{padding:4px 6px;vertical-align:top}
+table.cfg td.num input{font-family:var(--f-mono);text-align:right}
+.sug{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.sug-head{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.code{font-family:var(--f-mono);font-size:.84rem}
+.ok{color:var(--opt);font-size:.78rem}
+.bad-txt{color:var(--ess);font-size:.78rem}
+textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
+.help{font-size:.85rem;color:var(--muted)}
+.help code{font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.help ul{margin:6px 0;padding-left:18px}
+@media (prefers-reduced-motion:no-preference){.item{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1><small id="opName">Óptica</small>Paquete visual del paciente</h1>
+    <div class="actions">
+      <span class="example" id="exTag">Paciente de ejemplo</span>
+      <button class="btn" id="newBtn" type="button">Nuevo paciente</button>
+      <a class="btn" id="viewBtn" href="#config">Configuración</a>
+    </div>
+  </header>
+
+  <!-- ===================== ATENCIÓN ===================== -->
+  <div class="grid" id="viewPlan">
+    <div class="col">
+      <section class="card">
+        <div class="step"><span class="n">1</span><h2>Paciente</h2></div>
+        <div class="row">
+          <label class="f">Nombre<input id="p-nombre"></label>
+          <label class="f" style="flex:0 1 90px">Edad<input id="p-edad" type="number" min="0" max="110" inputmode="numeric"></label>
+          <label class="f">WhatsApp<input id="p-tel" inputmode="tel"></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="step"><span class="n">2</span><h2>Receta del oftalmólogo</h2></div>
+        <div class="drop">
+          <img id="rxImg" alt="Foto de la receta" hidden>
+          <div class="txt" id="dropTxt">Sacale una foto a la receta y la leemos con IA. Después revisá los números contra el papel.</div>
+          <div class="actions">
+            <label class="btn primary" for="rxFile" id="rxFileLbl">Subir foto de receta</label>
+            <input id="rxFile" type="file" accept="image/*" capture="environment" hidden>
+          </div>
+        </div>
+        <div id="aiStatus" class="status" hidden></div>
+        <div class="rx-wrap">
+          <table class="rx">
+            <thead><tr><th></th><th>Esf</th><th>Cil</th><th>Eje</th><th>Add</th></tr></thead>
+            <tbody>
+              <tr><td>OD</td><td><input id="od-esf" inputmode="decimal"></td><td><input id="od-cil" inputmode="decimal"></td><td><input id="od-eje" inputmode="numeric"></td><td><input id="od-add" inputmode="decimal"></td></tr>
+              <tr><td>OI</td><td><input id="oi-esf" inputmode="decimal"></td><td><input id="oi-cil" inputmode="decimal"></td><td><input id="oi-eje" inputmode="numeric"></td><td><input id="oi-add" inputmode="decimal"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <label class="f">Fecha de la receta<input id="rx-fecha" type="date"></label>
+          <label class="f">Indicada para
+            <select id="rx-tipo">
+              <option value="anteojos">Anteojos</option>
+              <option value="lc">Lentes de contacto</option>
+              <option value="ambos">Anteojos y lentes de contacto</option>
+            </select>
+          </label>
+          <label class="f">Médico<input id="rx-medico"></label>
+        </div>
+        <div>
+          <h3 style="margin-bottom:6px">Qué dice la receta, en simple</h3>
+          <ul class="read" id="rxRead"></ul>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="step"><span class="n">3</span><h2>Anamnesis: cómo es su día</h2></div>
+        <p class="note" style="margin:0">Preguntas de uso y hábitos. No reemplazan ni modifican la receta.</p>
+        <div id="qs" style="display:flex;flex-direction:column;gap:0"></div>
+      </section>
+    </div>
+
+    <div class="col plan">
+      <section class="card">
+        <div class="plan-head">
+          <div>
+            <h2>Un anteojo para cada momento</h2>
+            <div class="who" id="planWho"></div>
+            <p class="intro" id="planIntro"></p>
+          </div>
+          <div class="legend">
+            <span><span class="dot" style="background:var(--ess)"></span>Esencial</span>
+            <span><span class="dot" style="background:var(--rec)"></span>Recomendado</span>
+            <span><span class="dot" style="background:var(--opt)"></span>Opcional</span>
+          </div>
+        </div>
+        <div class="items" id="items"></div>
+        <div class="totals" id="totals"></div>
+        <div class="actions">
+          <button class="btn primary" id="copyBtn" type="button">Copiar plan para WhatsApp</button>
+        </div>
+        <textarea class="out" id="outTxt" readonly hidden></textarea>
+        <div class="legal" id="legal"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== CONFIGURACIÓN ===================== -->
+  <div class="cfg-grid" id="viewCfg" hidden>
+    <section class="card">
+      <h2>Tu óptica</h2>
+      <div class="row">
+        <label class="f">Nombre<input id="c-nombre"></label>
+      </div>
+      <label class="f">Frase de presentación del plan<textarea id="c-intro" rows="2"></textarea></label>
+      <label class="f">Saludo del mensaje de WhatsApp<input id="c-saludo"></label>
+      <label class="f">Texto legal al pie del plan<textarea id="c-legal" rows="2"></textarea></label>
+    </section>
+
+    <section class="card">
+      <div class="actions" style="justify-content:space-between"><h2>Tipos de cristal y productos</h2><button class="btn small" id="addProd" type="button">Agregar</button></div>
+      <p class="note" style="margin:0">Los nombres que usa tu óptica. El código es el que usan las sugerencias.</p>
+      <div class="tbl-wrap"><table class="cfg"><thead><tr><th>Código</th><th>Nombre</th><th>Detalle</th><th></th></tr></thead><tbody id="prodRows"></tbody></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Sugerencias</h2>
+      <p class="note" style="margin:0">Cada sugerencia aparece en el plan cuando se cumple su condición. Podés cambiar nombre, prioridad y condición acá; las soluciones, motivos y preguntas se editan en el JSON de abajo.</p>
+      <div id="sugList" style="display:flex;flex-direction:column;gap:10px"></div>
+      <details class="help">
+        <summary style="cursor:pointer;font-weight:600">Cómo se escriben las condiciones</summary>
+        <ul>
+          <li>Datos de la receta: <code>add</code>, <code>lejos</code> (tiene graduación de lejos), <code>miopia</code>, <code>hipermetropia</code>, <code>astigmatismo</code>, <code>potencia</code>, <code>anisometropia</code>, <code>receta</code> (cargada), <code>receta_meses</code>, <code>receta_tipo</code>, <code>edad</code>.</li>
+          <li>Respuestas: el código de cada pregunta, por ejemplo <code>maneja == "noche"</code>, <code>"pc" in trabajo</code>, <code>pantallas in ["5-8","8+"]</code>.</li>
+          <li>Unir: <code>and</code> / <code>y</code>, <code>or</code> / <code>o</code>, <code>not</code> / <code>no</code>, paréntesis. Comparar: <code>== != &gt; &gt;= &lt; &lt;=</code>.</li>
+          <li>Ejemplo: <code>add &gt; 0 and (lejos or "lejos" in dist)</code></li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Configuración completa (JSON)</h2>
+      <p class="note" style="margin:0">Momentos, preguntas, tipos de cristal, sugerencias, soluciones y motivos. Sirve para pasar la configuración a otra computadora o a otra óptica.</p>
+      <textarea class="json" id="cfgJson" spellcheck="false"></textarea>
+      <div id="cfgJsonMsg" class="note"></div>
+      <div class="actions">
+        <button class="btn primary" id="applyJson" type="button">Aplicar JSON</button>
+        <button class="btn" id="copyJson" type="button">Copiar</button>
+        <button class="btn" id="dlJson" type="button" hidden>Descargar archivo</button>
+        <label class="btn" for="impJson">Importar archivo</label><input id="impJson" type="file" accept=".json,application/json" hidden>
+        <button class="btn danger" id="resetCfg" type="button">Volver a la configuración de fábrica</button>
+      </div>
+      <div id="resetConfirm" class="status err" hidden>Se borran tus productos y reglas de este navegador. <button class="btn small" id="resetYes" type="button">Sí, volver</button> <button class="btn small" id="resetNo" type="button">Cancelar</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Lectura de recetas con IA (instalación propia)</h2>
+      <p class="note" style="margin:0">Dentro de Claude la lectura funciona sola. Si instalás la app en tu propio sitio, cargá una clave de la API de Anthropic. Se guarda solo en este navegador y nunca se exporta.</p>
+      <div class="row">
+        <label class="f">Clave API<input id="c-key" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+        <label class="f">Modelo<input id="c-model" placeholder="claude-sonnet-5-5"></label>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n==null ? "a cotizar" : "$" + Math.round(n).toLocaleString("es-AR");
+const clone = o => JSON.parse(JSON.stringify(o));
+const LS = {get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* =========================================================
+   CONFIGURACIÓN DE FÁBRICA (Óptica Rodriguez)
+   ========================================================= */
+const DEFAULT_CONFIG = {
+  version: 5,
+  optica: {
+    nombre: "Óptica Rodriguez",
+    intro: "Así como no usás el mismo calzado para una fiesta, para correr y para caminar, tu vista también rinde mejor con la solución justa para cada momento.",
+    saludo: "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
+    legal: "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día."
+  },
+  momentos: [
+    {id:"dia", nombre:"Para todo el día"},
+    {id:"trabajo", nombre:"Para estudiar, trabajar y pantallas"},
+    {id:"manejo", nombre:"Para manejar"},
+    {id:"sol", nombre:"Al sol y al aire libre"},
+    {id:"deporte", nombre:"Para hacer deporte"},
+    {id:"salidas", nombre:"Para salir y eventos"},
+    {id:"cerca", nombre:"Para leer y hobbies"},
+    {id:"repuesto", nombre:"Por las dudas"}
+  ],
+  preguntas: [
+    {id:"pantallas", texto:"¿Cuántas horas por día mirás pantallas?", ayuda:"PC, celular, tablet, consola", opciones:[["0-2","Menos de 2"],["2-5","2 a 5"],["5-8","5 a 8"],["8+","Más de 8"]]},
+    {id:"trabajo", multiple:true, texto:"¿Qué hacés la mayor parte del día?", opciones:[["pc","Oficina / PC"],["aire","Trabajo al aire libre"],["chofer","Manejo (chofer, reparto)"],["taller","Taller, obra o laboratorio"],["publico","Docencia / atención al público"],["precision","Oficio de precisión (costura, electrónica)"],["estudio","Estudio"],["casa","Casa / jubilado"]]},
+    {id:"dist", multiple:true, texto:"¿Dónde necesitás ver bien sí o sí?", opciones:[["lejos","Lejos (calle, tele, pizarrón)"],["inter","Intermedia (PC, tablero, cocina)"],["cerca","Cerca (celular, leer, coser)"]]},
+    {id:"maneja", texto:"¿Manejás?", opciones:[["no","No"],["dia","Sí, de día"],["noche","También de noche"],["trabajo","Por trabajo"]]},
+    {id:"luz", multiple:true, texto:"¿Algo de la luz te molesta?", opciones:[["sol","El sol, me achino"],["noche","Las luces de noche me encandilan"],["fatiga","Termino el día con la vista cansada"],["nada","Nada"]], exclusivas:["nada"]},
+    {id:"aire", texto:"¿Cuánto tiempo pasás al aire libre?", opciones:[["poco","Poco"],["medio","1 a 3 horas"],["mucho","Más de 3 horas"]]},
+    {id:"osc", texto:"¿Te gustaría que tu anteojo de todos los días se oscurezca al sol?", opciones:[["si","Sí"],["no","No"],["nose","No sé"]]},
+    {id:"deporte", multiple:true, texto:"¿Hacés deporte?", opciones:[["no","No"],["gym","Gimnasio"],["run","Running / caminata"],["bici","Bici"],["pelota","Fútbol / pádel / tenis"],["agua","Natación"],["nieve","Esquí / nieve"],["pesca","Pesca / náutica"]], exclusivas:["no"]},
+    {id:"actividades", multiple:true, texto:"¿Qué más hacés en tu tiempo libre?", opciones:[["eventos","Salidas y eventos"],["playa","Playa, pileta y vacaciones"],["lectura","Leer mucho"],["manualidades","Manualidades, costura, maquetas"],["gaming","Videojuegos"],["nada","Nada en especial"]], exclusivas:["nada"]},
+    {id:"lc", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
+    {id:"tiene", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
+    {id:"importa", texto:"¿Qué es lo que más te importa?", opciones:[["estetica","Verme bien"],["confort","Comodidad todo el día"],["dura","Que dure"],["precio","Cuidar el presupuesto"]]}
+  ],
+  derivados: {
+    oscurece: 'osc == "si" or (osc != "no" and ("sol" in luz or aire == "mucho" or "aire" in trabajo))',
+    usa_pc: '"pc" in trabajo or "estudio" in trabajo or pantallas in ["5-8","8+"] or "gaming" in actividades',
+    maneja_si: 'maneja in ["dia","noche","trabajo"]',
+    maneja_noche: 'maneja in ["noche","trabajo"] or (maneja_si and "noche" in luz)',
+    necesita_lejos_y_cerca: 'add > 0 and (lejos or "lejos" in dist)',
+    deporte_activo: 'deporte in ["run","bici","pelota","nieve","pesca","gym"]',
+    deporte_exterior: 'deporte in ["run","bici","pelota","nieve","pesca"]',
+    quiere_lc: 'lc in ["uso","interes"]'
+  },
+  productos: [
+    {id:"ar", nombre:"Clara", detalle:"Orgánico con antirreflejo"},
+    {id:"blue", nombre:"Escudo Digital", detalle:"Blue Cut con antirreflejo"},
+    {id:"antiage", nombre:"Antiage", detalle:"Descanso visual + filtro azul"},
+    {id:"digital", nombre:"Precisión", detalle:"Tallado digital"},
+    {id:"foto", nombre:"Fotocromático AR", detalle:"Se oscurece al sol"},
+    {id:"fotoblue", nombre:"Fotoblue", detalle:"Fotocromático + filtro azul"},
+    {id:"transitions", nombre:"Transitions", detalle:"Se oscurece y aclara rápido"},
+    {id:"bifocal", nombre:"Bifocal", detalle:"Lejos arriba, cerca abajo"},
+    {id:"multi", nombre:"Total", detalle:"Multifocal"},
+    {id:"multi_aa", nombre:"Total Antiage", detalle:"Multifocal con antiage"},
+    {id:"multi_dig", nombre:"Total Precisión", detalle:"Multifocal tallado digital premium"},
+    {id:"control_miopia", nombre:"Control de miopía", detalle:"Cristal para chicos, sin filtro azul (según indicación médica)"},
+    {id:"ocup", nombre:"Ocupacional", detalle:"Intermedio y cerca, con filtro azul"},
+    {id:"drive", nombre:"Manejo nocturno", detalle:"Más contraste y menos encandilamiento"},
+    {id:"sol", nombre:"Sol polarizado graduado", detalle:"Corta el reflejo del asfalto y el agua"},
+    {id:"sol_espejado", nombre:"Sol espejado graduado", detalle:"Para mucha luz: playa, nieve"},
+    {id:"deportivo", nombre:"Deportivo graduado", detalle:"Envolvente, policarbonato irrompible"},
+    {id:"deportivo_foto", nombre:"Deportivo fotocromático", detalle:"Se adapta a sol y sombra"},
+    {id:"protector", nombre:"Protector deportivo graduado", detalle:"Con elástico, para deportes con pelota"},
+    {id:"mascara", nombre:"Máscara con clip óptico", detalle:"Tu graduación dentro de la máscara"},
+    {id:"seguridad", nombre:"Seguridad graduado", detalle:"Norma de seguridad, protecciones laterales"},
+    {id:"segundo", nombre:"Segundo anteojo", detalle:"Otro estilo de armazón, mismos cristales"},
+    {id:"lc", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario"},
+    {id:"lc_diarias", nombre:"Lentes de contacto diarias", detalle:"Se usan un día y se descartan"},
+    {id:"antiparra", nombre:"Antiparras graduadas", detalle:"Para pileta"}
+  ],
+  sugerencias: [
+    {id:"lejos_cerca", momento:"dia", nombre:"Ver bien de lejos y de cerca", prioridad:"ess", cuando:"necesita_lejos_y_cerca",
+      motivos:[
+        {texto:"Tu receta tiene adición: necesitás una corrección para lejos y otra para cerca."},
+        {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
+        {si:'pantallas in ["5-8","8+"]', texto:"Pasás {pantallas} h por día frente a pantallas."},
+        {si:'tiene in ["viejo","ninguno"]', texto:"Hoy no tenés un anteojo en buen estado."}
+      ],
+      soluciones:[
+        {id:"multi", nombre:"Multifocal", explicacion:"Un solo anteojo para lejos, intermedio y cerca, sin línea. Es lo más cómodo; lleva unos días de adaptación.",
+          pares:[{nombre:"Multifocal", opciones:["multi_dig","multi_aa","multi"], destacada:"multi_aa"}]},
+        {id:"bifocal", nombre:"Bifocal", explicacion:"Un solo anteojo con dos zonas: lejos arriba y cerca abajo. Se ve la línea y no tiene zona para la compu.",
+          pares:[{nombre:"Bifocal", opciones:["bifocal"]}]},
+        {id:"dos", nombre:"Dos anteojos (lejos + cerca)", explicacion:"Uno para lejos y otro para cerca. Campo amplio en cada uno, pero hay que cambiarlos según lo que hagas.",
+          pares:[
+            {nombre:"Lejos", opciones:["digital","antiage","blue"], destacada:"antiage", opcionesSi:[{si:"oscurece", opciones:["transitions","fotoblue","foto"], destacada:"fotoblue"}]},
+            {nombre:"Cerca", opciones:["antiage","blue","ar"], destacada:"blue"}
+          ]}
+      ]},
+    {id:"principal", momento:"dia", nombre:"Anteojo para todo el día", prioridad:"ess", cuando:"receta and lejos and not add > 0",
+      motivos:[
+        {si:"miopia", texto:"Lo necesitás para ver de lejos: calle, tele, caras."},
+        {si:"not miopia", texto:"Es la corrección que indicó tu oftalmólogo, para usar todo el día."},
+        {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
+        {si:'pantallas in ["5-8","8+"]', texto:"Pasás {pantallas} h por día frente a pantallas."},
+        {si:"potencia >= 4", texto:"Tu graduación es alta: conviene un cristal adelgazado (alto índice)."},
+        {si:"edad < 18 and miopia", texto:"Para chicos con miopía, el anteojo de todos los días va sin filtro azul; si el oftalmólogo lo indica, con cristal de control de miopía."}
+      ],
+      soluciones:[{id:"uno", nombre:"Anteojo", pares:[{opciones:["digital","antiage","blue"], destacada:"antiage", opcionesSi:[{si:"edad < 18 and miopia", opciones:["control_miopia","ar"], destacada:"control_miopia"},{si:"oscurece", opciones:["transitions","fotoblue","foto"], destacada:"fotoblue"}]}]}]},
+    {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
+      motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
+      soluciones:[{id:"uno", nombre:"Cerca", pares:[{opciones:["antiage","blue","ar"], destacada:"blue"}]}]},
+    {id:"lc_diario", momento:"dia", nombre:"Lentes de contacto de uso diario", prioridad:"rec", cuando:'lc == "uso"',
+      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc","lc_diarias"], destacada:"lc"}]}]},
+
+    {id:"ocup", momento:"trabajo", nombre:"Anteojo ocupacional para la compu", prioridad:"rec", cuando:"add > 0 and usa_pc",
+      prioridadSi:[{si:'pantallas == "8+" or "fatiga" in luz', prioridad:"rec"}],
+      motivos:[
+        {texto:"Para la compu, el ocupacional da un campo ancho de pantalla y escritorio que el multifocal y el bifocal no tienen."},
+        {si:'pantallas == "8+"', texto:"Estás más de 8 horas por día frente a pantallas."},
+        {si:'"fatiga" in luz', texto:"Terminás el día con la vista cansada."}
+      ],
+      soluciones:[{id:"uno", nombre:"Ocupacional", pares:[{opciones:["ocup"]}]}]},
+    {id:"pantalla", momento:"trabajo", nombre:"Anteojo para pantallas", prioridad:"rec", cuando:'receta and lejos and not add > 0 and usa_pc and (oscurece or edad < 18)',
+      motivos:[{si:"edad < 18", texto:"Para las horas de estudio, compu o consola, un anteojo aparte con filtro azul. El de todos los días queda sin filtro."},{si:"oscurece and not edad < 18", texto:"Si tu anteojo de todos los días se oscurece al sol, conviene un segundo par con filtro azul para la compu."},{si:'"gaming" in actividades', texto:"Jugás videojuegos: muchas horas de pantalla seguidas."}],
+      soluciones:[{id:"uno", nombre:"Pantallas", pares:[{opciones:["antiage","blue"], destacada:"antiage"}]}]},
+    {id:"seguridad", momento:"trabajo", nombre:"Anteojo de seguridad graduado", prioridad:"rec", cuando:'receta and "taller" in trabajo',
+      motivos:[{texto:"Trabajás en taller, obra o laboratorio: tu anteojo común no protege de golpes ni partículas."}],
+      soluciones:[{id:"uno", nombre:"Seguridad", pares:[{opciones:["seguridad"]}]}]},
+
+    {id:"manejo", momento:"manejo", nombre:"Anteojos para manejar", prioridad:"rec", cuando:"receta and maneja_si",
+
+      motivos:[
+        {si:'maneja == "trabajo"', texto:"Manejás por trabajo: muchas horas al volante."},
+        {texto:"De día, el polarizado corta el reflejo del asfalto y del parabrisas."},
+        {si:"maneja_noche", texto:"De noche, un cristal para manejo da más contraste y encandila menos."},
+        {si:"oscurece", texto:"Los fotocromáticos se oscurecen poco dentro del auto, porque el parabrisas filtra el UV."}
+      ],
+      soluciones:[{id:"uno", nombre:"Manejo", pares:[
+        {nombre:"De día", opciones:["sol"]},
+        {nombre:"De noche", si:"maneja_noche", opciones:["drive","antiage"], destacada:"drive"}
+      ]}]},
+
+    {id:"sol", momento:"sol", nombre:"Anteojo de sol graduado", prioridad:"rec", cuando:'receta and not maneja_si and ("sol" in luz or aire in ["medio","mucho"] or "playa" in actividades or "aire" in trabajo)',
+      prioridadSi:[{si:'oscurece and not "playa" in actividades', prioridad:"opt"}],
+      motivos:[
+        {si:'"sol" in luz or aire == "mucho"', texto:"Pasás tiempo al sol o te molesta la luz."},
+        {si:'"playa" in actividades', texto:"Playa, pileta y vacaciones: ver bien y proteger los ojos del sol."},
+        {si:'"aire" in trabajo', texto:"Trabajás al aire libre."}
+      ],
+      soluciones:[{id:"uno", nombre:"Sol", pares:[{opciones:["sol","sol_espejado"], destacada:"sol"}]}]},
+
+    {id:"deportivo", momento:"deporte", nombre:"Anteojo deportivo graduado", prioridad:"rec", cuando:'receta and deporte_exterior',
+      motivos:[
+        {si:'deporte in ["run","bici"]', texto:"Corrés, caminás o andás en bici: envolvente, liviano y que no se mueva."},
+        {si:'"pelota" in deporte', texto:"Jugás con pelota: tu anteojo común se puede romper y lastimarte."},
+        {si:'"nieve" in deporte', texto:"En la nieve la luz es muy fuerte: máscara con tu graduación adentro."},
+        {si:'"pesca" in deporte', texto:"Pesca o náutica: el polarizado deja ver a través del reflejo del agua."}
+      ],
+      soluciones:[{id:"uno", nombre:"Deportivo", pares:[
+        {nombre:"Correr / bici", si:'deporte in ["run","bici"]', opciones:["deportivo_foto","deportivo"], destacada:"deportivo_foto"},
+        {nombre:"Deportes con pelota", si:'"pelota" in deporte', opciones:["protector"]},
+        {nombre:"Nieve", si:'"nieve" in deporte', opciones:["mascara"]},
+        {nombre:"Agua", si:'"pesca" in deporte', opciones:["sol"]}
+      ]}]},
+    {id:"lc_deporte", momento:"deporte", nombre:"Lentes de contacto para hacer deporte", prioridad:"opt", cuando:'deporte_activo and lc != "no"',
+      prioridadSi:[{si:'"pelota" in deporte and quiere_lc', prioridad:"rec"}],
+      motivos:[
+        {texto:"Para entrenar sin anteojo: no se empañan, no se mueven y ves todo el campo."},
+        {si:'"pelota" in deporte', texto:"Con pelota o raqueta son más seguros que un anteojo común."},
+        {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
+      ],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc_diarias","lc"], destacada:"lc_diarias"}]}]},
+    {id:"antiparra", momento:"deporte", nombre:"Antiparras graduadas", prioridad:"opt", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
+      prioridadSi:[{si:'"agua" in deporte', prioridad:"rec"}],
+      motivos:[{texto:"En la pileta ves bien y cuidás el anteojo."}],
+      soluciones:[{id:"uno", nombre:"Antiparras", pares:[{opciones:["antiparra"]}]}]},
+
+    {id:"lc_salidas", momento:"salidas", nombre:"Lentes de contacto para salir", prioridad:"opt", cuando:'"eventos" in actividades and lc != "no"',
+      motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
+      soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{opciones:["lc_diarias"]}]}]},
+    {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", prioridad:"opt", cuando:'receta and ("eventos" in actividades or importa == "estetica")',
+      motivos:[{texto:"Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."}],
+      soluciones:[{id:"uno", nombre:"Segundo anteojo", pares:[{opciones:["segundo"]}]}]},
+
+    {id:"cerca_extra", momento:"cerca", nombre:"Anteojo de cerca para leer y hobbies", prioridad:"opt", cuando:'necesita_lejos_y_cerca and ("precision" in trabajo or actividades in ["lectura","manualidades"] or edad >= 60)',
+      motivos:[{si:'"precision" in trabajo or "manualidades" in actividades', texto:"Hacés trabajos de precisión o manualidades: un anteojo solo de cerca da el campo más amplio."},{si:'"lectura" in actividades', texto:"Leés mucho: el campo de lectura más cómodo, en la cama o el sillón."},{texto:"Ideal para la mesa de luz o la cartera."}],
+      soluciones:[{id:"uno", nombre:"Cerca", pares:[{opciones:["antiage","blue","ar"], destacada:"blue"}]}]},
+
+    {id:"repuesto", momento:"repuesto", nombre:"Anteojo de repuesto", prioridad:"opt", cuando:'receta and potencia >= 3 and tiene != "varios"',
+      motivos:[{texto:"Sin anteojo no ves bien: si se rompe, te quedás sin ver."},{texto:"Puede ser tu marco actual con cristales nuevos."}],
+      soluciones:[{id:"uno", nombre:"Repuesto", pares:[{opciones:["blue","ar"], destacada:"blue"}]}]}
+  ]
+};
+
+/* =========================================================
+   MINI LENGUAJE DE CONDICIONES (seguro, sin eval)
+   ========================================================= */
+const ALIAS = {y:"and", o:"or", no:"not", en:"in"};
+function tokenize(src){
+  const re = /\s*(>=|<=|==|!=|>|<|\(|\)|\[|\]|,|"(?:[^"\\]|\\.)*"|-?\d+(?:[.,]\d+)?|[A-Za-z_À-ſ][\wÀ-ſ]*)/y;
+  const out=[]; re.lastIndex=0; let m;
+  while(re.lastIndex < src.length){
+    const start = re.lastIndex;
+    if(/^\s*$/.test(src.slice(start))) break;
+    m = re.exec(src);
+    if(!m) throw new Error("No entiendo: " + src.slice(start).trim().slice(0,20));
+    let t = m[1]; if(ALIAS[t]) t = ALIAS[t];
+    out.push(t);
+  }
+  return out;
+}
+function compile(src){
+  const tk = tokenize(String(src||"")); let i=0;
+  const peek=()=>tk[i], next=()=>tk[i++];
+  const expect=t=>{ if(tk[i]!==t) throw new Error(`Falta "${t}"`); i++; };
+  function orE(){ let l=andE(); while(peek()==="or"){ next(); l={op:"or",l,r:andE()}; } return l; }
+  function andE(){ let l=notE(); while(peek()==="and"){ next(); l={op:"and",l,r:notE()}; } return l; }
+  function notE(){ if(peek()==="not"){ next(); return {op:"not",x:notE()}; } return cmp(); }
+  function cmp(){ const l=prim(); const o=peek(); if(["==","!=",">",">=","<","<=","in"].includes(o)){ next(); return {op:o,l,r:prim()}; } return l; }
+  function prim(){
+    const t=next(); if(t===undefined) throw new Error("La condición está incompleta");
+    if(t==="("){ const e=orE(); expect(")"); return e; }
+    if(t==="["){ const arr=[]; if(peek()!=="]"){ arr.push(prim()); while(peek()===","){ next(); arr.push(prim()); } } expect("]"); return {op:"list",arr}; }
+    if(t[0]==='"') return {op:"lit",v:JSON.parse(t)};
+    if(/^-?\d/.test(t)) return {op:"lit",v:parseFloat(t.replace(",","."))};
+    if(t==="true"||t==="false") return {op:"lit",v:t==="true"};
+    if(/^[A-Za-z_À-ſ]/.test(t) && !["and","or","not","in"].includes(t)) return {op:"var",n:t};
+    throw new Error(`No esperaba "${t}"`);
+  }
+  if(!tk.length) return {op:"lit",v:true};
+  const ast=orE(); if(i<tk.length) throw new Error(`Sobra "${tk[i]}"`); return ast;
+}
+const truthy = v => Array.isArray(v) ? v.length>0 : !!v;
+function run(n,F){
+  switch(n.op){
+    case "lit": return n.v;
+    case "var": return F[n.n] ?? null;
+    case "list": return n.arr.map(x=>run(x,F));
+    case "not": return !truthy(run(n.x,F));
+    case "and": return truthy(run(n.l,F)) && truthy(run(n.r,F));
+    case "or": return truthy(run(n.l,F)) || truthy(run(n.r,F));
+    case "in": { const a=run(n.l,F), b=run(n.r,F); if(b==null) return false; if(Array.isArray(b)) return Array.isArray(a)? a.some(x=>b.includes(x)) : b.includes(a); return String(b).includes(a); }
+    default: { const a=run(n.l,F), b=run(n.r,F);
+      if(n.op==="==") return a===b || (a==null&&b==null);
+      if(n.op==="!=") return !(a===b || (a==null&&b==null));
+      if(a==null||b==null) return false;
+      return n.op===">"?a>b : n.op===">="?a>=b : n.op==="<"?a<b : a<=b; }
+  }
+}
+const CC = new Map();
+function test(src,F){ if(src==null||src==="") return true; let a=CC.get(src); if(!a){ try{ a=compile(src); }catch(e){ a={op:"lit",v:false,err:e.message}; } CC.set(src,a); } return truthy(run(a,F)); }
+function checkExpr(src){ try{ compile(src); return null; }catch(e){ return e.message; } }
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+let C = LS.get("pv-config");
+if(!C || !C.version || C.version < 5){ C = clone(DEFAULT_CONFIG); }
+const saveCfg = () => { CC.clear(); LS.set("pv-config", C); };
+let AI = LS.get("pv-ai") || {key:"", model:""};
+
+const EXAMPLE = {
+  pac:{nombre:"Laura (ejemplo)", edad:"46", tel:""},
+  rx:{od:{esf:"-1.50",cil:"-0.75",eje:"180",add:"+1.50"}, oi:{esf:"-1.25",cil:"-0.50",eje:"170",add:"+1.50"}, fecha:"2026-09-12", tipo:"anteojos", medico:""},
+  a:{pantallas:"8+", trabajo:["pc"], dist:["lejos","inter","cerca"], maneja:"noche", luz:["noche","fatiga"], aire:"medio", osc:"no", deporte:["gym","run"], actividades:["eventos","lectura"], lc:"interes", tiene:"viejo", importa:"confort"},
+  sol:{}, sel:{}, own:{}, off:{}, hoy:{lejos_cerca:true}, example:true
+};
+const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, hoy:{}, example:false});
+let S = LS.get("pv-state2") || clone(EXAMPLE);
+["sol","sel","own","off","hoy","a"].forEach(k=>S[k]=S[k]||{});
+const save = () => LS.set("pv-state2", S);
+
+/* =========================================================
+   RECETA → DATOS
+   ========================================================= */
+const num = v => { if(v==null||v==="") return null; const s=String(v).trim().toLowerCase(); if(/^(n|neutro|plano|pl)$/.test(s)) return 0; const n=parseFloat(s.replace(",",".").replace(/[^\d.\-+]/g,"")); return isNaN(n)?null:n; };
+function rxInfo(){
+  const e = ["od","oi"].map(k=>({esf:num(S.rx[k].esf), cil:num(S.rx[k].cil), add:num(S.rx[k].add)}));
+  const any = e.some(x=>x.esf!=null||x.cil!=null||x.add!=null);
+  const esf = e.map(x=>x.esf||0), cil = e.map(x=>x.cil||0);
+  const add = Math.max(0,...e.map(x=>x.add||0));
+  const potencia = Math.max(...e.map(x=>Math.abs(x.esf||0)+Math.abs(x.cil||0)));
+  const lejos = e.some(x=>Math.abs(x.esf||0)>=0.25 || Math.abs(x.cil||0)>=0.25);
+  let meses=null; if(S.rx.fecha){ const d=new Date(S.rx.fecha); if(!isNaN(d)) meses=Math.floor((Date.now()-d)/(864e5*30.4)); }
+  return {receta:any, add, lejos, potencia, miopia:esf.some(v=>v<=-0.25), hipermetropia:esf.some(v=>v>=0.25), astigmatismo:cil.some(v=>Math.abs(v)>=0.25), anisometropia:Math.abs(esf[0]-esf[1])>=2, receta_meses:meses};
+}
+function facts(){
+  const F = {...rxInfo(), receta_tipo:S.rx.tipo||"anteojos", edad:num(S.pac.edad)};
+  C.preguntas.forEach(q=>{ const v=S.a[q.id]; F[q.id] = q.multiple ? (Array.isArray(v)?v:[]) : (v??null); });
+  Object.entries(C.derivados||{}).forEach(([k,ex])=>{ F[k]=test(ex,F); });
+  return F;
+}
+function renderRead(){
+  const r = rxInfo(), L=[];
+  if(!r.receta){ $("rxRead").innerHTML = '<li class="note">Cargá la receta para ver la explicación.</li>'; return; }
+  if(r.miopia) L.push(["Corrige <b>miopía</b>: lo de lejos se ve borroso sin anteojos."]);
+  if(r.hipermetropia && !r.add) L.push(["Corrige <b>hipermetropía</b>: el esfuerzo es mayor de cerca y al final del día."]);
+  if(r.hipermetropia && r.add) L.push(["Tiene graduación positiva de lejos además de la de cerca."]);
+  if(r.astigmatismo) L.push(["Corrige <b>astigmatismo</b>: las imágenes se ven algo deformadas o con sombra."]);
+  if(r.add) L.push([`Tiene <b>adición +${r.add.toFixed(2)}</b> para cerca (presbicia o vista cansada). Para ver bien de lejos y de cerca necesitás <b>dos anteojos, un bifocal o un multifocal</b>.`]);
+  if(r.potencia>=4) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
+  if(r.anisometropia) L.push(["Hay bastante diferencia entre un ojo y el otro: hay que cuidar mucho el centrado del cristal.","warn"]);
+  if(r.receta_meses!=null && r.receta_meses>12) L.push(["La receta tiene más de un año. Conviene revisarla con tu oftalmólogo antes de hacer cristales nuevos.","warn"]);
+  if(S.rx.tipo==="anteojos" && ["uso","interes"].includes(S.a.lc)) L.push(["Para lentes de contacto hace falta que tu oftalmólogo los indique en la receta.","warn"]);
+  $("rxRead").innerHTML = L.map(([t,c])=>`<li${c?` class="${c}"`:""}>${t}</li>`).join("");
+}
+
+/* =========================================================
+   MOTOR DEL PLAN
+   ========================================================= */
+const prod = id => C.productos.find(p=>p.id===id);
+const ORDER = {ess:0, rec:1, opt:2};
+const TAG = {ess:"Esencial", rec:"Recomendado", opt:"Opcional"};
+function fill(txt,F){ return String(txt).replace(/\{(\w+)\}/g,(m,k)=>{ const q=C.preguntas.find(x=>x.id===k); const v=F[k]; if(q){ const vals=Array.isArray(v)?v:[v]; return vals.map(x=>{ const l=String((q.opciones.find(o=>o[0]===x)||[,x])[1]); return l.charAt(0).toLowerCase()+l.slice(1); }).join(", "); } return v??""; }); }
+function build(){
+  const F = facts(), out=[];
+  C.sugerencias.forEach(s=>{
+    if(s.activa===false || !test(s.cuando,F)) return;
+    let pr = s.prioridad||"rec"; (s.prioridadSi||[]).forEach(x=>{ if(test(x.si,F)) pr=x.prioridad; });
+    const motivos = (s.motivos||[]).filter(m=>test(m.si,F)).map(m=>fill(m.texto,F));
+    const mk = sol => sol.pares.map((p,i)=>[p,i]).filter(([p])=>test(p.si,F)).map(([p,i])=>{
+      let opts=p.opciones, dest=p.destacada; (p.opcionesSi||[]).some(x=>{ if(test(x.si,F)){ opts=x.opciones; dest=x.destacada; return true; } });
+      opts = opts.map(prod).filter(Boolean);
+      const key = `${s.id}:${sol.id}:${i}`;
+      const destP = opts.find(o=>o.id===dest) || (opts.length===3?opts[1]:opts[0]);
+      const chosen = opts.find(o=>o.id===S.sel[key]) || destP;
+      return {...p, key, opts, dest:destP, chosen};
+    });
+    const alts = (s.soluciones||[]).filter(x=>test(x.si,F)).map(sol=>({sol, pares:mk(sol)})).filter(a=>a.pares.length);
+    if(!alts.length) return;
+    const picked = alts.find(a=>a.sol.id===S.sol[s.id]) || null;
+    const main = picked || alts[0];
+    out.push({s, pr, motivos, alts, picked, sol:main.sol, pares:main.pares});
+  });
+  const mo = id => { const i=(C.momentos||[]).findIndex(m=>m.id===id); return i<0?99:i; };
+  out.sort((a,b)=>(a.pr==="ess"?0:1)-(b.pr==="ess"?0:1) || mo(a.s.momento)-mo(b.s.momento) || ORDER[a.pr]-ORDER[b.pr]);
+  return out;
+}
+
+/* =========================================================
+   RENDER: ATENCIÓN
+   ========================================================= */
+function renderQs(){
+  $("qs").innerHTML = C.preguntas.map(q=>`<div class="q"><div class="lbl">${esc(q.texto)}${q.ayuda?`<em>${esc(q.ayuda)}</em>`:""}${q.multiple?`<em>(varias)</em>`:""}</div><div class="chips">${
+    q.opciones.map(([v,l])=>{ const cur=S.a[q.id]; const on = q.multiple ? (cur||[]).includes(v) : cur===v; return `<button type="button" class="chip" data-q="${esc(q.id)}" data-v="${esc(v)}" aria-pressed="${on}">${esc(l)}</button>`; }).join("")}</div></div>`).join("");
+}
+let lastItems=[];
+function pairHtml(p, showName, off){
+  const lad = p.opts.length>1 ? `<div class="ladder" style="grid-template-columns:repeat(${p.opts.length},minmax(0,1fr))">${p.opts.map(o=>`<button type="button" class="opt-btn" data-key="${esc(p.key)}" data-opt="${esc(o.id)}" aria-pressed="${p.chosen&&p.chosen.id===o.id}">${p.dest&&o.id===p.dest.id?"<i>Sugerido</i>":""}<b>${esc(o.nombre)}</b><span>${esc(o.detalle||"")}</span></button>`).join("")}</div>`
+    : (p.chosen?`<div class="note">${esc(p.chosen.nombre)}${p.chosen.detalle?` · ${esc(p.chosen.detalle)}`:""}</div>`:"");
+  return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}${off?"":lad}</div>`;
+}
+function itemHtml(it){
+  const id=it.s.id, off=!!S.off[id], hoy=!!S.hoy[id];
+  let body;
+  if(it.alts.length>1){
+    body = `<div class="pair-name">Cualquiera de estas opciones lo resuelve:</div>` + it.alts.map((a,k)=>{
+      const sel = it.picked && it.picked.sol.id===a.sol.id;
+      return `${k?'<div class="or">o</div>':""}<div class="alt${sel?" sel":""}">
+        <div class="alt-head"><b>${String.fromCharCode(65+k)}. ${esc(a.sol.nombre)}</b>${off?"":`<button type="button" class="btn small" data-sug="${esc(id)}" data-sol="${esc(a.sol.id)}" aria-pressed="${!!sel}">${sel?"Elegida ✓":"Elegir esta"}</button>`}</div>
+        ${a.sol.explicacion?`<p class="sol-exp">${esc(a.sol.explicacion)}</p>`:""}
+        ${a.pares.map(p=>pairHtml(p, a.pares.length>1, off)).join("")}</div>`;
+    }).join("");
+  } else {
+    body = it.pares.map(p=>pairHtml(p, it.pares.length>1, off)).join("");
+  }
+  return `<div class="item ${it.pr}${off?" off":""}">
+    <div class="item-top"><div class="t"><span class="tag">${TAG[it.pr]}</span><h3>${esc(it.s.nombre)}</h3></div>
+      ${it.pares.length>1&&it.alts.length===1&&!off?`<div class="price"><small>${it.pares.length} anteojos</small></div>`:""}</div>
+    ${it.motivos.length?`<ul class="why">${it.motivos.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
+    ${body}
+    <div class="toggles">
+      <label><input type="checkbox" data-hoy="${esc(id)}" ${hoy&&!off?"checked":""} ${off?"disabled":""}> Empezamos por este</label>
+      ${it.pr==="ess"?"":`<label><input type="checkbox" data-off="${esc(id)}" ${off?"checked":""}> No me interesa</label>`}
+    </div></div>`;
+}
+const momentName = id => ((C.momentos||[]).find(m=>m.id===id)||{nombre:"Otros"}).nombre;
+function renderPlan(){
+  const items = build(); lastItems = items;
+  $("planWho").textContent = (S.pac.nombre || "Paciente sin nombre") + (S.pac.edad? ` · ${S.pac.edad} años`:"");
+  $("exTag").hidden = !S.example;
+  if(!items.length){ $("items").innerHTML = '<p class="note">Cargá la receta y respondé la anamnesis: el plan se arma solo.</p>'; $("totals").innerHTML=""; return; }
+  const ess = items.filter(i=>i.pr==="ess"), extra = items.filter(i=>i.pr!=="ess");
+  let h = "";
+  if(ess.length) h += `<div class="section"><h3>Lo esencial: ver bien todo el día</h3><p class="note">Es la prioridad. Esto te garantiza ver bien en tu día a día.</p></div>` + ess.map(itemHtml).join("");
+  if(extra.length){
+    h += `<div class="section"><h3>Opcional y de especialidad</h3><p class="note">Como el calzado: un par para cada actividad.</p></div>`;
+    let cm=null; extra.forEach(it=>{ if(it.s.momento!==cm){ cm=it.s.momento; h += `<div class="moment">${esc(momentName(cm))}</div>`; } h += itemHtml(it); });
+  }
+  $("items").innerHTML = h;
+  const act = items.filter(i=>!S.off[i.s.id]);
+  const hoyN = act.filter(i=>S.hoy[i.s.id]).length;
+  $("totals").innerHTML = `
+    <div>Lo esencial</div><div class="v big">${ess.length}</div>
+    <div class="note">Opcional y de especialidad</div><div class="v note">${act.filter(i=>i.pr!=="ess").length} en ${new Set(act.filter(i=>i.pr!=="ess").map(i=>i.s.momento)).size} momentos</div>
+    <div class="note">Para empezar</div><div class="v note">${hoyN?hoyN+" elegida"+(hoyN>1?"s":""):"sin elegir"}</div>`;
+}
+function waText(){
+  const act = lastItems.filter(i=>!S.off[i.s.id]);
+  const what = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.chosen?p.chosen.nombre:""}`).join(" + ");
+  const line = i => {
+    let w;
+    if(i.alts.length>1 && !i.picked) w = "\n  Opciones: " + i.alts.map(a=>`${a.sol.nombre} (${what(a.pares)})`).join(" / o / ");
+    else w = (i.alts.length>1?` ${i.sol.nombre} – `:": ") + what(i.pares);
+    return `• ${i.s.nombre}${S.hoy[i.s.id]?" ⭐ empezamos por acá":""}${w}${i.motivos[0]?`\n  ${i.motivos[0]}`:""}`;
+  };
+  const nombre = (S.pac.nombre||"").replace(/\s*\(ejemplo\)/,"");
+  let t = `Hola${nombre?" "+nombre:""}! ${C.optica.saludo||""}\n\n`;
+  if(C.optica.intro) t += C.optica.intro + "\n\n";
+  const ess = act.filter(i=>i.pr==="ess"), extra = act.filter(i=>i.pr!=="ess");
+  if(ess.length) t += `*Lo esencial: ver bien todo el día*\n${ess.map(line).join("\n")}\n\n`;
+  if(extra.length){
+    t += `*Opcional y de especialidad*\n`;
+    let cm=null; extra.forEach(i=>{ if(i.s.momento!==cm){ cm=i.s.momento; t += `\n_${momentName(cm)}_\n`; } t += line(i)+"\n"; });
+    t += "\n";
+  }
+  t += C.optica.legal || "";
+  return t.trim();
+}
+function fillForm(){
+  $("p-nombre").value=S.pac.nombre; $("p-edad").value=S.pac.edad; $("p-tel").value=S.pac.tel;
+  ["od","oi"].forEach(e=>["esf","cil","eje","add"].forEach(f=>$(`${e}-${f}`).value=S.rx[e][f]??""));
+  $("rx-fecha").value=S.rx.fecha||""; $("rx-tipo").value=S.rx.tipo||"anteojos"; $("rx-medico").value=S.rx.medico||"";
+}
+function header(){ $("opName").textContent = C.optica.nombre||"Óptica"; $("planIntro").textContent = C.optica.intro||""; $("planIntro").hidden=!C.optica.intro; $("legal").textContent = C.optica.legal||""; }
+function all(){ header(); renderRead(); renderPlan(); save(); }
+
+/* =========================================================
+   RENDER: CONFIGURACIÓN
+   ========================================================= */
+function renderCfg(){
+  $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
+  $("c-key").value=AI.key||""; $("c-model").value=AI.model||"";
+  $("prodRows").innerHTML = C.productos.map((p,i)=>`<tr>
+    <td style="width:120px"><input class="code" id="pr-id-${i}" data-pi="${i}" data-pf="id" value="${esc(p.id)}"></td>
+    <td><input id="pr-n-${i}" data-pi="${i}" data-pf="nombre" value="${esc(p.nombre)}"></td>
+    <td><input id="pr-d-${i}" data-pi="${i}" data-pf="detalle" value="${esc(p.detalle||"")}"></td>
+    <td style="width:40px"><button class="btn small danger" type="button" data-pdel="${i}" aria-label="Borrar ${esc(p.nombre)}">✕</button></td></tr>`).join("");
+  $("sugList").innerHTML = C.sugerencias.map((s,i)=>{ const err=checkExpr(s.cuando); return `<div class="sug ${s.prioridad||"rec"}">
+    <div class="sug-head">
+      <label class="f" style="flex:2 1 220px">Nombre<input id="sg-n-${i}" data-si="${i}" data-sf="nombre" value="${esc(s.nombre)}"></label>
+      <label class="f" style="flex:0 1 150px">Prioridad base<select id="sg-p-${i}" data-si="${i}" data-sf="prioridad">${Object.entries(TAG).map(([k,v])=>`<option value="${k}" ${s.prioridad===k?"selected":""}>${v}</option>`).join("")}</select></label>
+      <label class="toggles" style="padding-bottom:8px"><input type="checkbox" id="sg-a-${i}" data-si="${i}" data-sf="activa" ${s.activa===false?"":"checked"}> Activa</label>
+    </div>
+    <label class="f">Aparece cuando<input class="code${err?" bad":""}" id="sg-c-${i}" data-si="${i}" data-sf="cuando" value="${esc(s.cuando)}"></label>
+    <div id="sg-m-${i}" class="${err?"bad-txt":"ok"}">${err?esc(err):"Condición válida"}</div>
+    <div class="note">Momento: ${esc(((C.momentos||[]).find(m=>m.id===s.momento)||{nombre:"sin momento"}).nombre)} · ${s.soluciones.length} solucion${s.soluciones.length>1?"es":""}: ${s.soluciones.map(x=>esc(x.nombre)).join(" / ")}</div>
+  </div>`; }).join("");
+  $("cfgJson").value = JSON.stringify(C,null,2); $("cfgJsonMsg").textContent="";
+}
+function validateConfig(c){
+  if(!c || typeof c!=="object") return "No es un objeto JSON.";
+  for(const k of ["optica","preguntas","productos","sugerencias"]) if(!c[k]) return `Falta "${k}".`;
+  const ids = new Set(c.productos.map(p=>p.id));
+  for(const [k,ex] of Object.entries(c.derivados||{})){ const e=checkExpr(ex); if(e) return `Derivado "${k}": ${e}`; }
+  for(const s of c.sugerencias){
+    let e=checkExpr(s.cuando); if(e) return `Sugerencia "${s.nombre}": ${e}`;
+    if(!Array.isArray(s.soluciones)||!s.soluciones.length) return `Sugerencia "${s.nombre}" no tiene soluciones.`;
+    for(const m of s.motivos||[]){ e=checkExpr(m.si); if(e) return `Motivo de "${s.nombre}": ${e}`; }
+    for(const so of s.soluciones) for(const p of so.pares||[]){ e=checkExpr(p.si); if(e) return `Par de "${s.nombre}": ${e}`; } 
+    for(const so of s.soluciones) for(const p of so.pares||[]) for(const o of [...(p.opciones||[]), ...((p.opcionesSi||[]).flatMap(x=>x.opciones))]) if(!ids.has(o)) return `"${s.nombre}" usa el producto "${o}", que no existe.`;
+  }
+  return null;
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+document.addEventListener("input", e=>{
+  const t=e.target, id=t.id||"";
+  // configuración
+  if(t.dataset.pi!=null){ const p=C.productos[+t.dataset.pi], f=t.dataset.pf;
+    p[f]=t.value;
+    saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
+  if(t.dataset.si!=null && t.dataset.sf!=="activa" && t.tagName==="INPUT"){ const i=+t.dataset.si, s=C.sugerencias[i];
+    if(t.dataset.sf==="cuando"){ const err=checkExpr(t.value); t.classList.toggle("bad",!!err); const m=$("sg-m-"+i); m.className=err?"bad-txt":"ok"; m.textContent=err||"Condición válida"; if(err) return; }
+    s[t.dataset.sf]=t.value; saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
+  if(id.startsWith("c-")){ const f=id.slice(2);
+    if(f==="key"||f==="model"){ AI[f]=t.value.trim(); LS.set("pv-ai",AI); return; }
+    C.optica[f] = t.value; saveCfg(); header(); return; }
+  if(id==="cfgJson") return;
+  // atención
+  if(id.startsWith("p-")) S.pac[id.slice(2)]=t.value;
+  else if(/^o[di]-/.test(id)){ const [e2,f]=id.split("-"); S.rx[e2][f]=t.value; }
+  else if(id.startsWith("rx-")) S.rx[id.slice(3)]=t.value;
+  else return;
+  S.example=false; all();
+});
+document.addEventListener("click", e=>{
+  const c=e.target.closest(".chip");
+  if(c){ const q=C.preguntas.find(x=>x.id===c.dataset.q), v=c.dataset.v;
+    if(q.multiple){ const ex=q.exclusivas||[]; let arr=S.a[q.id]||[];
+      if(ex.includes(v)) arr = arr.includes(v)?[]:[v];
+      else { arr=arr.filter(x=>!ex.includes(x)); arr = arr.includes(v)?arr.filter(x=>x!==v):[...arr,v]; }
+      S.a[q.id]=arr; }
+    else S.a[q.id] = S.a[q.id]===v?undefined:v;
+    S.example=false; renderQs(); all(); return; }
+  const o=e.target.closest(".opt-btn"); if(o){ S.sel[o.dataset.key]=o.dataset.opt; all(); return; }
+  const sb=e.target.closest("[data-sol]"); if(sb){ const k=sb.dataset.sug; S.sol[k] = S.sol[k]===sb.dataset.sol ? undefined : sb.dataset.sol; all(); return; }
+  const pd=e.target.closest("[data-pdel]"); if(pd){ C.productos.splice(+pd.dataset.pdel,1); saveCfg(); renderCfg(); return; }
+});
+document.addEventListener("change", e=>{
+  const t=e.target;
+  if(t.dataset.sf==="activa"){ C.sugerencias[+t.dataset.si].activa=t.checked; saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
+  if(t.dataset.sf==="prioridad"){ C.sugerencias[+t.dataset.si].prioridad=t.value; saveCfg(); renderCfg(); return; }
+  if(t.dataset.hoy) S.hoy[t.dataset.hoy]=t.checked;
+  else if(t.dataset.off){ S.off[t.dataset.off]=t.checked; if(t.checked) S.hoy[t.dataset.off]=false; }
+  else return;
+  all();
+});
+$("addProd").onclick = ()=>{ let n=1; while(prod("nuevo"+n)) n++; C.productos.push({id:"nuevo"+n, nombre:"Nuevo", detalle:""}); saveCfg(); renderCfg(); };
+$("applyJson").onclick = ()=>{
+  const m=$("cfgJsonMsg"); let c;
+  try{ c=JSON.parse($("cfgJson").value); }catch(err){ m.className="bad-txt"; m.textContent="El JSON tiene un error: "+err.message; return; }
+  const v=validateConfig(c); if(v){ m.className="bad-txt"; m.textContent=v; return; }
+  c.version = Math.max(5,c.version||5); C=c; saveCfg(); renderCfg(); renderQs(); m.className="ok"; m.textContent="Configuración aplicada.";
+};
+$("copyJson").onclick = async ()=>{ const ta=$("cfgJson"); try{ await navigator.clipboard.writeText(ta.value); $("copyJson").textContent="Copiado ✓"; }catch(_){ ta.focus(); ta.select(); $("copyJson").textContent="Seleccionado: copialo"; } setTimeout(()=>$("copyJson").textContent="Copiar",2500); };
+$("impJson").onchange = e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ $("cfgJson").value=String(r.result); $("applyJson").click(); }; r.readAsText(f); e.target.value=""; };
+$("resetCfg").onclick = ()=>{ $("resetConfirm").hidden=false; };
+$("resetNo").onclick = ()=>{ $("resetConfirm").hidden=true; };
+$("resetYes").onclick = ()=>{ C=clone(DEFAULT_CONFIG); saveCfg(); $("resetConfirm").hidden=true; renderCfg(); renderQs(); };
+$("newBtn").onclick = ()=>{ S=BLANK(); fillForm(); renderQs(); $("rxImg").hidden=true; $("aiStatus").hidden=true; $("outTxt").hidden=true; location.hash=""; route(); };
+$("copyBtn").onclick = async ()=>{
+  const t = waText(), ta=$("outTxt"); ta.value=t; ta.hidden=false;
+  try{ await navigator.clipboard.writeText(t); $("copyBtn").textContent="Copiado ✓"; }
+  catch(_){ ta.focus(); ta.select(); $("copyBtn").textContent="Seleccioná y copiá el texto"; }
+  setTimeout(()=>$("copyBtn").textContent="Copiar plan para WhatsApp",2500);
+};
+function route(){
+  const cfg = location.hash==="#config";
+  $("viewPlan").hidden=cfg; $("viewCfg").hidden=!cfg;
+  $("newBtn").hidden=cfg; $("exTag").hidden = cfg || !S.example;
+  $("viewBtn").textContent = cfg ? "Volver a la atención" : "Configuración";
+  $("viewBtn").setAttribute("href", cfg ? "#atencion" : "#config");
+  if(cfg) renderCfg(); else { renderQs(); all(); }
+}
+window.addEventListener("hashchange", route);
+
+/* =========================================================
+   LECTURA DE RECETA CON IA
+   ========================================================= */
+const PROMPT = `Sos el asistente de una óptica en Argentina. La imagen es una receta oftalmológica (manuscrita o impresa). Transcribí los valores, sin interpretar ni corregir nada.
+Devolvé SOLO un JSON con esta forma:
+{"es_receta":true,"tipo":"anteojos"|"lc"|"ambos","fecha":"YYYY-MM-DD" o null,"medico":string o null,
+ "od":{"esf":number|null,"cil":number|null,"eje":number|null,"add":number|null},
+ "oi":{"esf":number|null,"cil":number|null,"eje":number|null,"add":number|null},
+ "indicaciones":[string],"dudas":[string]}
+Reglas: OD = ojo derecho, OI (u OS) = ojo izquierdo. "Neutro", "N" o "plano" en esférico = 0. Si hay filas separadas de Lejos y Cerca sin "ADD", la adición es esf de cerca menos esf de lejos. Si un valor no se lee con seguridad, poné null y explicá cuál en "dudas". Si dice lentes de contacto, tipo "lc". "indicaciones" son textos como "antirreflejo", "fotocromático", "uso permanente". Si la imagen no es una receta, "es_receta":false.`;
+let sampleFn=null, canImg=false;
+async function readWithApi(file){
+  const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
+  const resp = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":AI.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:AI.model||"claude-sonnet-5-5",max_tokens:1500,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},{type:"text",text:PROMPT}]}]})});
+  if(!resp.ok) throw {code:"api_"+resp.status};
+  const j = await resp.json(); const txt=(j.content||[]).map(c=>c.text||"").join(""); const m=txt.match(/\{[\s\S]*\}/);
+  if(!m) throw {code:"invalid_json"}; return JSON.parse(m[0]);
+}
+(async()=>{
+  try{ sampleFn = await window.claude?.use?.("sample"); }catch(_){ sampleFn=null; }
+  if(sampleFn){ try{ const lim = await sampleFn.limits(); canImg = !!lim?.images; if(canImg) $("rxFile").accept = lim.images.mediaTypes.join(","); }catch(_){} }
+  if(!canImg && !AI.key){ $("rxFileLbl").hidden=true; $("dropTxt").textContent="La lectura con IA no está disponible acá. Cargá los valores a mano, o poné tu clave de API en Configuración."; }
+})();
+$("rxFile").onchange = async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=$("rxImg"); img.src=URL.createObjectURL(f); img.hidden=false;
+  const st=$("aiStatus"); st.hidden=false; st.className="status"; st.textContent="Leyendo la receta…";
+  try{
+    const d = canImg ? await sampleFn.json(PROMPT, {images:[f], modelTier:"complex"}) : await readWithApi(f);
+    if(!d || d.es_receta===false){ st.className="status err"; st.textContent="No parece una receta. Probá con otra foto, derecha y con buena luz."; return; }
+    const show = v => v==null ? "" : (typeof v==="number" ? (v>0?"+":"")+v.toFixed(2) : String(v));
+    ["od","oi"].forEach(k=>{ const x=d[k]||{}; S.rx[k]={esf:show(x.esf), cil:show(x.cil), eje:x.eje==null?"":String(x.eje), add:show(x.add)}; });
+    if(d.fecha) S.rx.fecha=d.fecha; if(d.medico) S.rx.medico=d.medico; if(d.tipo) S.rx.tipo=d.tipo;
+    S.example=false; fillForm(); all();
+    const dudas=(d.dudas||[]).filter(Boolean), ind=(d.indicaciones||[]).filter(Boolean);
+    st.innerHTML = `Listo. <b>Revisá cada número contra el papel</b> antes de seguir.` + (ind.length?`<br>Indicaciones: ${ind.map(esc).join(", ")}.`:"") + (dudas.length?`<br>Dudas: ${dudas.map(esc).join("; ")}.`:"");
+  }catch(err){
+    st.className="status err";
+    const c=err?.code||"";
+    st.textContent = c==="not_granted" ? "Sin permiso para usar Claude en esta página. Cargá los valores a mano."
+      : c==="rate_limited" ? "Demasiados pedidos seguidos. Esperá un minuto y probá de nuevo."
+      : c==="image_rejected" ? "La imagen no se pudo leer (formato o tamaño). Probá con una foto JPG."
+      : c==="api_401" ? "La clave de API no es válida. Revisala en Configuración."
+      : "No pude leer la receta. Cargá los valores a mano.";
+  }finally{ e.target.value=""; }
+};
+
+/* downloads (solo dentro de Claude) */
+(async()=>{ try{ const dl = await window.claude?.use?.("downloads"); if(dl){ $("dlJson").hidden=false; $("dlJson").onclick=async()=>{ try{ await dl.save({filename:"paquete-visual-config.json", data:JSON.stringify(C,null,2)}); }catch(_){} }; } }catch(_){} })();
+
+fillForm(); route();
+})();
+</script>
+
+</body>
+</html>
