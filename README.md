@@ -35,6 +35,7 @@ Para probar cambios, entrá en **modo óptica**: tocá "Acceso óptica" al pie d
 
 Desde Configuración podés editar:
 
+- **Qué ofrece tu óptica:** destildá las especialidades que no trabajás (lentes de contacto, control de miopía, seguridad, deportivos, antiparras) y no se recomiendan ni se pregunta por ellas.
 - Nombre de la óptica, **número de WhatsApp** (el botón "Contactar a la óptica" le abre al paciente un mensaje con su nombre, edad, por dónde quiere empezar, el resto del plan y su receta), saludos y texto legal.
 - **Tecnologías** (por función, sin marcas) con los nombres que usa tu óptica.
 - **Momentos** del día (en el JSON) y a qué momento pertenece cada sugerencia.
@@ -90,7 +91,7 @@ Ejemplo: `add > 0 and (lejos or "lejos" in dist)`
 ## Lectura de recetas con IA
 
 - Dentro de Claude (claude.ai) funciona sin configurar nada.
-- Instalada en tu sitio: cargá una clave de la API de Anthropic en Configuración. Se guarda solo en ese navegador y nunca se exporta. Usala en computadoras de la óptica, no en equipos públicos.
+- Instalada en tu sitio: elegí el proveedor (Claude, Gemini o ChatGPT) y cargá su clave de API en Configuración. La opción más barata es Gemini Flash-Lite. Se guarda solo en ese navegador y nunca se exporta. Usala en computadoras de la óptica, no en equipos públicos.
 
 ## Licencia
 

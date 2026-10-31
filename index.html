@@ -288,6 +288,12 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
     </section>
 
     <section class="card">
+      <h2>Qué ofrece tu óptica</h2>
+      <p class="note" style="margin:0">Destildá las especialidades que no trabajás: no se recomiendan ni se pregunta por ellas.</p>
+      <div id="espList" class="toggles" style="flex-wrap:wrap"></div>
+    </section>
+
+    <section class="card">
       <div class="actions" style="justify-content:space-between"><h2>Tecnologías (por función, sin marcas)</h2><button class="btn small" id="addProd" type="button">Agregar</button></div>
       <p class="note" style="margin:0">Los nombres que usa tu óptica. El código es el que usan las sugerencias.</p>
       <div class="tbl-wrap"><table class="cfg"><thead><tr><th>Código</th><th>Nombre</th><th>Detalle</th><th></th></tr></thead><tbody id="prodRows"></tbody></table></div>
@@ -325,9 +331,10 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
 
     <section class="card">
       <h2>Lectura de recetas con IA (instalación propia)</h2>
-      <p class="note" style="margin:0">Dentro de Claude la lectura funciona sola. Si instalás la app en tu propio sitio, cargá una clave de la API de Anthropic. Se guarda solo en este navegador y nunca se exporta.</p>
+      <p class="note" style="margin:0">Dentro de Claude la lectura funciona sola. Si instalás la app en tu propio sitio, elegí el proveedor y cargá su clave de API. Se guarda solo en este navegador y nunca se exporta.</p>
       <div class="row">
-        <label class="f">Clave API<input id="c-key" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+        <label class="f">Proveedor<select id="c-prov"><option value="claude">Claude (Anthropic)</option><option value="gemini">Gemini (Google)</option><option value="openai">ChatGPT (OpenAI)</option></select></label>
+        <label class="f">Clave API<input id="c-key" type="password" autocomplete="off" placeholder="Clave del proveedor"></label>
         <label class="f">Modelo<input id="c-model" placeholder="claude-sonnet-5-5"></label>
       </div>
     </section>
@@ -387,7 +394,7 @@ const DEFAULT_CONFIG = {
     {id:"deporte", multiple:true, texto:"¿Hacés deporte?", opciones:[["no","No"],["gym","Gimnasio"],["run","Running / caminata"],["bici","Bici"],["pelota","Fútbol / pádel / tenis"],["agua","Natación"],["nieve","Esquí / nieve"],["pesca","Pesca / náutica"]], exclusivas:["no"]},
     {id:"deporte_frec", si:'deporte_activo or "agua" in deporte', texto:"¿Cada cuánto hacés deporte?", opciones:[["ocasional","De vez en cuando"],["semanal","1 o 2 veces por semana"],["seguido","3 veces o más por semana"]]},
     {id:"actividades", multiple:true, texto:"¿Qué más hacés en tu tiempo libre?", opciones:[["eventos","Salidas y eventos"],["playa","Playa, pileta y vacaciones"],["lectura","Leer mucho"],["manualidades","Manualidades, costura, maquetas"],["gaming","Videojuegos"],["nada","Nada en especial"]], exclusivas:["nada"]},
-    {id:"lc", si:"lc_edad_ok", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
+    {id:"lc", si:"lc_edad_ok and ofrece_lc", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
     {id:"tiene", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
     {id:"importa", texto:"¿Qué es lo que más te importa?", opciones:[["estetica","Verme bien"],["confort","Comodidad todo el día"],["dura","Que dure"],["precio","Cuidar el presupuesto"]]}
   ],
@@ -411,6 +418,13 @@ const DEFAULT_CONFIG = {
     adolescente_miope: 'menor_miope and edad > 12',
     lc_candidato: 'lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)'
   },
+  especialidades: [
+    {id:"lc", nombre:"Lentes de contacto"},
+    {id:"control_miopia", nombre:"Control de miopía"},
+    {id:"seguridad", nombre:"Anteojos de seguridad"},
+    {id:"deportivo", nombre:"Anteojos deportivos y protectores"},
+    {id:"antiparras", nombre:"Antiparras graduadas"}
+  ],
   productos: [
     {id:"vision_simple", nombre:"Visión simple", detalle:"Un solo foco: la graduación de tu receta en todo el cristal"},
     {id:"vision_cerca", nombre:"Visión simple de cerca", detalle:"Toda la superficie para leer, el celular o coser"},
@@ -424,17 +438,17 @@ const DEFAULT_CONFIG = {
     {id:"espejado", nombre:"Espejado", detalle:"Para luz muy intensa: playa o nieve"},
     {id:"alto_indice", nombre:"Alto índice", detalle:"Cristal más fino y liviano para graduaciones altas"},
     {id:"contraste", nombre:"Mayor contraste", detalle:"Para manejar de noche o con poca luz"},
-    {id:"control_miopia", nombre:"Cristal de control de miopía", detalle:"Diseñado para ayudar a frenar el avance de la miopía en chicos, según indicación del oftalmólogo"},
-    {id:"lc_control_miopia", nombre:"Lentes de contacto de control de miopía", detalle:"Alternativa al cristal para frenar el avance de la miopía, según indicación del oftalmólogo"},
+    {id:"control_miopia", especialidad:"control_miopia", nombre:"Cristal de control de miopía", detalle:"Diseñado para ayudar a frenar el avance de la miopía en chicos, según indicación del oftalmólogo"},
+    {id:"lc_control_miopia", especialidad:["lc","control_miopia"], nombre:"Lentes de contacto de control de miopía", detalle:"Alternativa al cristal para frenar el avance de la miopía, según indicación del oftalmólogo"},
     {id:"policarbonato", nombre:"Policarbonato", detalle:"Irrompible: para deporte, chicos y seguridad"},
     {id:"envolvente", nombre:"Armazón envolvente", detalle:"No se mueve y protege de costado"},
-    {id:"proteccion_lateral", nombre:"Protecciones laterales", detalle:"Anteojo de seguridad con norma"},
-    {id:"clip", nombre:"Clip óptico", detalle:"Tu graduación adentro de la máscara o antiparra"},
-    {id:"antiparra", nombre:"Antiparra graduada", detalle:"Para ver bien en la pileta"},
+    {id:"proteccion_lateral", especialidad:"seguridad", nombre:"Protecciones laterales", detalle:"Anteojo de seguridad con norma"},
+    {id:"clip", especialidad:"deportivo", nombre:"Clip óptico", detalle:"Tu graduación adentro de la máscara o antiparra"},
+    {id:"antiparra", especialidad:"antiparras", nombre:"Antiparra graduada", detalle:"Para ver bien en la pileta"},
     {id:"mismas", nombre:"Mismas tecnologías que tu anteojo principal", detalle:"Otro estilo de armazón para combinar"},
-    {id:"lc_diarias", nombre:"Lentes de contacto diarias", detalle:"Se usan un día y se descartan"},
-    {id:"lc_mensuales", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario, con solución"},
-    {id:"lc_torica", nombre:"Lentes de contacto tóricas", detalle:"Para astigmatismo"}
+    {id:"lc_diarias", especialidad:"lc", nombre:"Lentes de contacto diarias", detalle:"Se usan un día y se descartan"},
+    {id:"lc_mensuales", especialidad:"lc", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario, con solución"},
+    {id:"lc_torica", especialidad:"lc", nombre:"Lentes de contacto tóricas", detalle:"Para astigmatismo"}
   ],
   sugerencias: [
     {id:"lejos_cerca", momento:"dia", nombre:"Ver bien de lejos y de cerca", prioridad:"ess", cuando:"necesita_lejos_y_cerca",
@@ -463,19 +477,20 @@ const DEFAULT_CONFIG = {
         {si:"filtro_azul", texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas: suma filtro de luz azul."},
         {si:"oscurece", texto:"Querés que se oscurezca al sol: va fotocromático."},
         {si:"potencia >= 6", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
-        {si:"nino_miope", texto:"Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."},
+        {si:"nino_miope and ofrece_control_miopia", texto:"Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."},
+        {si:"nino_miope and not ofrece_control_miopia", texto:"Con miopía y menos de 18 años, va sin filtro azul."},
         {si:"adolescente_miope", texto:"Con miopía y menos de 18 años, va sin filtro azul."}
       ],
       soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"},{id:"control_miopia",si:"nino_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
       motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
-    {id:"lc_diario", momento:"dia", nombre:"Lentes de contacto de uso diario", cuando:'quiere_lc and lc == "uso"',
+    {id:"lc_diario", momento:"dia", especialidad:"lc", nombre:"Lentes de contacto de uso diario", cuando:'quiere_lc and lc == "uso"',
       puntos:[{n:7}],
       motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"}]}]}]},
 
-    {id:"lc_alternativa", momento:"dia", nombre:"Lentes de contacto como alternativa al anteojo", cuando:'lc_candidato and lc != "no" and lc != "uso"',
+    {id:"lc_alternativa", momento:"dia", especialidad:"lc", nombre:"Lentes de contacto como alternativa al anteojo", cuando:'lc_candidato and lc != "no" and lc != "uso"',
       puntos:[{n:3},{si:"quiere_lc", n:3},{si:"deporte_activo", n:1},{si:'"eventos" in actividades', n:1},{si:'importa == "estetica"', n:1},{si:"potencia >= 3", n:1}],
       motivos:[
         {texto:"Tu graduación supera 0.75: con lentes de contacto ves completo, sin el marco y sin que se empañen."},
@@ -485,7 +500,7 @@ const DEFAULT_CONFIG = {
         {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"},{id:"lc_diarias"}]}]}]},
-    {id:"lc_miopia", momento:"dia", nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
+    {id:"lc_miopia", momento:"dia", especialidad:"control_miopia", nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
       puntos:[{si:"nino_miope", n:6},{si:"adolescente_miope", n:3},{si:"deporte_activo", n:1}],
       motivos:[
         {si:"nino_miope", texto:"Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."},
@@ -508,7 +523,7 @@ const DEFAULT_CONFIG = {
       puntos:[{n:2},{si:'pantallas in ["5-8","8+"]', n:2},{si:'"gaming" in actividades', n:1},{si:"oscurece", n:1}],
       motivos:[{si:"oscurece", texto:"Tu anteojo de todos los días se oscurece al sol: para la compu conviene un segundo par claro con filtro azul."},{si:'"gaming" in actividades', texto:"Jugás videojuegos: muchas horas de pantalla seguidas."}],
       soluciones:[{id:"uno", nombre:"Pantallas", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue"}]}]}]},
-    {id:"seguridad", momento:"trabajo", nombre:"Anteojo de seguridad graduado", cuando:'receta and "taller" in trabajo',
+    {id:"seguridad", momento:"trabajo", especialidad:"seguridad", nombre:"Anteojo de seguridad graduado", cuando:'receta and "taller" in trabajo',
       puntos:[{n:8}],
       motivos:[{texto:"Trabajás en taller, obra o laboratorio: tu anteojo común no protege de golpes ni partículas."}],
       soluciones:[{id:"uno", nombre:"Seguridad", pares:[{tecnologias:[{id:"policarbonato"},{id:"proteccion_lateral"},{id:"ar"}]}]}]},
@@ -537,7 +552,7 @@ const DEFAULT_CONFIG = {
       ],
       soluciones:[{id:"uno", nombre:"Sol", pares:[{tecnologias:[{id:"polar"},{id:"espejado",si:'"playa" in actividades'}]}]}]},
 
-    {id:"deportivo", momento:"deporte", nombre:"Anteojo deportivo graduado", cuando:'receta and deporte_exterior',
+    {id:"deportivo", momento:"deporte", especialidad:"deportivo", nombre:"Anteojo deportivo graduado", cuando:'receta and deporte_exterior',
       puntos:[{n:1},{si:"deporte_seguido", n:3},{si:'deporte_frec == "seguido"', n:1},{si:'"pelota" in deporte', n:3},{si:'"nieve" in deporte', n:2},{si:"quiere_lc", n:-2},{si:"graduacion_baja", n:-3}],
       motivos:[
         {si:"deporte_frec", texto:"Nos dijiste que hacés deporte {deporte_frec}."},
@@ -552,7 +567,7 @@ const DEFAULT_CONFIG = {
         {nombre:"Nieve", si:'"nieve" in deporte', tecnologias:[{id:"clip"},{id:"espejado"}]},
         {nombre:"Agua", si:'"pesca" in deporte', tecnologias:[{id:"polar"},{id:"envolvente"}]}
       ]}]},
-    {id:"lc_deporte", momento:"deporte", nombre:"Lentes de contacto para hacer deporte", cuando:'deporte_activo and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+    {id:"lc_deporte", momento:"deporte", especialidad:"lc", nombre:"Lentes de contacto para hacer deporte", cuando:'deporte_activo and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
       puntos:[{n:1},{si:"quiere_lc", n:2},{si:"deporte_seguido", n:2},{si:'"pelota" in deporte', n:2},{si:"graduacion_baja", n:-2}],
       motivos:[
         {texto:"Para entrenar sin anteojo: no se empañan, no se mueven y ves todo el campo."},
@@ -561,12 +576,12 @@ const DEFAULT_CONFIG = {
         {si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
-    {id:"antiparra", momento:"deporte", nombre:"Antiparras graduadas", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
+    {id:"antiparra", momento:"deporte", especialidad:"antiparras", nombre:"Antiparras graduadas", cuando:'receta and ("agua" in deporte or "playa" in actividades)',
       puntos:[{si:'"agua" in deporte', n:3},{si:'"agua" in deporte and deporte_seguido', n:3},{si:'"playa" in actividades', n:1},{si:"graduacion_baja", n:-3}],
       motivos:[{si:'"agua" in deporte', texto:"Nadás: en la pileta ves bien y cuidás el anteojo."},{si:'"playa" in actividades and not "agua" in deporte', texto:"Para la pileta en vacaciones."}],
       soluciones:[{id:"uno", nombre:"Antiparras", pares:[{tecnologias:[{id:"antiparra"}]}]}]},
 
-    {id:"lc_salidas", momento:"salidas", nombre:"Lentes de contacto para salir", cuando:'"eventos" in actividades and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
+    {id:"lc_salidas", momento:"salidas", especialidad:"lc", nombre:"Lentes de contacto para salir", cuando:'"eventos" in actividades and lc_edad_ok and lc != "no" and not menor_miope and not (lc_candidato and lc != "uso")',
       puntos:[{n:2},{si:"quiere_lc", n:2},{si:'importa == "estetica"', n:1}],
       motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'receta_tipo == "anteojos"', texto:"Necesitás que tu oftalmólogo indique lentes de contacto en la receta."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
@@ -656,7 +671,8 @@ const localC = LS.get("pv-config");
 const hasLocal = () => isStaff() && localC && localC.version >= 6;
 if(hasLocal()) C = localC;
 const saveCfg = () => { CC.clear(); if(isStaff()) LS.set("pv-config", C); };
-let AI = LS.get("pv-ai") || {key:"", model:""};
+let AI = LS.get("pv-ai") || {prov:"claude", key:"", model:""};
+const AI_DEF = {claude:"claude-sonnet-5-5", gemini:"gemini-flash-lite-latest", openai:"gpt-5-mini"};
 
 const EXAMPLE = {
   pac:{nombre:"Laura (ejemplo)", edad:"46", tel:""},
@@ -685,6 +701,7 @@ function rxInfo(){
 }
 function facts(){
   const F = {...rxInfo(), receta_tipo:S.rx.tipo||"anteojos", edad:num(S.pac.edad)};
+  (C.especialidades||[]).forEach(e=>{ F["ofrece_"+e.id]=ofrece(e.id); });
   C.preguntas.forEach(q=>{ const v=S.a[q.id]; F[q.id] = q.multiple ? (Array.isArray(v)?v:[]) : (v??null); });
   // dos pasadas: un derivado puede usar otro definido más abajo
   for(let i=0;i<2;i++) Object.entries(C.derivados||{}).forEach(([k,ex])=>{ F[k]=test(ex,F); });
@@ -701,14 +718,16 @@ function renderRead(){
   if(r.potencia>=6) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
   if(r.anisometropia) L.push(["Hay bastante diferencia entre un ojo y el otro: hay que cuidar mucho el centrado del cristal.","warn"]);
   if(r.receta_meses!=null && r.receta_meses>12) L.push(["La receta tiene más de un año. Conviene revisarla con tu oftalmólogo antes de hacer cristales nuevos.","warn"]);
-  if(S.rx.tipo==="anteojos" && ["uso","interes"].includes(S.a.lc)) L.push(["Para lentes de contacto hace falta que tu oftalmólogo los indique en la receta.","warn"]);
+  if(ofrece("lc") && S.rx.tipo==="anteojos" && ["uso","interes"].includes(S.a.lc)) L.push(["Para lentes de contacto hace falta que tu oftalmólogo los indique en la receta.","warn"]);
   $("rxRead").innerHTML = L.map(([t,c])=>`<li${c?` class="${c}"`:""}>${t}</li>`).join("");
 }
 
 /* =========================================================
    MOTOR DEL PLAN
    ========================================================= */
-const prod = id => C.productos.find(p=>p.id===id);
+const ofrece = e => !(C.optica.noOfrece||[]).includes(e);
+const ofreceTodo = x => [].concat(x||[]).every(ofrece);
+const prod = id => { const p=C.productos.find(p=>p.id===id); return p && ofreceTodo(p.especialidad) ? p : null; };
 const ORDER = {ess:0, rec:1, opt:2};
 const TAG = {ess:"Esencial", rec:"Recomendado", opt:"Opcional"};
 function fill(txt,F){ return String(txt).replace(/\{(\w+)\}/g,(m,k)=>{ const q=C.preguntas.find(x=>x.id===k); const v=F[k]; if(q){ const vals=Array.isArray(v)?v:[v]; return vals.map(x=>{ const l=String((q.opciones.find(o=>o[0]===x)||[,x])[1]); return l.charAt(0).toLowerCase()+l.slice(1); }).join(", "); } return v??""; }); }
@@ -716,7 +735,7 @@ function build(){
   const F = facts(), out=[];
   const minP = num(C.optica.puntosMinimos) ?? 3, recP = num(C.optica.puntosRecomendado) ?? 6;
   C.sugerencias.forEach(s=>{
-    if(s.activa===false || !test(s.cuando,F)) return;
+    if(s.activa===false || !ofreceTodo(s.especialidad) || !test(s.cuando,F)) return;
     const motivos = (s.motivos||[]).filter(m=>test(m.si,F)).map(m=>fill(m.texto,F));
     const mk = sol => (sol.pares||[]).filter(p=>test(p.si,F)).map(p=>{
       const tecs = (p.tecnologias||[]).filter(t=>test(t.si,F)).map(t=>prod(t.id)).filter(Boolean);
@@ -889,7 +908,8 @@ function all(){ header(); renderRead(); renderPlan(); updateWa(); $("copyBtn").h
    ========================================================= */
 function renderCfg(){
   $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-whatsapp").value=C.optica.whatsapp||""; $("c-contacto").value=C.optica.contacto||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
-  $("c-key").value=AI.key||""; $("c-model").value=AI.model||"";
+  $("c-prov").value=AI.prov||"claude"; $("c-key").value=AI.key||""; $("c-model").value=AI.model||""; $("c-model").placeholder=AI_DEF[AI.prov||"claude"];
+  $("espList").innerHTML = (C.especialidades||[]).map(e=>`<label><input type="checkbox" data-esp="${esc(e.id)}" ${ofrece(e.id)?"checked":""}> ${esc(e.nombre)}</label>`).join("");
   $("prodRows").innerHTML = C.productos.map((p,i)=>`<tr>
     <td style="width:120px"><input class="code" id="pr-id-${i}" data-pi="${i}" data-pf="id" value="${esc(p.id)}"></td>
     <td><input id="pr-n-${i}" data-pi="${i}" data-pf="nombre" value="${esc(p.nombre)}"></td>
@@ -938,7 +958,7 @@ document.addEventListener("input", e=>{
     s[t.dataset.sf]=t.value; saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
   if(id==="c-pin"){ const v=t.value.trim(); if(v.length>=4){ C.optica.pinHash=hashPin(v); saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); } return; }
   if(id.startsWith("c-")){ const f=id.slice(2);
-    if(f==="key"||f==="model"){ AI[f]=t.value.trim(); LS.set("pv-ai",AI); return; }
+    if(f==="key"||f==="model"||f==="prov"){ AI[f]=t.value.trim(); LS.set("pv-ai",AI); if(f==="prov") $("c-model").placeholder=AI_DEF[AI.prov]; return; }
     C.optica[f] = t.value; saveCfg(); header(); return; }
   if(id==="cfgJson") return;
   // atención
@@ -964,6 +984,8 @@ document.addEventListener("click", e=>{
 });
 document.addEventListener("change", e=>{
   const t=e.target;
+  if(t.id==="c-prov"){ AI.prov=t.value; LS.set("pv-ai",AI); $("c-model").placeholder=AI_DEF[AI.prov]; return; }
+  if(t.dataset.esp){ const s=new Set(C.optica.noOfrece||[]); t.checked?s.delete(t.dataset.esp):s.add(t.dataset.esp); C.optica.noOfrece=[...s]; saveCfg(); renderCfg(); renderQs(); all(); return; }
   if(t.dataset.sf==="activa"){ C.sugerencias[+t.dataset.si].activa=t.checked; saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
   if(t.dataset.sf==="prioridad"){ C.sugerencias[+t.dataset.si].prioridad=t.value; saveCfg(); renderCfg(); return; }
   if(t.dataset.hoy) S.hoy[t.dataset.hoy]=t.checked;
@@ -1023,10 +1045,25 @@ Reglas: OD = ojo derecho, OI (u OS) = ojo izquierdo. "Neutro", "N" o "plano" en 
 let sampleFn=null, canImg=false;
 async function readWithApi(file){
   const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
-  const resp = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":AI.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:AI.model||"claude-sonnet-5-5",max_tokens:1500,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},{type:"text",text:PROMPT}]}]})});
-  if(!resp.ok) throw {code:"api_"+resp.status};
-  const j = await resp.json(); const txt=(j.content||[]).map(c=>c.text||"").join(""); const m=txt.match(/\{[\s\S]*\}/);
+  const mime=file.type||"image/jpeg", prov=AI.prov||"claude", model=AI.model||AI_DEF[prov];
+  let resp, txt="";
+  if(prov==="gemini"){
+    resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":AI.key},
+      body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mime,data:b64}},{text:PROMPT}]}],generationConfig:{responseMimeType:"application/json"}})});
+    if(!resp.ok) throw {code:"api_"+resp.status};
+    const j=await resp.json(); txt=((j.candidates||[])[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+  } else if(prov==="openai"){
+    resp = await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+AI.key},
+      body:JSON.stringify({model,response_format:{type:"json_object"},messages:[{role:"user",content:[{type:"text",text:PROMPT},{type:"image_url",image_url:{url:`data:${mime};base64,${b64}`}}]}]})});
+    if(!resp.ok) throw {code:"api_"+resp.status};
+    const j=await resp.json(); txt=(j.choices||[])[0]?.message?.content||"";
+  } else {
+    resp = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":AI.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model,max_tokens:1500,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:mime,data:b64}},{type:"text",text:PROMPT}]}]})});
+    if(!resp.ok) throw {code:"api_"+resp.status};
+    const j = await resp.json(); txt=(j.content||[]).map(c=>c.text||"").join("");
+  }
+  const m=txt.match(/\{[\s\S]*\}/);
   if(!m) throw {code:"invalid_json"}; return JSON.parse(m[0]);
 }
 (async()=>{

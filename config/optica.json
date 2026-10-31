@@ -332,7 +332,7 @@
     },
     {
       "id": "lc",
-      "si": "lc_edad_ok",
+      "si": "lc_edad_ok and ofrece_lc",
       "texto": "¿Usás o te interesan los lentes de contacto?",
       "opciones": [
         [
@@ -414,6 +414,28 @@
     "adolescente_miope": "menor_miope and edad > 12",
     "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)"
   },
+  "especialidades": [
+    {
+      "id": "lc",
+      "nombre": "Lentes de contacto"
+    },
+    {
+      "id": "control_miopia",
+      "nombre": "Control de miopía"
+    },
+    {
+      "id": "seguridad",
+      "nombre": "Anteojos de seguridad"
+    },
+    {
+      "id": "deportivo",
+      "nombre": "Anteojos deportivos y protectores"
+    },
+    {
+      "id": "antiparras",
+      "nombre": "Antiparras graduadas"
+    }
+  ],
   "productos": [
     {
       "id": "vision_simple",
@@ -477,11 +499,16 @@
     },
     {
       "id": "control_miopia",
+      "especialidad": "control_miopia",
       "nombre": "Cristal de control de miopía",
       "detalle": "Diseñado para ayudar a frenar el avance de la miopía en chicos, según indicación del oftalmólogo"
     },
     {
       "id": "lc_control_miopia",
+      "especialidad": [
+        "lc",
+        "control_miopia"
+      ],
       "nombre": "Lentes de contacto de control de miopía",
       "detalle": "Alternativa al cristal para frenar el avance de la miopía, según indicación del oftalmólogo"
     },
@@ -497,16 +524,19 @@
     },
     {
       "id": "proteccion_lateral",
+      "especialidad": "seguridad",
       "nombre": "Protecciones laterales",
       "detalle": "Anteojo de seguridad con norma"
     },
     {
       "id": "clip",
+      "especialidad": "deportivo",
       "nombre": "Clip óptico",
       "detalle": "Tu graduación adentro de la máscara o antiparra"
     },
     {
       "id": "antiparra",
+      "especialidad": "antiparras",
       "nombre": "Antiparra graduada",
       "detalle": "Para ver bien en la pileta"
     },
@@ -517,16 +547,19 @@
     },
     {
       "id": "lc_diarias",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto diarias",
       "detalle": "Se usan un día y se descartan"
     },
     {
       "id": "lc_mensuales",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto mensuales",
       "detalle": "Para uso diario, con solución"
     },
     {
       "id": "lc_torica",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto tóricas",
       "detalle": "Para astigmatismo"
     }
@@ -691,8 +724,12 @@
           "texto": "Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."
         },
         {
-          "si": "nino_miope",
+          "si": "nino_miope and ofrece_control_miopia",
           "texto": "Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."
+        },
+        {
+          "si": "nino_miope and not ofrece_control_miopia",
+          "texto": "Con miopía y menos de 18 años, va sin filtro azul."
         },
         {
           "si": "adolescente_miope",
@@ -775,6 +812,7 @@
     {
       "id": "lc_diario",
       "momento": "dia",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto de uso diario",
       "cuando": "quiere_lc and lc == \"uso\"",
       "puntos": [
@@ -819,6 +857,7 @@
     {
       "id": "lc_alternativa",
       "momento": "dia",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto como alternativa al anteojo",
       "cuando": "lc_candidato and lc != \"no\" and lc != \"uso\"",
       "puntos": [
@@ -894,6 +933,7 @@
     {
       "id": "lc_miopia",
       "momento": "dia",
+      "especialidad": "control_miopia",
       "nombre": "Control de miopía",
       "cuando": "menor_miope and edad >= 8",
       "puntos": [
@@ -1078,6 +1118,7 @@
     {
       "id": "seguridad",
       "momento": "trabajo",
+      "especialidad": "seguridad",
       "nombre": "Anteojo de seguridad graduado",
       "cuando": "receta and \"taller\" in trabajo",
       "puntos": [
@@ -1276,6 +1317,7 @@
     {
       "id": "deportivo",
       "momento": "deporte",
+      "especialidad": "deportivo",
       "nombre": "Anteojo deportivo graduado",
       "cuando": "receta and deporte_exterior",
       "puntos": [
@@ -1392,6 +1434,7 @@
     {
       "id": "lc_deporte",
       "momento": "deporte",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto para hacer deporte",
       "cuando": "deporte_activo and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
       "puntos": [
@@ -1455,6 +1498,7 @@
     {
       "id": "antiparra",
       "momento": "deporte",
+      "especialidad": "antiparras",
       "nombre": "Antiparras graduadas",
       "cuando": "receta and (\"agua\" in deporte or \"playa\" in actividades)",
       "puntos": [
@@ -1504,6 +1548,7 @@
     {
       "id": "lc_salidas",
       "momento": "salidas",
+      "especialidad": "lc",
       "nombre": "Lentes de contacto para salir",
       "cuando": "\"eventos\" in actividades and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
       "puntos": [
