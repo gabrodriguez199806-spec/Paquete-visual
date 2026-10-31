@@ -236,6 +236,7 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
         <div class="totals" id="totals"></div>
         <div class="actions">
           <a class="btn primary" id="waBtn" href="#" target="_blank" rel="noopener">Contactar a la óptica por WhatsApp</a>
+          <span class="note" id="waNote" style="flex-basis:100%">Al abrirse WhatsApp, adjuntá la foto de tu receta antes de enviar.</span>
           <button class="btn" id="copyBtn" type="button">Copiar plan para enviar al paciente</button>
         </div>
         <textarea class="out" id="outTxt" readonly hidden></textarea>
@@ -781,12 +782,13 @@ function contactText(){
   if(start.length) t += "*Quiero empezar con:*\n" + start.map(i=>"• "+desc(i)).join("\n") + "\n\n";
   if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(i=>"• "+desc(i)).join("\n") + "\n\n";
   const rx = rxLines();
-  if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n";
+  if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n\n";
+  t += "*Envío la foto de la receta para revisión.*";
   return t.trim();
 }
 function updateWa(){
   const n = String(C.optica.whatsapp||"").replace(/\D/g,""), a=$("waBtn");
-  a.hidden = !n || !lastItems.length;
+  a.hidden = !n || !lastItems.length; $("waNote").hidden = a.hidden;
   a.href = n ? "https://wa.me/"+n+"?text="+encodeURIComponent(contactText()) : "#";
 }
 function fillForm(){
