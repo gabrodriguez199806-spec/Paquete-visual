@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Probador Óptica Rodriguez</title>
+<meta name="description" content="Probador virtual de armazones y medición de DNP y altura con la cámara del celular.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: una sola columna tipo app; el "escenario" (cámara o foto) arriba, controles debajo. En pantallas anchas, controles al costado. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --fg:#14202e; --muted:#5b6878; --line:#d7dee7;
+  --accent:#1f5fa8; --accent-fg:#ffffff; --accent-soft:#e3edf8;
+  --od:#d2553a; --oi:#1f8a6d; --ref:#b8860b; --ok:#1f8a6d; --warn:#9a5b00;
+  --stage:#0d141c;
+  --display:"Fraunces",Georgia,serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f151c; --surface:#17202a; --fg:#e7edf3; --muted:#9aa8b8; --line:#2a3644;
+  --accent:#6aa6e8; --accent-fg:#0b1520; --accent-soft:#1b2c40;
+  --od:#f08a6f; --oi:#4cc7a2; --ref:#e3b341; --ok:#4cc7a2; --warn:#e3b341;
+  --stage:#05080b; color-scheme:dark;
+}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--body);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1100px;margin:0 auto;padding-block:14px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+h1{font:600 1.45rem/1.15 var(--display);margin:0;text-wrap:balance}
+h1 small{display:block;font:400 .85rem var(--body);color:var(--muted);margin-top:2px}
+h2{font:600 1.05rem var(--display);margin:0 0 8px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--fg);font:700 .95rem var(--body);padding:9px 14px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-fg)}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;background:var(--stage);border-radius:12px;overflow:hidden;min-height:240px;display:flex;align-items:center;justify-content:center}
+.stage canvas{display:block;width:100%;height:auto;touch-action:none}
+.stage .empty{color:#c9d3de;text-align:center;padding:40px 20px;max-width:34ch}
+.stage .empty b{display:block;font:600 1.1rem var(--display);color:#fff;margin-bottom:6px}
+.status{position:absolute;left:10px;top:10px;background:rgba(10,16,22,.78);color:#fff;font-size:.82rem;padding:5px 9px;border-radius:6px;pointer-events:none}
+.status:empty{display:none}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:700 .92rem var(--body);padding:10px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn:focus-visible,.tabs button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+input[type=number],select,input[type=text]{font:500 1rem var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.88rem;cursor:pointer;display:flex;gap:6px;align-items:center}
+.seg input{accent-color:var(--accent);margin:0}
+.seg label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.hint{font-size:.85rem;color:var(--muted);margin:0}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:.9rem}
+.chk input{margin-top:3px;accent-color:var(--accent)}
+.results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.res{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.res .k{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.res .v{font:500 1.5rem var(--mono);font-variant-numeric:tabular-nums}
+.res .v small{font-size:.8rem;color:var(--muted)}
+.res.od .k{color:var(--od)} .res.oi .k{color:var(--oi)}
+.res.wide{grid-column:1/-1}
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.frames button{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:6px;cursor:pointer;color:var(--fg);font:400 .78rem var(--body);display:flex;flex-direction:column;align-items:center;gap:2px}
+.frames button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.frames canvas{width:84px;height:34px}
+.frames .m{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.shot{position:fixed;inset:0;background:rgba(5,8,11,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:20;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.shot img{max-width:100%;max-height:75vh;border-radius:10px}
+details summary{cursor:pointer;font-weight:700;font-size:.9rem}
+details[open] summary{margin-bottom:10px}
+.note{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin:0}
+footer{margin-top:18px;font-size:.8rem;color:var(--muted);max-width:75ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Probador y centrado<small>Óptica Rodriguez · prototipo</small></h1>
+    <div class="tabs" role="tablist">
+      <button id="tab-probar" role="tab" aria-selected="true">Probar armazón</button>
+      <button id="tab-medir" role="tab" aria-selected="false">Medir DNP y altura</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="stage" id="stage">
+        <canvas id="cv" hidden></canvas>
+        <div class="empty" id="empty"><b>Cámara o foto de frente</b>Tocá "Abrir cámara" o subí una foto. Todo se procesa en este celular: la foto no se envía a ningún lado.</div>
+        <div class="status" id="status"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="btnCam">Abrir cámara</button>
+        <label class="btn" for="file">Subir foto</label>
+        <input type="file" id="file" accept="image/*" capture="user" hidden>
+        <button class="btn" id="btnFreeze" hidden>Congelar foto</button>
+        <button class="btn" id="btnSnap" hidden>Guardar imagen</button>
+      </div>
+    </div>
+
+    <!-- PROBAR -->
+    <section class="panel" id="pnl-probar">
+      <div>
+        <h2>Armazón</h2>
+        <div class="frames" id="frames"></div>
+      </div>
+      <div class="fields">
+        <label class="f">Calibre (mm)<input type="number" id="fCal" min="35" max="70" step="1"></label>
+        <label class="f">Puente (mm)<input type="number" id="fPue" min="10" max="26" step="1"></label>
+        <label class="f">Alto lente (mm)<input type="number" id="fAlt" min="20" max="60" step="1"></label>
+        <label class="f">Color<select id="fCol">
+          <option value="negro">Negro</option><option value="carey">Carey</option><option value="cristal">Cristal</option>
+          <option value="azul">Azul</option><option value="dorado">Dorado</option><option value="plateado">Plateado</option><option value="bordo">Bordó</option>
+        </select></label>
+        <label class="f">Lentes<select id="fLen">
+          <option value="clear">Transparentes</option><option value="sol">Sol gris</option><option value="sol-marron">Sol marrón</option><option value="espejado">Espejado azul</option>
+        </select></label>
+      </div>
+      <label class="f"><span>Altura en la cara: <b id="vOff">0</b> mm</span><input type="range" id="fOff" min="-8" max="8" step="0.5" value="0"></label>
+      <label class="f">DP para la escala (mm)<input type="number" id="fDP" min="45" max="80" step="0.5" value="63">
+        <span class="hint" id="dpHint">Valor promedio de adulto. Si medís la DP en la otra pestaña, se usa la tuya y el armazón queda a escala real.</span></label>
+      <details>
+        <summary>Probar con la foto de un armazón (PNG)</summary>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <p class="hint">Foto de frente del armazón, idealmente con fondo transparente. Es lo que cargaría cada armazón de la tienda online.</p>
+          <input type="file" id="png" accept="image/*">
+          <div class="fields">
+            <label class="f">Ancho total del frente (mm)<input type="number" id="pngW" value="140" min="100" max="170" step="1"></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="pngBg" checked> Quitar fondo blanco</label>
+        </div>
+      </details>
+      <p class="note">Escala con DP de <b>63 mm</b> si no medís: el tamaño es orientativo. El modelo dibujado respeta calibre, puente y alto reales.</p>
+    </section>
+
+    <!-- MEDIR -->
+    <section class="panel" id="pnl-medir" hidden>
+      <div>
+        <h2>1 · Referencia de tamaño</h2>
+        <div class="seg" id="refSeg">
+          <label><input type="radio" name="ref" value="tarjeta" checked> Tarjeta en la frente</label>
+          <label><input type="radio" name="ref" value="armazon"> Armazón puesto</label>
+          <label><input type="radio" name="ref" value="iris"> Sin referencia</label>
+        </div>
+        <p class="hint" id="refHint"></p>
+        <div class="fields" id="refMmWrap" style="margin-top:8px">
+          <label class="f" id="refMmLbl">Medida de la referencia (mm)<input type="number" id="refMm" step="0.1"></label>
+        </div>
+      </div>
+      <div>
+        <h2>2 · Ajustá los puntos</h2>
+        <p class="hint">Arrastrá cada punto si quedó corrido. Al tocar aparece una lupa.</p>
+        <div class="legend" style="margin-top:6px">
+          <span><i style="background:var(--od)"></i>Pupila OD</span>
+          <span><i style="background:var(--oi)"></i>Pupila OI</span>
+          <span><i style="background:#fff;border:1px solid #888"></i>Centro nariz</span>
+          <span><i style="background:var(--ref)"></i>Referencia</span>
+        </div>
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="useAlt"> Medir altura (con el armazón puesto): bajá las líneas al borde inferior de cada lente</label>
+      </div>
+      <div>
+        <h2>3 · Medidas</h2>
+        <div class="results">
+          <div class="res od"><div class="k">DNP OD</div><div class="v" id="rOD">–</div></div>
+          <div class="res oi"><div class="k">DNP OI</div><div class="v" id="rOI">–</div></div>
+          <div class="res"><div class="k">DP lejos</div><div class="v" id="rDP">–</div></div>
+          <div class="res"><div class="k">DP cerca (cámara)</div><div class="v" id="rDPn">–</div></div>
+          <div class="res od" id="rAltODw" hidden><div class="k">Altura OD</div><div class="v" id="rAltOD">–</div></div>
+          <div class="res oi" id="rAltOIw" hidden><div class="k">Altura OI</div><div class="v" id="rAltOI">–</div></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btnCopy">Copiar medidas</button>
+          <button class="btn" id="btnUseDP">Usar en el probador</button>
+        </div>
+        <p class="hint" id="copyMsg" aria-live="polite"></p>
+      </div>
+      <details>
+        <summary>Ajustes finos</summary>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="f">Distancia cámara a los ojos (cm)<input type="number" id="dist" value="40" min="20" max="100" step="1"></label>
+          <label class="chk"><input type="checkbox" id="conv" checked> El paciente miraba a la cámara: pasar la DP a visión lejana</label>
+          <p class="hint">Mirando a la cámara los ojos convergen y la DP medida da menor que la de lejos. Brazo estirado es más o menos 40 cm.</p>
+        </div>
+      </details>
+      <p class="note">Margen esperado: 1 a 2 mm con tarjeta bien apoyada, más sin referencia. Para pedir lentes, confirmá con el pupilómetro o la regla en el mostrador.</p>
+    </section>
+  </div>
+
+  <footer>Prototipo para la tienda online de Óptica Rodriguez. Usa detección de rostro en el propio celular (MediaPipe, de Google); las fotos no se suben a ningún servidor. Toma medidas para el armado del anteojo: no reemplaza la receta.</footer>
+</div>
+
+<div class="shot" id="shot" hidden>
+  <img id="shotImg" alt="Foto con el armazón puesto">
+  <div class="row">
+    <a class="btn primary" id="shotDl" download="probador-optica-rodriguez.jpg">Descargar</a>
+    <button class="btn" id="shotShare" hidden>Compartir</button>
+    <button class="btn" id="shotClose">Volver</button>
+  </div>
+</div>
+
+<script type="module">
+const MP = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+const MODEL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+const HVID = 11.7;          // diámetro de iris promedio (mm)
+const CARD = 85.6;          // tarjeta ISO (DNI, SUBE, crédito)
+const ROT = 10;             // pupila a centro de rotación del ojo (mm), para corregir convergencia
+const PLANE = {tarjeta:10, armazon:12, iris:0}; // cuánto más cerca de la cámara está la referencia que las pupilas (mm)
+
+const $ = id => document.getElementById(id);
+const cv = $("cv"), ctx = cv.getContext("2d");
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- Estado ----------
+const S = {
+  tab: "probar",
+  src: null,            // "video" | "image"
+  video: null, img: null, stream: null,
+  lmVideo: null, lmImage: null, loading: null,
+  face: null,           // landmarks del frame actual (px)
+  smooth: null,
+  frame: null, png: null,
+  meas: null,           // puntos de medición
+  drag: null, pointer: null,
+  dpMeasured: null,
+  view: {x:0, y:0, s:1}, // zona de la imagen que se muestra (zoom a la cara al medir)
+};
+
+// ---------- Detector ----------
+async function loadLandmarkers(){
+  if (S.loading) return S.loading;
+  S.loading = (async () => {
+    setStatus("Cargando detector de rostro…");
+    const vision = await import(MP + "/vision_bundle.mjs");
+    const files = await vision.FilesetResolver.forVisionTasks(MP + "/wasm");
+    const make = async (mode, delegate) => vision.FaceLandmarker.createFromOptions(files, {
+      baseOptions: {modelAssetPath: MODEL, delegate},
+      runningMode: mode, numFaces: 1,
+    });
+    const both = async d => [await make("VIDEO", d), await make("IMAGE", d)];
+    try { [S.lmVideo, S.lmImage] = await both("GPU"); }
+    catch (e) { console.warn("GPU no disponible, uso CPU", e); [S.lmVideo, S.lmImage] = await both("CPU"); }
+    setStatus("");
+  })();
+  S.loading.catch(e => { S.loading = null; setStatus("No se pudo cargar el detector. Revisá la conexión y recargá."); console.error(e); });
+  return S.loading;
+}
+function toPx(lms, w, h){ return lms.map(p => ({x:p.x*w, y:p.y*h, z:p.z*w})); }
+
+function faceInfo(L){
+  // Iris: 468 (centro) 469-472 (borde) y 473 (centro) 474-477 (borde)
+  const a = L[468], b = L[473];
+  const [od, oi] = a.x < b.x ? [a, b] : [b, a]; // en la imagen sin espejar, el OD del paciente queda a la izquierda
+  const irisD = (i) => (dist(L[i+1], L[i+3]) + dist(L[i+2], L[i+4])) / 2;
+  const iris = (irisD(468) + irisD(473)) / 2;
+  const d3 = Math.hypot(oi.x-od.x, oi.y-od.y, oi.z-od.z);
+  return {od, oi, bridge: L[168], iris, ang: Math.atan2(oi.y-od.y, oi.x-od.x), d3,
+          cosYaw: Math.min(1, Math.hypot(oi.x-od.x, oi.y-od.y) / d3)};
+}
+const dist = (p, q) => Math.hypot(p.x-q.x, p.y-q.y);
+
+// ---------- Fuente: cámara o foto ----------
+$("btnCam").onclick = async () => {
+  if (S.src === "video" && S.stream) { stopCam(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:{ideal:1280}, height:{ideal:960}}, audio:false});
+    S.stream = stream;
+    const v = S.video || document.createElement("video");
+    v.playsInline = true; v.muted = true; v.srcObject = stream; await v.play();
+    S.video = v; S.src = "video"; S.face = null; S.smooth = null;
+    showStage(v.videoWidth, v.videoHeight);
+    $("btnCam").textContent = "Cerrar cámara";
+    $("btnFreeze").hidden = false;
+    if (S.tab === "medir") setStatus("Tocá \"Congelar foto\" para medir");
+    await loadLandmarkers();
+    loop();
+  } catch (e) {
+    console.error(e);
+    setStatus(e.name === "NotAllowedError" ? "Sin permiso de cámara. Podés subir una foto." : "No se pudo abrir la cámara. Podés subir una foto.");
+  }
+};
+function stopCam(){
+  S.stream?.getTracks().forEach(t => t.stop()); S.stream = null;
+  $("btnCam").textContent = "Abrir cámara"; $("btnFreeze").hidden = true;
+  if (S.src === "video") { S.src = null; cv.hidden = true; $("empty").hidden = false; $("btnSnap").hidden = true; }
+}
+$("btnFreeze").onclick = () => {
+  if (!S.video) return;
+  const c = document.createElement("canvas");
+  c.width = S.video.videoWidth; c.height = S.video.videoHeight;
+  c.getContext("2d").drawImage(S.video, 0, 0);
+  stopCam();
+  setImage(c);
+};
+$("file").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const bmp = await createImageBitmap(f, {imageOrientation:"from-image"}).catch(() => null);
+  let src = bmp;
+  if (!src) { src = new Image(); src.src = URL.createObjectURL(f); await src.decode(); }
+  // Limitar a 1600 px para que sea ágil
+  const k = Math.min(1, 1600 / Math.max(src.width, src.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(src.width*k); c.height = Math.round(src.height*k);
+  c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+  stopCam(); setImage(c); e.target.value = "";
+};
+async function setImage(c){
+  S.img = c; S.src = "image"; S.face = null; S.smooth = null; S.meas = null;
+  showStage(c.width, c.height);
+  draw();
+  await loadLandmarkers();
+  setStatus("Buscando la cara…");
+  const r = S.lmImage.detect(c);
+  if (!r.faceLandmarks?.length) { setStatus("No encontré una cara. Probá con una foto de frente y con buena luz."); draw(); return; }
+  setStatus("");
+  S.face = faceInfo(toPx(r.faceLandmarks[0], c.width, c.height));
+  initMeas(); setView();
+  draw(); compute();
+}
+function showStage(w, h){ S.view = {x:0, y:0, s:1}; cv.width = w; cv.height = h; cv.hidden = false; $("empty").hidden = true; $("btnSnap").hidden = false; }
+
+let lastT = -1;
+function loop(){
+  if (S.src !== "video" || !S.stream) return;
+  const v = S.video;
+  if (v.readyState >= 2 && v.currentTime !== lastT && S.lmVideo) {
+    lastT = v.currentTime;
+    const r = S.lmVideo.detectForVideo(v, performance.now());
+    if (r.faceLandmarks?.length) {
+      S.face = faceInfo(toPx(r.faceLandmarks[0], v.videoWidth, v.videoHeight));
+      setStatus("");
+    } else { S.face = null; S.smooth = null; setStatus("Mirá de frente a la cámara"); }
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ---------- Armazones dibujados (en mm) ----------
+const FRAMES = [
+  {id:"rect", nombre:"Rectangular", forma:"rect", cal:54, pue:18, alt:36, col:"negro", grosor:4},
+  {id:"redondo", nombre:"Redondo", forma:"round", cal:49, pue:21, alt:46, col:"dorado", grosor:1.4},
+  {id:"aviador", nombre:"Aviador", forma:"aviator", cal:58, pue:14, alt:50, col:"plateado", grosor:1.4, len:"sol"},
+  {id:"cat", nombre:"Cat-eye", forma:"cat", cal:52, pue:17, alt:40, col:"bordo", grosor:4.5},
+  {id:"square", nombre:"Cuadrado grueso", forma:"square", cal:52, pue:20, alt:42, col:"carey", grosor:5.5},
+  {id:"panto", nombre:"Panto", forma:"panto", cal:48, pue:21, alt:42, col:"cristal", grosor:4},
+];
+const COLORS = {
+  negro:{rim:"#141414", hi:"rgba(255,255,255,.18)"}, carey:{rim:"carey", hi:"rgba(255,230,190,.25)"},
+  cristal:{rim:"rgba(225,232,238,.55)", hi:"rgba(255,255,255,.6)"}, azul:{rim:"#1d3f73", hi:"rgba(255,255,255,.2)"},
+  dorado:{rim:"#c39a45", hi:"rgba(255,245,200,.6)"}, plateado:{rim:"#a9b0b8", hi:"rgba(255,255,255,.7)"},
+  bordo:{rim:"#5e1424", hi:"rgba(255,200,210,.2)"},
+};
+const LENS = {clear:"rgba(220,235,255,.07)", sol:"rgba(30,34,38,.62)", "sol-marron":"rgba(80,50,25,.58)", espejado:"rgba(30,80,160,.6)"};
+
+let careyPat = null;
+function carey(c){
+  if (careyPat) return careyPat;
+  const t = document.createElement("canvas"); t.width = t.height = 64; const g = t.getContext("2d");
+  g.fillStyle = "#3a1e0c"; g.fillRect(0,0,64,64);
+  let s = 7; const rnd = () => (s = (s*16807) % 2147483647) / 2147483647;
+  for (let i=0;i<40;i++){ g.fillStyle = ["#7a4417","#a8641f","#1c0d05","#c98a3a"][i%4]; g.globalAlpha = .55;
+    g.beginPath(); g.ellipse(rnd()*64, rnd()*64, 3+rnd()*9, 2+rnd()*5, rnd()*3, 0, 7); g.fill(); }
+  return careyPat = c.createPattern(t, "repeat");
+}
+
+// Contorno de un lente centrado en 0, ancho W, alto H: lado nasal en -x, lado de la sien en +x
+function lensPath(g, f, W, H){
+  const w = W/2, h = H/2; g.beginPath();
+  switch (f) {
+    case "round": g.ellipse(0, 0, w, h, 0, 0, Math.PI*2); break;
+    case "rect": rr(g, -w, -h, W, H, H*.22); break;
+    case "square": // más ancho arriba
+      g.moveTo(-w, -h+3); g.quadraticCurveTo(-w, -h, -w+4, -h); g.lineTo(w-4, -h); g.quadraticCurveTo(w+1, -h, w, -h+5);
+      g.lineTo(w-2, h-7); g.quadraticCurveTo(w-3, h, w-10, h); g.lineTo(-w+9, h); g.quadraticCurveTo(-w+2, h, -w+1, h-7); g.closePath(); break;
+    case "aviator":
+      g.moveTo(-w+2, -h+3); g.quadraticCurveTo(0, -h-2, w-2, -h+1); g.quadraticCurveTo(w+2, -h+4, w, -h*0.2);
+      g.bezierCurveTo(w-1, h*0.7, w*0.3, h, -w*0.1, h); g.bezierCurveTo(-w*0.75, h, -w-1, h*0.2, -w, -h*0.35);
+      g.quadraticCurveTo(-w+.5, -h+4, -w+2, -h+3); break;
+    case "cat":
+      g.moveTo(-w, -h*0.55); g.quadraticCurveTo(-w*0.2, -h*1.02, w*0.75, -h*1.05); g.quadraticCurveTo(w+3, -h*1.15, w+2, -h*0.6);
+      g.bezierCurveTo(w, h*0.5, w*0.5, h, 0, h); g.bezierCurveTo(-w*0.7, h, -w-1, h*0.4, -w, -h*0.55); break;
+    case "panto":
+      g.moveTo(-w, -h*0.45); g.quadraticCurveTo(-w, -h, -w*0.4, -h); g.lineTo(w*0.5, -h); g.quadraticCurveTo(w, -h, w, -h*0.4);
+      g.bezierCurveTo(w, h*0.6, w*0.6, h, 0, h); g.bezierCurveTo(-w*0.6, h, -w, h*0.6, -w, -h*0.45); break;
+  }
+}
+function rr(g, x, y, w, h, r){ g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+
+// Dibuja el frente completo en mm, origen en el centro del puente
+function drawFrameMM(g, F){
+  const W = F.cal, H = F.alt, P = F.pue, t = F.grosor, c = COLORS[F.col] || COLORS.negro;
+  const rim = c.rim === "carey" ? carey(g) : c.rim;
+  const cx = P/2 + W/2;
+  for (const s of [-1, 1]) {
+    g.save(); g.translate(s*cx, 0); g.scale(s, 1); // el contorno tiene el lado de la sien en +x; el lente izquierdo se espeja
+    lensPath(g, F.forma, W, H);
+    g.fillStyle = LENS[F.len || "clear"]; g.fill();
+    if (F.len === "espejado") { const gr = g.createLinearGradient(0,-H/2,0,H/2); gr.addColorStop(0,"rgba(120,200,255,.35)"); gr.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle = gr; g.fill(); }
+    g.lineJoin = "round"; g.lineWidth = t; g.strokeStyle = rim; g.stroke();
+    // brillo
+    g.save(); g.clip(); g.strokeStyle = c.hi; g.lineWidth = Math.max(.5, t*.25);
+    g.beginPath(); g.ellipse(-W*0.12, -H*0.12, W*0.32, H*0.3, -0.5, Math.PI*1.05, Math.PI*1.45); g.stroke(); g.restore();
+    // bisagra / frente lateral
+    g.fillStyle = rim; g.beginPath(); rr(g, W/2 - 0.8, -H*0.32, t*0.9 + 3, Math.max(4, t*1.4), 1.2); g.fill();
+    g.restore();
+  }
+  // puente
+  g.strokeStyle = rim; g.lineCap = "round";
+  const yb = F.forma === "aviator" ? -H*0.32 : -H*0.18;
+  g.lineWidth = Math.max(1.4, t*0.8);
+  g.beginPath(); g.moveTo(-P/2 - 1, yb); g.quadraticCurveTo(0, yb - 4, P/2 + 1, yb); g.stroke();
+  if (F.forma === "aviator") { g.lineWidth = 1.2; g.beginPath(); g.moveTo(-P/2 - W*0.35, -H/2 + 1.5); g.quadraticCurveTo(0, -H/2 - 2, P/2 + W*0.35, -H/2 + 1.5); g.stroke(); }
+}
+const totalWidth = F => 2*F.cal + F.pue + 2*(F.grosor*0.9 + 3);
+
+// ---------- Selector de armazones ----------
+function renderFrameButtons(){
+  const box = $("frames"); box.innerHTML = "";
+  for (const f of FRAMES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-pressed", S.frame?.id === f.id ? "true" : "false");
+    const c = document.createElement("canvas"); c.width = 168; c.height = 68;
+    const g = c.getContext("2d"); const k = 160 / (totalWidth(f) + 4);
+    g.translate(84, 34); g.scale(k, k); drawFrameMM(g, {...f, len: f.len || "clear"});
+    const n = document.createElement("span"); n.textContent = f.nombre;
+    const m = document.createElement("span"); m.className = "m"; m.textContent = `${f.cal}□${f.pue}`;
+    b.append(c, n, m);
+    b.onclick = () => { S.png = null; selectFrame(f); };
+    box.append(b);
+  }
+}
+function selectFrame(f){
+  S.frame = {...f, len: f.len || "clear"};
+  $("fCal").value = f.cal; $("fPue").value = f.pue; $("fAlt").value = f.alt; $("fCol").value = f.col; $("fLen").value = S.frame.len;
+  renderFrameButtons(); draw();
+}
+for (const id of ["fCal","fPue","fAlt","fCol","fLen"]) $(id).addEventListener("input", () => {
+  if (!S.frame) return;
+  S.frame.cal = +$("fCal").value || S.frame.cal; S.frame.pue = +$("fPue").value || S.frame.pue; S.frame.alt = +$("fAlt").value || S.frame.alt;
+  S.frame.col = $("fCol").value; S.frame.len = $("fLen").value; draw();
+});
+$("fOff").oninput = () => { $("vOff").textContent = (+$("fOff").value > 0 ? "+" : "") + $("fOff").value; draw(); };
+$("fDP").oninput = draw;
+
+$("png").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const im = await createImageBitmap(f);
+  S.pngRaw = im; buildPng(); draw();
+};
+$("pngBg").onchange = () => { if (S.pngRaw) { buildPng(); draw(); } };
+$("pngW").oninput = draw;
+function buildPng(){
+  const im = S.pngRaw, c = document.createElement("canvas"); c.width = im.width; c.height = im.height;
+  const g = c.getContext("2d"); g.drawImage(im, 0, 0);
+  if ($("pngBg").checked) {
+    const d = g.getImageData(0, 0, c.width, c.height), a = d.data;
+    for (let i = 0; i < a.length; i += 4) { const m = Math.min(a[i], a[i+1], a[i+2]); if (m > 235) a[i+3] = 0; else if (m > 205) a[i+3] = Math.min(a[i+3], (235 - m) * 8.5); }
+    g.putImageData(d, 0, 0);
+  }
+  // recortar transparencia para que el ancho sea el del frente
+  const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = 0, y0 = c.height, y1 = 0;
+  for (let y = 0; y < c.height; y += 2) for (let x = 0; x < c.width; x += 2) if (d[(y*c.width + x)*4 + 3] > 40) { if (x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+  if (x1 <= x0) { S.png = c; return; }
+  const o = document.createElement("canvas"); o.width = x1-x0+1; o.height = y1-y0+1;
+  o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+  S.png = o; renderFrameButtons();
+}
+
+// ---------- Dibujo ----------
+function setView(){
+  if (S.src !== "image" || !S.img) return;
+  const W = S.img.width, H = S.img.height;
+  if (S.tab === "medir" && S.meas) {
+    const M = S.meas, c = {x:(M.od.x + M.oi.x)/2, y:(M.od.y + M.oi.y)/2 + 0.15*dist(M.od, M.oi)};
+    const w = Math.min(W, 3.6 * dist(M.od, M.oi)), h = Math.min(H, w * 0.9);
+    const x = Math.max(0, Math.min(W - w, c.x - w/2)), y = Math.max(0, Math.min(H - h, c.y - h/2));
+    const sc = Math.max(1, Math.min(3, 1200 / w));
+    S.view = {x, y, s: sc}; cv.width = Math.round(w*sc); cv.height = Math.round(h*sc);
+  } else { S.view = {x:0, y:0, s:1}; cv.width = W; cv.height = H; }
+}
+function draw(){
+  if (cv.hidden) return;
+  const V = S.view;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.save();
+  if (S.src === "video") { ctx.translate(cv.width, 0); ctx.scale(-1, 1); ctx.drawImage(S.video, 0, 0, cv.width, cv.height); }
+  else if (S.img) { ctx.setTransform(V.s, 0, 0, V.s, -V.x*V.s, -V.y*V.s); ctx.drawImage(S.img, 0, 0); }
+  if (S.tab === "probar" && S.face) drawTryOn();
+  if (S.tab === "medir" && S.meas && S.src === "image") drawMeas();
+  ctx.restore();
+}
+
+function drawTryOn(){
+  const f = S.face;
+  // Escala: distancia 3D entre pupilas (corrige giro de cabeza) / DP
+  const dp = +$("fDP").value || 63;
+  const target = {
+    x: (f.od.x + f.oi.x)/2, y: (f.od.y + f.oi.y)/2,
+    k: f.d3 / dp, ang: f.ang, cy: f.cosYaw,
+  };
+  const s = S.smooth, a = S.src === "video" ? 0.45 : 1;
+  S.smooth = s ? {x: s.x + (target.x-s.x)*a, y: s.y + (target.y-s.y)*a, k: s.k + (target.k-s.k)*a, ang: s.ang + (target.ang-s.ang)*a, cy: s.cy + (target.cy-s.cy)*a} : target;
+  const T = S.smooth;
+  ctx.save();
+  ctx.translate(T.x, T.y); ctx.rotate(T.ang); ctx.scale(T.k * T.cy, T.k);
+  // el centro de la caja del lente suele quedar 2-3 mm por debajo de la pupila
+  ctx.translate(0, 2.5 - (+$("fOff").value || 0));
+  if (S.png) {
+    const w = +$("pngW").value || 140, h = w * S.png.height / S.png.width;
+    ctx.drawImage(S.png, -w/2, -h/2 - 2, w, h);
+  } else if (S.frame) {
+    ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 3; ctx.shadowOffsetY = 1.5;
+    drawFrameMM(ctx, S.frame);
+  }
+  ctx.restore();
+}
+
+// ---------- Medición ----------
+const REF_TXT = {
+  tarjeta: ["Apoyá una tarjeta (DNI, SUBE o de crédito) acostada sobre la frente, centrada, y sacá la foto de frente a unos 40 cm. Llevá los dos marcadores amarillos a los bordes izquierdo y derecho de la tarjeta.", CARD, "Ancho de la tarjeta (mm)"],
+  armazon: ["Con un armazón puesto del que sepas el ancho total del frente (de bisagra a bisagra). Llevá los marcadores amarillos a los dos extremos del frente.", 140, "Ancho total del frente (mm)"],
+  iris: ["Usa el tamaño promedio del iris (11,7 mm). Es rápido pero puede errar 3 mm o más: sirve para orientar, no para pedir lentes.", null, ""],
+};
+function refMode(){ return document.querySelector('input[name="ref"]:checked').value; }
+function setRefUI(){
+  const m = refMode(), [t, mm, lbl] = REF_TXT[m];
+  $("refHint").textContent = t;
+  $("refMmWrap").hidden = !mm;
+  if (mm) { $("refMm").value = mm; $("refMmLbl").firstChild.textContent = lbl; }
+  if (S.face) initRef();
+  draw(); compute();
+}
+document.querySelectorAll('input[name="ref"]').forEach(r => r.onchange = setRefUI);
+$("refMm").oninput = compute; $("dist").oninput = compute; $("conv").onchange = compute;
+$("useAlt").onchange = () => { $("rAltODw").hidden = $("rAltOIw").hidden = !$("useAlt").checked; draw(); compute(); };
+
+function initMeas(){
+  const f = S.face;
+  S.meas = {od:{...f.od}, oi:{...f.oi}, br:{...f.bridge}, k0: f.iris / HVID, altOD: 20, altOI: 20};
+  initRef();
+}
+function initRef(){
+  const M = S.meas, f = S.face, k = M.k0, m = refMode();
+  const u = {x: Math.cos(f.ang), y: Math.sin(f.ang)}, n = {x: -u.y, y: u.x};
+  const c = {x: (M.od.x + M.oi.x)/2, y: (M.od.y + M.oi.y)/2};
+  const half = (m === "tarjeta" ? CARD : 140) / 2 * k, up = m === "tarjeta" ? -32 * k : 0;
+  M.a = {x: c.x - u.x*half + n.x*up, y: c.y - u.y*half + n.y*up};
+  M.b = {x: c.x + u.x*half + n.x*up, y: c.y + u.y*half + n.y*up};
+}
+function axes(){ const M = S.meas, ang = Math.atan2(M.oi.y - M.od.y, M.oi.x - M.od.x); const u = {x:Math.cos(ang), y:Math.sin(ang)}; return {u, n:{x:-u.y, y:u.x}}; }
+function altLine(eye){ // segmento paralelo al eje pupilar, debajo de la pupila
+  const M = S.meas, {u, n} = axes(), p = M[eye], k = M.k0, d = M[eye === "od" ? "altOD" : "altOI"] * k, L = 16 * k;
+  const c = {x: p.x + n.x*d, y: p.y + n.y*d};
+  return {c, a:{x:c.x - u.x*L, y:c.y - u.y*L}, b:{x:c.x + u.x*L, y:c.y + u.y*L}};
+}
+function handles(){
+  const M = S.meas, h = [
+    {id:"od", p:M.od, col:css("--od")}, {id:"oi", p:M.oi, col:css("--oi")}, {id:"br", p:M.br, col:"#ffffff"},
+  ];
+  if (refMode() !== "iris") h.push({id:"a", p:M.a, col:css("--ref")}, {id:"b", p:M.b, col:css("--ref")});
+  if ($("useAlt").checked) { h.push({id:"hOD", p:altLine("od").c, col:css("--od"), line:true}, {id:"hOI", p:altLine("oi").c, col:css("--oi"), line:true}); }
+  return h;
+}
+function drawMeas(){
+  const M = S.meas, k = cv.width / cv.getBoundingClientRect().width / S.view.s; // px de imagen por px de pantalla
+  const {u, n} = axes(), lw = 2*k;
+  ctx.save(); ctx.lineWidth = lw;
+  // eje pupilar y línea media
+  ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.setLineDash([6*k, 5*k]);
+  ctx.beginPath(); ctx.moveTo(M.od.x - u.x*40*k, M.od.y - u.y*40*k); ctx.lineTo(M.oi.x + u.x*40*k, M.oi.y + u.y*40*k); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(M.br.x - n.x*60*k, M.br.y - n.y*60*k); ctx.lineTo(M.br.x + n.x*120*k, M.br.y + n.y*120*k); ctx.stroke();
+  ctx.setLineDash([]);
+  if (refMode() !== "iris") { ctx.strokeStyle = css("--ref"); ctx.beginPath(); ctx.moveTo(M.a.x, M.a.y); ctx.lineTo(M.b.x, M.b.y); ctx.stroke(); }
+  if ($("useAlt").checked) for (const e of ["od","oi"]) {
+    const L = altLine(e); ctx.strokeStyle = css(e === "od" ? "--od" : "--oi"); ctx.lineWidth = 2.5*k;
+    ctx.beginPath(); ctx.moveTo(L.a.x, L.a.y); ctx.lineTo(L.b.x, L.b.y); ctx.stroke();
+    ctx.setLineDash([3*k, 3*k]); ctx.lineWidth = 1.2*k; ctx.beginPath(); ctx.moveTo(M[e].x, M[e].y); ctx.lineTo(L.c.x, L.c.y); ctx.stroke(); ctx.setLineDash([]);
+  }
+  for (const h of handles()) {
+    ctx.beginPath(); ctx.arc(h.p.x, h.p.y, (h.line ? 6 : 4.5)*k, 0, 7);
+    ctx.fillStyle = h.col; ctx.fill(); ctx.lineWidth = 1.5*k; ctx.strokeStyle = "rgba(0,0,0,.7)"; ctx.stroke();
+    if (h.id === "od" || h.id === "oi") { ctx.font = `700 ${13*k}px system-ui`; ctx.fillStyle = h.col; ctx.textAlign = "center";
+      ctx.fillText(h.id.toUpperCase(), h.p.x - n.x*22*k, h.p.y - n.y*22*k); }
+  }
+  // lupa
+  ctx.restore();
+  if (S.drag && S.pointer) {
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const V = S.view, kc = k * V.s, R = 60*kc, Z = 2.5, p = {x:(S.pointer.x - V.x)*V.s, y:(S.pointer.y - V.y)*V.s}, left = p.x > cv.width/2, cx = left ? R + 12*kc : cv.width - R - 12*kc, cy = R + 12*kc;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip();
+    ctx.drawImage(cv, p.x - R/Z, p.y - R/Z, 2*R/Z, 2*R/Z, cx - R, cy - R, 2*R, 2*R); // ya incluye los marcadores
+    ctx.restore();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2*kc; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.8)"; ctx.lineWidth = 1*kc;
+    ctx.beginPath(); ctx.moveTo(cx - 12*kc, cy); ctx.lineTo(cx + 12*kc, cy); ctx.moveTo(cx, cy - 12*kc); ctx.lineTo(cx, cy + 12*kc); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function evtPt(e){
+  const r = cv.getBoundingClientRect(); let x = (e.clientX - r.left) * cv.width / r.width; const y = (e.clientY - r.top) * cv.height / r.height;
+  if (S.src === "video") return {x: cv.width - x, y};
+  return {x: x / S.view.s + S.view.x, y: y / S.view.s + S.view.y};
+}
+cv.addEventListener("pointerdown", e => {
+  if (S.tab !== "medir" || !S.meas || S.src !== "image") return;
+  const p = evtPt(e), k = cv.width / cv.getBoundingClientRect().width / S.view.s;
+  let best = null, bd = 28*k;
+  for (const h of handles()) { const d = dist(p, h.p); if (d < bd) { bd = d; best = h; } }
+  if (!best) return;
+  S.drag = {id: best.id, off: {x: best.p.x - p.x, y: best.p.y - p.y}};
+  S.pointer = best.p; cv.setPointerCapture(e.pointerId); e.preventDefault(); draw();
+});
+cv.addEventListener("pointermove", e => {
+  if (!S.drag) return;
+  const p = evtPt(e), q = {x: p.x + S.drag.off.x, y: p.y + S.drag.off.y}, M = S.meas, id = S.drag.id;
+  if (id === "hOD" || id === "hOI") {
+    const eye = id === "hOD" ? "od" : "oi", {n} = axes();
+    M[id === "hOD" ? "altOD" : "altOI"] = Math.max(5, ((q.x - M[eye].x)*n.x + (q.y - M[eye].y)*n.y) / M.k0);
+    S.pointer = altLine(eye).c;
+  } else { M[id].x = q.x; M[id].y = q.y; S.pointer = M[id]; }
+  draw(); compute();
+});
+const endDrag = () => { if (S.drag) { S.drag = null; S.pointer = null; draw(); } };
+cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
+
+function compute(){
+  const M = S.meas, out = (id, v) => $(id).innerHTML = v == null ? "–" : `${v.toFixed(1).replace(".", ",")}<small> mm</small>`;
+  if (!M) { ["rOD","rOI","rDP","rDPn","rAltOD","rAltOI"].forEach(i => out(i, null)); return; }
+  const m = refMode(), D = (+$("dist").value || 40) * 10;
+  let pxmm;
+  if (m === "iris") pxmm = M.k0;
+  else { const mm = +$("refMm").value; pxmm = mm > 0 ? dist(M.a, M.b) / mm : M.k0; }
+  const plane = D / (D - PLANE[m]);       // la referencia está más cerca de la cámara que los ojos
+  const toMM = px => px / pxmm * plane;
+  const {u, n} = axes();
+  const along = p => (p.x - M.br.x)*u.x + (p.y - M.br.y)*u.y;
+  const nOD = toMM(Math.abs(along(M.od))), nOI = toMM(Math.abs(along(M.oi)));
+  const conv = $("conv").checked ? (D + ROT) / D : 1;
+  const r05 = v => Math.round(v * 2) / 2;
+  S.result = {dnpOD: r05(nOD*conv), dnpOI: r05(nOI*conv), dpLejos: r05((nOD+nOI)*conv), dpCerca: r05(nOD+nOI)};
+  out("rOD", S.result.dnpOD); out("rOI", S.result.dnpOI); out("rDP", S.result.dpLejos); out("rDPn", S.result.dpCerca);
+  if ($("useAlt").checked) {
+    // altura en px reales = alt(mm aprox por iris) * k0 → pasar a mm con la referencia elegida
+    S.result.altOD = r05(toMM(M.altOD * M.k0)); S.result.altOI = r05(toMM(M.altOI * M.k0));
+    out("rAltOD", S.result.altOD); out("rAltOI", S.result.altOI);
+  } else { delete S.result.altOD; delete S.result.altOI; }
+  S.result.ref = m;
+}
+$("btnCopy").onclick = async () => {
+  const R = S.result; if (!R) { $("copyMsg").textContent = "Primero sacá o subí una foto."; return; }
+  const f = v => String(v).replace(".", ",");
+  let t = `Medidas Óptica Rodriguez (probador)\nDNP OD ${f(R.dnpOD)} mm · DNP OI ${f(R.dnpOI)} mm\nDP lejos ${f(R.dpLejos)} mm · DP cerca ${f(R.dpCerca)} mm`;
+  if (R.altOD != null) t += `\nAltura OD ${f(R.altOD)} mm · Altura OI ${f(R.altOI)} mm`;
+  t += `\nReferencia: ${({tarjeta:"tarjeta", armazon:"armazón", iris:"iris (aprox.)"})[R.ref]}`;
+  try { await navigator.clipboard.writeText(t); $("copyMsg").textContent = "Copiado."; }
+  catch { $("copyMsg").textContent = t; }
+};
+$("btnUseDP").onclick = () => {
+  if (!S.result) return;
+  $("fDP").value = S.result.dpCerca; S.dpMeasured = S.result.dpCerca;
+  $("dpHint").textContent = `Usando tu DP medida (${String(S.result.dpCerca).replace(".", ",")} mm, mirando a la cámara).`;
+  setTab("probar");
+};
+
+// ---------- Pestañas ----------
+function setTab(t){
+  S.tab = t;
+  $("tab-probar").setAttribute("aria-selected", t === "probar"); $("tab-medir").setAttribute("aria-selected", t === "medir");
+  $("pnl-probar").hidden = t !== "probar"; $("pnl-medir").hidden = t !== "medir";
+  if (t === "medir" && S.src === "video") setStatus("Tocá \"Congelar foto\" para medir");
+  else if (S.face || !S.src) setStatus("");
+  setView(); draw();
+}
+$("tab-probar").onclick = () => setTab("probar");
+$("tab-medir").onclick = () => setTab("medir");
+
+// ---------- Guardar imagen ----------
+$("btnSnap").onclick = () => {
+  const c = document.createElement("canvas"); c.width = cv.width; c.height = cv.height;
+  const g = c.getContext("2d"); g.drawImage(cv, 0, 0);
+  g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(0, c.height - 34, c.width, 34);
+  g.fillStyle = "#fff"; g.font = "600 18px Georgia, serif"; g.fillText("Óptica Rodriguez", 12, c.height - 11);
+  const url = c.toDataURL("image/jpeg", 0.9);
+  $("shotImg").src = url; $("shotDl").href = url; $("shot").hidden = false;
+  if (navigator.canShare) c.toBlob(b => {
+    const file = new File([b], "probador-optica-rodriguez.jpg", {type:"image/jpeg"});
+    if (navigator.canShare({files:[file]})) { $("shotShare").hidden = false; $("shotShare").onclick = () => navigator.share({files:[file]}).catch(() => {}); }
+  }, "image/jpeg", 0.9);
+};
+$("shotClose").onclick = () => { $("shot").hidden = true; };
+
+function setStatus(t){ $("status").textContent = t; }
+window.addEventListener("resize", draw);
+
+selectFrame(FRAMES[0]);
+setRefUI();
+// precargar el detector en segundo plano
+loadLandmarkers();
+window.__S = S; // para pruebas
+</script>
+</body>
+</html>
