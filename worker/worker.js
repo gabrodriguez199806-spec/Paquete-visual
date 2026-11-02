@@ -20,8 +20,11 @@ const MAX_B64 = 8 * 1024 * 1024; // ~6 MB de imagen
 
 export default {
   async fetch(request, env) {
+    // acepta los nombres de variables sin importar mayúsculas (GEMINI_KEY, Gemini_key, ALLOWED_ORIGINS, Allowed_origins…)
+    const pick = re => { const k = Object.keys(env || {}).find(k => re.test(k)); return k ? String(env[k]) : ""; };
+    env = { GEMINI_KEY: pick(/^gemini/i), ALLOWED_ORIGINS: pick(/origin/i), MODEL: pick(/^model$/i) };
     const origin = request.headers.get("Origin") || "";
-    const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+    const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim().replace(/\/+$/, "")).filter(Boolean);
     const ok = allowed.includes(origin);
     const cors = {
       "Access-Control-Allow-Origin": ok ? origin : "null",
