@@ -88,6 +88,15 @@ Ejemplo: `add > 0 and (lejos or "lejos" in dist)`
 - Cada par lista `tecnologias`; cada una puede tener `si` (por ejemplo `{"id":"blue","si":"filtro_azul"}`).
 - Una pregunta puede tener `si` para aparecer solo cuando corresponde (`"si": "maneja_si"`).
 
+## Probador y centrado (prototipo)
+
+`probador/index.html` es una página aparte, pensada para la tienda online:
+
+- **Probar armazón:** con la cámara frontal (en vivo) o una foto, dibuja el armazón sobre la cara a escala real según calibre, puente y alto de lente, y sigue la inclinación y el giro de la cabeza. También acepta la foto frontal de un armazón (PNG, se le puede quitar el fondo blanco) con su ancho total en mm.
+- **Medir DNP y altura:** detecta las pupilas y el centro de la nariz en una foto de frente. La escala sale de una tarjeta (DNI, SUBE o de crédito, 85,6 mm) apoyada en la frente, del ancho de un armazón puesto o, como estimación, del tamaño promedio del iris. Corrige la convergencia de mirar a la cámara para dar la DP de lejos. Con el armazón puesto, mide la altura de montaje.
+
+Usa MediaPipe Face Landmarker (de Google) dentro del navegador: las fotos no salen del dispositivo. La cámara solo funciona con https (GitHub Pages sirve). Margen esperado de 1 a 2 mm con tarjeta; para pedir lentes conviene confirmar en el mostrador.
+
 ## Lectura de recetas con IA
 
 - Dentro de Claude (claude.ai) funciona sin configurar nada.
