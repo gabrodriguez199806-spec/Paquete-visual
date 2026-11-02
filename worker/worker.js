@@ -23,7 +23,7 @@ export default {
     // acepta los nombres de variables sin importar mayúsculas (GEMINI_KEY, Gemini_key, ALLOWED_ORIGINS, Allowed_origins…)
     const pick = re => { const k = Object.keys(env || {}).find(k => re.test(k)); return k ? String(env[k]) : ""; };
     const KV = env.TEXTOS || null;
-    env = { GEMINI_KEY: pick(/^gemini/i), ALLOWED_ORIGINS: pick(/origin/i), MODEL: pick(/^model$/i), PINES: pick(/^pines$/i) };
+    env = { GEMINI_KEY: pick(/^gemini/i), ALLOWED_ORIGINS: pick(/origin/i), MODEL: pick(/^model$/i), PINES: pick(/pin/i) || Object.values(env || {}).map(v => typeof v === "string" ? v : "").find(v => /[a-z0-9-]+\s*[:=]\s*\d{3,}/i.test(v)) || "" };
     const origin = request.headers.get("Origin") || "";
     const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim().replace(/\/+$/, "")).filter(Boolean);
     const ok = allowed.includes(origin);
