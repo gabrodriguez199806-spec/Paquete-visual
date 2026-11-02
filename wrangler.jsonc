@@ -4,6 +4,9 @@
   "main": "worker/worker.js",
   "compatibility_date": "2026-09-01",
   "keep_vars": true,
+  "kv_namespaces": [
+    { "binding": "TEXTOS", "id": "95f93568ca9945cb9b47cb2d999affa5" }
+  ],
   "vars": {
     "ALLOWED_ORIGINS": "https://gabrodriguez199806-spec.github.io"
   }

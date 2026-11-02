@@ -375,6 +375,7 @@ const DEFAULT_CONFIG = {
     legal: "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día. Los productos exactos se eligen en la óptica según tu graduación.",
     maxSugerencias: 4,
     iaProxy: "https://receta.gab-rodriguez199806.workers.dev",
+    textosApi: "https://paquete-visual.gab-rodriguez199806.workers.dev",
     pinHash: "a8f00ae3",
     puntosMinimos: 3,
     puntosRecomendado: 6,
@@ -960,7 +961,7 @@ function renderCfg(){
   </div>`; }).join("");
   $("cfgJson").value = JSON.stringify(C,null,2); $("cfgJsonMsg").textContent="";
 }
-const textosUrl = () => { try{ return C.optica.iaProxy ? new URL("textos", C.optica.iaProxy.replace(/\/?$/,"/")).toString() : ""; }catch(_){ return ""; } };
+const textosUrl = () => { const b=C.optica.textosApi||C.optica.iaProxy; try{ return b ? new URL("textos", b.replace(/\/?$/,"/")).toString() : ""; }catch(_){ return ""; } };
 function updPub(){}
 async function publicar(){
   const m=$("pubMsg"), u=textosUrl(); if(!u){ m.textContent="Falta el intermediario."; return; }
