@@ -85,8 +85,12 @@ async function textos(request, env, KV, out) {
   const failKey = "fallos:" + o;
   const fallos = Number(await KV.get(failKey)) || 0;
   if (fallos >= 5) return out({ error: "demasiados intentos, probá en una hora" }, 429);
-  const pines = Object.fromEntries(env.PINES.split(",").map(x => x.trim().split(":")).filter(x => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
-  if (!pines[o] || String(b.pin || "") !== pines[o]) {
+  // tolera comillas, espacios, saltos de línea, ";" o "=" en el secreto PINES
+  const pines = Object.fromEntries(String(env.PINES || "").replace(/["'`{}]/g, "").split(/[,;\n]+/)
+    .map(x => x.split(/[:=]/).map(s => s.trim())).filter(x => x.length === 2 && x[0] && x[1]).map(([k, v]) => [k.toLowerCase(), v]));
+  if (!Object.keys(pines).length) return out({ error: "falta el secreto PINES" }, 500);
+  if (!pines[o]) return out({ error: "esta sucursal no tiene PIN en PINES" }, 500);
+  if (String(b.pin || "").trim() !== pines[o]) {
     await KV.put(failKey, String(fallos + 1), { expirationTtl: 3600 });
     return out({ error: "PIN incorrecto" }, 401);
   }

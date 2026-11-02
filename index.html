@@ -970,7 +970,7 @@ async function publicar(){
     const r = await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({o:SLUG, pin:$("pubPin").value.trim(), textos:{intro:o.intro||"", contacto:o.contacto||"", saludo:o.saludo||"", legal:o.legal||""}})});
     const j = await r.json().catch(()=>({}));
     if(r.ok){ m.className="ok"; m.textContent="Publicado ✓ Tus pacientes ya ven los textos nuevos."; $("pubPin").value=""; }
-    else { m.className="bad-txt"; m.textContent = r.status===401 ? "PIN incorrecto." : r.status===429 ? "Demasiados intentos. Probá en una hora." : "No se pudo publicar ("+(j.error||r.status)+")."; }
+    else { m.className="bad-txt"; m.textContent = r.status===401 ? "PIN incorrecto." : r.status===500 && j.error ? "Error del servidor: "+j.error+"." : r.status===429 ? "Demasiados intentos. Probá en una hora." : "No se pudo publicar ("+(j.error||r.status)+")."; }
   }catch(_){ m.className="bad-txt"; m.textContent="No se pudo publicar. Revisá la conexión."; }
 }
 function validateConfig(c){
