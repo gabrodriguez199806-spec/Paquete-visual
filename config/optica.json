@@ -14,7 +14,8 @@
       "ess": "Es lo que te asegura ver bien en tu día a día.",
       "rec": "Por lo que nos contaste, te va a servir mucho.",
       "opt": "No es imprescindible, pero te suma según lo que nos contaste."
-    }
+    },
+    "iaProxy": "https://paquete-visual.gab-rodriguez199806.workers.dev"
   },
   "momentos": [
     {

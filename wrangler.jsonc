@@ -1,0 +1,10 @@
+// Cloudflare Worker: intermediario para leer recetas con Gemini (ver worker/worker.js)
+{
+  "name": "paquete-visual",
+  "main": "worker/worker.js",
+  "compatibility_date": "2026-09-01",
+  "keep_vars": true,
+  "vars": {
+    "ALLOWED_ORIGINS": "https://gabrodriguez199806-spec.github.io"
+  }
+}

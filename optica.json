@@ -1,0 +1,1770 @@
+{
+  "version": 6,
+  "optica": {
+    "nombre": "Óptica Rodriguez",
+    "whatsapp": "5491162762199",
+    "contacto": "Hola! Me llamo {nombre}, tengo {edad} años y este es mi plan visual que armé en la web de {optica}.",
+    "intro": "Así como no usás el mismo calzado para una fiesta, para correr y para caminar, tu vista también rinde mejor con la solución justa para cada momento.",
+    "saludo": "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
+    "legal": "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día. Los productos exactos se eligen en la óptica según tu graduación.",
+    "maxSugerencias": 4,
+    "puntosMinimos": 3,
+    "puntosRecomendado": 6,
+    "porque": {
+      "ess": "Es lo que te asegura ver bien en tu día a día.",
+      "rec": "Por lo que nos contaste, te va a servir mucho.",
+      "opt": "No es imprescindible, pero te suma según lo que nos contaste."
+    },
+    "iaProxy": "https://paquete-visual.gab-rodriguez199806.workers.dev"
+  },
+  "momentos": [
+    {
+      "id": "dia",
+      "nombre": "Para todo el día"
+    },
+    {
+      "id": "trabajo",
+      "nombre": "Para estudiar, trabajar y pantallas"
+    },
+    {
+      "id": "manejo",
+      "nombre": "Para manejar"
+    },
+    {
+      "id": "sol",
+      "nombre": "Al sol y al aire libre"
+    },
+    {
+      "id": "deporte",
+      "nombre": "Para hacer deporte"
+    },
+    {
+      "id": "salidas",
+      "nombre": "Para salir y eventos"
+    },
+    {
+      "id": "cerca",
+      "nombre": "Para leer y hobbies"
+    },
+    {
+      "id": "repuesto",
+      "nombre": "Por las dudas"
+    }
+  ],
+  "preguntas": [
+    {
+      "id": "pantallas",
+      "texto": "¿Cuántas horas por día mirás pantallas?",
+      "ayuda": "PC, celular, tablet, consola",
+      "opciones": [
+        [
+          "0-2",
+          "Menos de 2"
+        ],
+        [
+          "2-5",
+          "2 a 5"
+        ],
+        [
+          "5-8",
+          "5 a 8"
+        ],
+        [
+          "8+",
+          "Más de 8"
+        ]
+      ]
+    },
+    {
+      "id": "trabajo",
+      "multiple": true,
+      "texto": "¿Qué hacés la mayor parte del día?",
+      "opciones": [
+        [
+          "pc",
+          "Oficina / PC"
+        ],
+        [
+          "aire",
+          "Trabajo al aire libre"
+        ],
+        [
+          "chofer",
+          "Manejo (chofer, reparto)"
+        ],
+        [
+          "taller",
+          "Taller, obra o laboratorio"
+        ],
+        [
+          "publico",
+          "Docencia / atención al público"
+        ],
+        [
+          "precision",
+          "Oficio de precisión (costura, electrónica)"
+        ],
+        [
+          "estudio",
+          "Estudio"
+        ],
+        [
+          "casa",
+          "Casa / jubilado"
+        ]
+      ]
+    },
+    {
+      "id": "dist",
+      "multiple": true,
+      "texto": "¿Dónde necesitás ver bien sí o sí?",
+      "opciones": [
+        [
+          "lejos",
+          "Lejos (calle, tele, pizarrón)"
+        ],
+        [
+          "inter",
+          "Intermedia (PC, tablero, cocina)"
+        ],
+        [
+          "cerca",
+          "Cerca (celular, leer, coser)"
+        ]
+      ]
+    },
+    {
+      "id": "maneja",
+      "texto": "¿Manejás?",
+      "opciones": [
+        [
+          "no",
+          "No"
+        ],
+        [
+          "dia",
+          "Sí, de día"
+        ],
+        [
+          "noche",
+          "También de noche"
+        ],
+        [
+          "trabajo",
+          "Por trabajo"
+        ]
+      ]
+    },
+    {
+      "id": "maneja_frec",
+      "si": "maneja_si",
+      "texto": "¿Cada cuánto manejás?",
+      "opciones": [
+        [
+          "ocasional",
+          "De vez en cuando"
+        ],
+        [
+          "semanal",
+          "Varias veces por semana"
+        ],
+        [
+          "diario",
+          "Todos los días"
+        ]
+      ]
+    },
+    {
+      "id": "luz",
+      "multiple": true,
+      "texto": "¿Algo de la luz te molesta?",
+      "opciones": [
+        [
+          "sol",
+          "El sol, me achino"
+        ],
+        [
+          "noche",
+          "Las luces de noche me encandilan"
+        ],
+        [
+          "fatiga",
+          "Termino el día con la vista cansada"
+        ],
+        [
+          "nada",
+          "Nada"
+        ]
+      ],
+      "exclusivas": [
+        "nada"
+      ]
+    },
+    {
+      "id": "aire",
+      "texto": "¿Cuánto tiempo pasás al aire libre?",
+      "opciones": [
+        [
+          "poco",
+          "Poco"
+        ],
+        [
+          "medio",
+          "1 a 3 horas"
+        ],
+        [
+          "mucho",
+          "Más de 3 horas"
+        ]
+      ]
+    },
+    {
+      "id": "osc",
+      "texto": "¿Te gustaría que tu anteojo de todos los días se oscurezca al sol?",
+      "opciones": [
+        [
+          "si",
+          "Sí"
+        ],
+        [
+          "no",
+          "No"
+        ],
+        [
+          "nose",
+          "No sé"
+        ]
+      ]
+    },
+    {
+      "id": "deporte",
+      "multiple": true,
+      "texto": "¿Hacés deporte?",
+      "opciones": [
+        [
+          "no",
+          "No"
+        ],
+        [
+          "gym",
+          "Gimnasio"
+        ],
+        [
+          "run",
+          "Running / caminata"
+        ],
+        [
+          "bici",
+          "Bici"
+        ],
+        [
+          "pelota",
+          "Fútbol / pádel / tenis"
+        ],
+        [
+          "agua",
+          "Natación"
+        ],
+        [
+          "nieve",
+          "Esquí / nieve"
+        ],
+        [
+          "pesca",
+          "Pesca / náutica"
+        ]
+      ],
+      "exclusivas": [
+        "no"
+      ]
+    },
+    {
+      "id": "deporte_frec",
+      "si": "deporte_activo or \"agua\" in deporte",
+      "texto": "¿Cada cuánto hacés deporte?",
+      "opciones": [
+        [
+          "ocasional",
+          "De vez en cuando"
+        ],
+        [
+          "semanal",
+          "1 o 2 veces por semana"
+        ],
+        [
+          "seguido",
+          "3 veces o más por semana"
+        ]
+      ]
+    },
+    {
+      "id": "actividades",
+      "multiple": true,
+      "texto": "¿Qué más hacés en tu tiempo libre?",
+      "opciones": [
+        [
+          "eventos",
+          "Salidas y eventos"
+        ],
+        [
+          "playa",
+          "Playa, pileta y vacaciones"
+        ],
+        [
+          "lectura",
+          "Leer mucho"
+        ],
+        [
+          "manualidades",
+          "Manualidades, costura, maquetas"
+        ],
+        [
+          "gaming",
+          "Videojuegos"
+        ],
+        [
+          "nada",
+          "Nada en especial"
+        ]
+      ],
+      "exclusivas": [
+        "nada"
+      ]
+    },
+    {
+      "id": "lc",
+      "si": "lc_edad_ok and ofrece_lc",
+      "texto": "¿Usás o te interesan los lentes de contacto?",
+      "opciones": [
+        [
+          "uso",
+          "Ya uso"
+        ],
+        [
+          "interes",
+          "Me interesan"
+        ],
+        [
+          "no",
+          "No"
+        ]
+      ]
+    },
+    {
+      "id": "tiene",
+      "texto": "¿Qué anteojos tenés hoy?",
+      "opciones": [
+        [
+          "ninguno",
+          "Ninguno"
+        ],
+        [
+          "uno",
+          "Uno solo"
+        ],
+        [
+          "viejo",
+          "Uno viejo o rayado"
+        ],
+        [
+          "varios",
+          "Varios"
+        ]
+      ]
+    },
+    {
+      "id": "importa",
+      "texto": "¿Qué es lo que más te importa?",
+      "opciones": [
+        [
+          "estetica",
+          "Verme bien"
+        ],
+        [
+          "confort",
+          "Comodidad todo el día"
+        ],
+        [
+          "dura",
+          "Que dure"
+        ],
+        [
+          "precio",
+          "Cuidar el presupuesto"
+        ]
+      ]
+    }
+  ],
+  "derivados": {
+    "oscurece": "osc == \"si\" or (osc != \"no\" and (\"sol\" in luz or aire == \"mucho\" or \"aire\" in trabajo))",
+    "usa_pc": "\"pc\" in trabajo or \"estudio\" in trabajo or pantallas in [\"5-8\",\"8+\"] or \"gaming\" in actividades",
+    "filtro_azul": "(usa_pc or \"fatiga\" in luz) and not menor_miope",
+    "maneja_si": "maneja in [\"dia\",\"noche\",\"trabajo\"]",
+    "maneja_noche": "maneja in [\"noche\",\"trabajo\"] or (maneja_si and \"noche\" in luz)",
+    "maneja_mucho": "maneja == \"trabajo\" or maneja_frec in [\"semanal\",\"diario\"]",
+    "necesita_lejos_y_cerca": "add > 0 and (lejos or \"lejos\" in dist)",
+    "deporte_activo": "deporte in [\"run\",\"bici\",\"pelota\",\"nieve\",\"pesca\",\"gym\"]",
+    "deporte_exterior": "deporte in [\"run\",\"bici\",\"pelota\",\"nieve\",\"pesca\"]",
+    "deporte_seguido": "deporte_frec in [\"semanal\",\"seguido\"]",
+    "lc_edad_ok": "edad == null or edad >= 12",
+    "quiere_lc": "lc_edad_ok and lc in [\"uso\",\"interes\"]",
+    "astig_alto": "cil_max >= 1",
+    "graduacion_baja": "receta and potencia < 0.75 and not add > 0",
+    "menor_miope": "edad < 18 and miopia",
+    "nino_miope": "edad <= 12 and miopia",
+    "adolescente_miope": "menor_miope and edad > 12",
+    "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)"
+  },
+  "especialidades": [
+    {
+      "id": "lc",
+      "nombre": "Lentes de contacto"
+    },
+    {
+      "id": "control_miopia",
+      "nombre": "Control de miopía"
+    },
+    {
+      "id": "seguridad",
+      "nombre": "Anteojos de seguridad"
+    },
+    {
+      "id": "deportivo",
+      "nombre": "Anteojos deportivos y protectores"
+    },
+    {
+      "id": "antiparras",
+      "nombre": "Antiparras graduadas"
+    }
+  ],
+  "productos": [
+    {
+      "id": "vision_simple",
+      "nombre": "Visión simple",
+      "detalle": "Un solo foco: la graduación de tu receta en todo el cristal"
+    },
+    {
+      "id": "vision_cerca",
+      "nombre": "Visión simple de cerca",
+      "detalle": "Toda la superficie para leer, el celular o coser"
+    },
+    {
+      "id": "multifocal",
+      "nombre": "Multifocal",
+      "detalle": "Lejos, intermedio y cerca en un solo cristal, sin línea"
+    },
+    {
+      "id": "bifocal",
+      "nombre": "Bifocal",
+      "detalle": "Dos zonas: lejos arriba y cerca abajo"
+    },
+    {
+      "id": "ocupacional",
+      "nombre": "Ocupacional",
+      "detalle": "Campo ancho para la compu y el escritorio"
+    },
+    {
+      "id": "ar",
+      "nombre": "Antirreflejo",
+      "detalle": "Menos reflejos y encandilamiento, mejor visión de noche"
+    },
+    {
+      "id": "blue",
+      "nombre": "Filtro de luz azul",
+      "detalle": "Más descanso cuando pasás muchas horas frente a pantallas"
+    },
+    {
+      "id": "foto",
+      "nombre": "Fotocromático",
+      "detalle": "Se oscurece al sol y se aclara adentro"
+    },
+    {
+      "id": "polar",
+      "nombre": "Polarizado",
+      "detalle": "Corta el reflejo del asfalto, el agua y la nieve"
+    },
+    {
+      "id": "espejado",
+      "nombre": "Espejado",
+      "detalle": "Para luz muy intensa: playa o nieve"
+    },
+    {
+      "id": "alto_indice",
+      "nombre": "Alto índice",
+      "detalle": "Cristal más fino y liviano para graduaciones altas"
+    },
+    {
+      "id": "contraste",
+      "nombre": "Mayor contraste",
+      "detalle": "Para manejar de noche o con poca luz"
+    },
+    {
+      "id": "control_miopia",
+      "especialidad": "control_miopia",
+      "nombre": "Cristal de control de miopía",
+      "detalle": "Diseñado para ayudar a frenar el avance de la miopía en chicos, según indicación del oftalmólogo"
+    },
+    {
+      "id": "lc_control_miopia",
+      "especialidad": [
+        "lc",
+        "control_miopia"
+      ],
+      "nombre": "Lentes de contacto de control de miopía",
+      "detalle": "Alternativa al cristal para frenar el avance de la miopía, según indicación del oftalmólogo"
+    },
+    {
+      "id": "policarbonato",
+      "nombre": "Policarbonato",
+      "detalle": "Irrompible: para deporte, chicos y seguridad"
+    },
+    {
+      "id": "envolvente",
+      "nombre": "Armazón envolvente",
+      "detalle": "No se mueve y protege de costado"
+    },
+    {
+      "id": "proteccion_lateral",
+      "especialidad": "seguridad",
+      "nombre": "Protecciones laterales",
+      "detalle": "Anteojo de seguridad con norma"
+    },
+    {
+      "id": "clip",
+      "especialidad": "deportivo",
+      "nombre": "Clip óptico",
+      "detalle": "Tu graduación adentro de la máscara o antiparra"
+    },
+    {
+      "id": "antiparra",
+      "especialidad": "antiparras",
+      "nombre": "Antiparra graduada",
+      "detalle": "Para ver bien en la pileta"
+    },
+    {
+      "id": "mismas",
+      "nombre": "Mismas tecnologías que tu anteojo principal",
+      "detalle": "Otro estilo de armazón para combinar"
+    },
+    {
+      "id": "lc_diarias",
+      "especialidad": "lc",
+      "nombre": "Lentes de contacto diarias",
+      "detalle": "Se usan un día y se descartan"
+    },
+    {
+      "id": "lc_mensuales",
+      "especialidad": "lc",
+      "nombre": "Lentes de contacto mensuales",
+      "detalle": "Para uso diario, con solución"
+    },
+    {
+      "id": "lc_torica",
+      "especialidad": "lc",
+      "nombre": "Lentes de contacto tóricas",
+      "detalle": "Para astigmatismo"
+    }
+  ],
+  "sugerencias": [
+    {
+      "id": "lejos_cerca",
+      "momento": "dia",
+      "nombre": "Ver bien de lejos y de cerca",
+      "prioridad": "ess",
+      "cuando": "necesita_lejos_y_cerca",
+      "motivos": [
+        {
+          "texto": "Tu receta tiene adición: necesitás una corrección para lejos y otra para cerca."
+        },
+        {
+          "si": "maneja == \"noche\" or \"noche\" in luz",
+          "texto": "Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."
+        },
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "texto": "Nos dijiste que pasás {pantallas} h por día frente a pantallas."
+        },
+        {
+          "si": "tiene in [\"viejo\",\"ninguno\"]",
+          "texto": "Hoy no tenés un anteojo en buen estado."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "multi",
+          "nombre": "Multifocal",
+          "explicacion": "Un solo anteojo para lejos, intermedio y cerca, sin línea. Es lo más cómodo; lleva unos días de adaptación.",
+          "pares": [
+            {
+              "nombre": "Multifocal",
+              "tecnologias": [
+                {
+                  "id": "multifocal"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue",
+                  "si": "filtro_azul"
+                },
+                {
+                  "id": "foto",
+                  "si": "oscurece"
+                },
+                {
+                  "id": "alto_indice",
+                  "si": "potencia >= 6"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bifocal",
+          "nombre": "Bifocal",
+          "explicacion": "Un solo anteojo con dos zonas: lejos arriba y cerca abajo. Se ve la línea y no tiene zona para la compu.",
+          "pares": [
+            {
+              "nombre": "Bifocal",
+              "tecnologias": [
+                {
+                  "id": "bifocal"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "foto",
+                  "si": "oscurece"
+                },
+                {
+                  "id": "alto_indice",
+                  "si": "potencia >= 6"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dos",
+          "nombre": "Dos anteojos (lejos + cerca)",
+          "explicacion": "Uno para lejos y otro para cerca. Campo amplio en cada uno, pero hay que cambiarlos según lo que hagas.",
+          "pares": [
+            {
+              "nombre": "Lejos",
+              "tecnologias": [
+                {
+                  "id": "vision_simple"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue",
+                  "si": "filtro_azul"
+                },
+                {
+                  "id": "foto",
+                  "si": "oscurece"
+                },
+                {
+                  "id": "alto_indice",
+                  "si": "potencia >= 6"
+                }
+              ]
+            },
+            {
+              "nombre": "Cerca",
+              "tecnologias": [
+                {
+                  "id": "vision_cerca"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue",
+                  "si": "filtro_azul"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "principal",
+      "momento": "dia",
+      "nombre": "Anteojo para todo el día",
+      "prioridad": "ess",
+      "cuando": "receta and lejos and not add > 0",
+      "motivos": [
+        {
+          "si": "miopia",
+          "texto": "Lo necesitás para ver de lejos: calle, tele, caras."
+        },
+        {
+          "si": "not miopia",
+          "texto": "Es la corrección que indicó tu oftalmólogo, para usar todo el día."
+        },
+        {
+          "si": "maneja == \"noche\" or \"noche\" in luz",
+          "texto": "Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."
+        },
+        {
+          "si": "filtro_azul",
+          "texto": "Nos dijiste que pasás {pantallas} h por día frente a pantallas: suma filtro de luz azul."
+        },
+        {
+          "si": "oscurece",
+          "texto": "Querés que se oscurezca al sol: va fotocromático."
+        },
+        {
+          "si": "potencia >= 6",
+          "texto": "Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."
+        },
+        {
+          "si": "nino_miope and ofrece_control_miopia",
+          "texto": "Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."
+        },
+        {
+          "si": "nino_miope and not ofrece_control_miopia",
+          "texto": "Con miopía y menos de 18 años, va sin filtro azul."
+        },
+        {
+          "si": "adolescente_miope",
+          "texto": "Con miopía y menos de 18 años, va sin filtro azul."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Anteojo",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "vision_simple"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue",
+                  "si": "filtro_azul"
+                },
+                {
+                  "id": "foto",
+                  "si": "oscurece"
+                },
+                {
+                  "id": "alto_indice",
+                  "si": "potencia >= 6"
+                },
+                {
+                  "id": "control_miopia",
+                  "si": "nino_miope"
+                },
+                {
+                  "id": "policarbonato",
+                  "si": "edad < 12"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "solo_cerca",
+      "momento": "dia",
+      "nombre": "Anteojo de cerca",
+      "prioridad": "ess",
+      "cuando": "add > 0 and not lejos and not \"lejos\" in dist",
+      "motivos": [
+        {
+          "texto": "Tu receta es para cerca: leer, celular, coser."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Cerca",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "vision_cerca"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue",
+                  "si": "filtro_azul"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lc_diario",
+      "momento": "dia",
+      "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Lentes de contacto de uso diario",
+      "cuando": "quiere_lc and lc == \"uso\"",
+      "puntos": [
+        {
+          "n": 7
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Ya usás lentes de contacto: reposición y solución."
+        },
+        {
+          "si": "astig_alto",
+          "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Lentes de contacto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_torica",
+                  "si": "astig_alto"
+                },
+                {
+                  "id": "lc_mensuales",
+                  "si": "not astig_alto"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lc_alternativa",
+      "momento": "dia",
+      "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Lentes de contacto como alternativa al anteojo",
+      "cuando": "lc_candidato and lc != \"no\" and lc != \"uso\"",
+      "puntos": [
+        {
+          "n": 3
+        },
+        {
+          "si": "quiere_lc",
+          "n": 3
+        },
+        {
+          "si": "deporte_activo",
+          "n": 1
+        },
+        {
+          "si": "\"eventos\" in actividades",
+          "n": 1
+        },
+        {
+          "si": "importa == \"estetica\"",
+          "n": 1
+        },
+        {
+          "si": "potencia >= 3",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Tu graduación supera 0.75: con lentes de contacto ves completo, sin el marco y sin que se empañen."
+        },
+        {
+          "si": "deporte_activo",
+          "texto": "Ideales para hacer deporte sin anteojo."
+        },
+        {
+          "si": "\"eventos\" in actividades",
+          "texto": "Para salidas y eventos, sin anteojo."
+        },
+        {
+          "si": "astig_alto",
+          "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Lentes de contacto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_torica",
+                  "si": "astig_alto"
+                },
+                {
+                  "id": "lc_mensuales",
+                  "si": "not astig_alto"
+                },
+                {
+                  "id": "lc_diarias"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lc_miopia",
+      "momento": "dia",
+      "especialidad": "control_miopia",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Control de miopía",
+      "cuando": "menor_miope and edad >= 8",
+      "puntos": [
+        {
+          "si": "nino_miope",
+          "n": 6
+        },
+        {
+          "si": "adolescente_miope",
+          "n": 3
+        },
+        {
+          "si": "deporte_activo",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "si": "nino_miope",
+          "texto": "Con {edad} años y miopía: en la edad de crecimiento la miopía suele avanzar."
+        },
+        {
+          "si": "nino_miope",
+          "texto": "Los lentes de contacto de control de miopía son otra opción, además del cristal."
+        },
+        {
+          "si": "adolescente_miope",
+          "texto": "Con {edad} años el control de miopía todavía se puede usar, aunque rinde más hasta los 12."
+        },
+        {
+          "texto": "Siempre con indicación y control del oftalmólogo."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "cristal",
+          "si": "adolescente_miope",
+          "nombre": "Cristal de control de miopía",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "control_miopia"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lc",
+          "nombre": "Lentes de contacto de control de miopía",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_control_miopia"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ocup",
+      "momento": "trabajo",
+      "nombre": "Anteojo ocupacional para la compu",
+      "cuando": "add > 0 and usa_pc",
+      "puntos": [
+        {
+          "n": 2
+        },
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "n": 3
+        },
+        {
+          "si": "pantallas == \"8+\"",
+          "n": 1
+        },
+        {
+          "si": "\"fatiga\" in luz",
+          "n": 2
+        },
+        {
+          "si": "\"pc\" in trabajo",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Para la compu, el ocupacional da un campo ancho de pantalla y escritorio que el multifocal y el bifocal no tienen."
+        },
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "texto": "Nos dijiste que pasás {pantallas} h por día frente a pantallas."
+        },
+        {
+          "si": "\"fatiga\" in luz",
+          "texto": "Terminás el día con la vista cansada."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Ocupacional",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "ocupacional"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pantalla",
+      "momento": "trabajo",
+      "nombre": "Anteojo para pantallas",
+      "cuando": "receta and lejos and not add > 0 and usa_pc and oscurece and not menor_miope",
+      "puntos": [
+        {
+          "n": 2
+        },
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "n": 2
+        },
+        {
+          "si": "\"gaming\" in actividades",
+          "n": 1
+        },
+        {
+          "si": "oscurece",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "si": "oscurece",
+          "texto": "Tu anteojo de todos los días se oscurece al sol: para la compu conviene un segundo par claro con filtro azul."
+        },
+        {
+          "si": "\"gaming\" in actividades",
+          "texto": "Jugás videojuegos: muchas horas de pantalla seguidas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Pantallas",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "vision_simple"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "blue"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seguridad",
+      "momento": "trabajo",
+      "especialidad": "seguridad",
+      "nombre": "Anteojo de seguridad graduado",
+      "cuando": "receta and \"taller\" in trabajo",
+      "puntos": [
+        {
+          "n": 8
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Trabajás en taller, obra o laboratorio: tu anteojo común no protege de golpes ni partículas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Seguridad",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "proteccion_lateral"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "manejo",
+      "momento": "manejo",
+      "nombre": "Anteojos para manejar",
+      "cuando": "receta and maneja_si",
+      "puntos": [
+        {
+          "n": 1
+        },
+        {
+          "si": "maneja_mucho",
+          "n": 3
+        },
+        {
+          "si": "maneja == \"trabajo\" or maneja_frec == \"diario\"",
+          "n": 2
+        },
+        {
+          "si": "maneja_noche",
+          "n": 2
+        },
+        {
+          "si": "\"noche\" in luz or \"sol\" in luz",
+          "n": 1
+        },
+        {
+          "si": "oscurece",
+          "n": 1
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -3
+        }
+      ],
+      "motivos": [
+        {
+          "si": "maneja_frec",
+          "texto": "Nos dijiste que manejás {maneja_frec}."
+        },
+        {
+          "si": "maneja == \"trabajo\"",
+          "texto": "Manejás por trabajo: muchas horas al volante."
+        },
+        {
+          "texto": "De día, el polarizado corta el reflejo del asfalto y del parabrisas."
+        },
+        {
+          "si": "maneja_noche",
+          "texto": "De noche, un cristal con antirreflejo y mayor contraste encandila menos."
+        },
+        {
+          "si": "oscurece",
+          "texto": "Los fotocromáticos se oscurecen poco dentro del auto, porque el parabrisas filtra el UV."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Manejo",
+          "pares": [
+            {
+              "nombre": "De día",
+              "tecnologias": [
+                {
+                  "id": "polar"
+                },
+                {
+                  "id": "alto_indice",
+                  "si": "potencia >= 6"
+                }
+              ]
+            },
+            {
+              "nombre": "De noche",
+              "si": "maneja_noche",
+              "tecnologias": [
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "contraste"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sol",
+      "momento": "sol",
+      "nombre": "Anteojo de sol graduado",
+      "cuando": "receta and not maneja_si",
+      "puntos": [
+        {
+          "si": "\"sol\" in luz",
+          "n": 2
+        },
+        {
+          "si": "aire == \"mucho\"",
+          "n": 3
+        },
+        {
+          "si": "aire == \"medio\"",
+          "n": 1
+        },
+        {
+          "si": "\"playa\" in actividades",
+          "n": 2
+        },
+        {
+          "si": "\"aire\" in trabajo",
+          "n": 3
+        },
+        {
+          "si": "oscurece",
+          "n": -3
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -2
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"sol\" in luz",
+          "texto": "Nos dijiste que el sol te molesta."
+        },
+        {
+          "si": "aire in [\"medio\",\"mucho\"]",
+          "texto": "Pasás {aire} al aire libre por día."
+        },
+        {
+          "si": "\"playa\" in actividades",
+          "texto": "Playa, pileta y vacaciones: ver bien y proteger los ojos del sol."
+        },
+        {
+          "si": "\"aire\" in trabajo",
+          "texto": "Trabajás al aire libre."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Sol",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "polar"
+                },
+                {
+                  "id": "espejado",
+                  "si": "\"playa\" in actividades"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deportivo",
+      "momento": "deporte",
+      "especialidad": "deportivo",
+      "nombre": "Anteojo deportivo graduado",
+      "cuando": "receta and deporte_exterior",
+      "puntos": [
+        {
+          "n": 1
+        },
+        {
+          "si": "deporte_seguido",
+          "n": 3
+        },
+        {
+          "si": "deporte_frec == \"seguido\"",
+          "n": 1
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "n": 3
+        },
+        {
+          "si": "\"nieve\" in deporte",
+          "n": 2
+        },
+        {
+          "si": "quiere_lc",
+          "n": -2
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -3
+        }
+      ],
+      "motivos": [
+        {
+          "si": "deporte_frec",
+          "texto": "Nos dijiste que hacés deporte {deporte_frec}."
+        },
+        {
+          "si": "deporte in [\"run\",\"bici\"]",
+          "texto": "Corrés, caminás o andás en bici: envolvente, liviano y que no se mueva."
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "texto": "Jugás con pelota o raqueta: tu anteojo común se puede romper y lastimarte."
+        },
+        {
+          "si": "\"nieve\" in deporte",
+          "texto": "En la nieve la luz es muy fuerte: máscara con tu graduación adentro."
+        },
+        {
+          "si": "\"pesca\" in deporte",
+          "texto": "Pesca o náutica: el polarizado deja ver a través del reflejo del agua."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Deportivo",
+          "pares": [
+            {
+              "nombre": "Correr / bici",
+              "si": "deporte in [\"run\",\"bici\"]",
+              "tecnologias": [
+                {
+                  "id": "envolvente"
+                },
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "foto"
+                }
+              ]
+            },
+            {
+              "nombre": "Deportes con pelota",
+              "si": "\"pelota\" in deporte",
+              "tecnologias": [
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "envolvente"
+                }
+              ]
+            },
+            {
+              "nombre": "Nieve",
+              "si": "\"nieve\" in deporte",
+              "tecnologias": [
+                {
+                  "id": "clip"
+                },
+                {
+                  "id": "espejado"
+                }
+              ]
+            },
+            {
+              "nombre": "Agua",
+              "si": "\"pesca\" in deporte",
+              "tecnologias": [
+                {
+                  "id": "polar"
+                },
+                {
+                  "id": "envolvente"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lc_deporte",
+      "momento": "deporte",
+      "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Lentes de contacto para hacer deporte",
+      "cuando": "deporte_activo and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
+      "puntos": [
+        {
+          "n": 1
+        },
+        {
+          "si": "quiere_lc",
+          "n": 2
+        },
+        {
+          "si": "deporte_seguido",
+          "n": 2
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "n": 2
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -2
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Para entrenar sin anteojo: no se empañan, no se mueven y ves todo el campo."
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "texto": "Con pelota o raqueta son más seguros que un anteojo común."
+        },
+        {
+          "si": "astig_alto",
+          "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Lentes de contacto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_diarias"
+                },
+                {
+                  "id": "lc_torica",
+                  "si": "astig_alto"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "antiparra",
+      "momento": "deporte",
+      "especialidad": "antiparras",
+      "nombre": "Antiparras graduadas",
+      "cuando": "receta and (\"agua\" in deporte or \"playa\" in actividades)",
+      "puntos": [
+        {
+          "si": "\"agua\" in deporte",
+          "n": 3
+        },
+        {
+          "si": "\"agua\" in deporte and deporte_seguido",
+          "n": 3
+        },
+        {
+          "si": "\"playa\" in actividades",
+          "n": 1
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -3
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"agua\" in deporte",
+          "texto": "Nadás: en la pileta ves bien y cuidás el anteojo."
+        },
+        {
+          "si": "\"playa\" in actividades and not \"agua\" in deporte",
+          "texto": "Para la pileta en vacaciones."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Antiparras",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "antiparra"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lc_salidas",
+      "momento": "salidas",
+      "especialidad": "lc",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Lentes de contacto para salir",
+      "cuando": "\"eventos\" in actividades and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
+      "puntos": [
+        {
+          "n": 2
+        },
+        {
+          "si": "quiere_lc",
+          "n": 2
+        },
+        {
+          "si": "importa == \"estetica\"",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Para un casamiento, una fiesta o una foto, sin anteojo."
+        },
+        {
+          "si": "astig_alto",
+          "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Lentes de contacto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_diarias"
+                },
+                {
+                  "id": "lc_torica",
+                  "si": "astig_alto"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vestir",
+      "momento": "salidas",
+      "nombre": "Un segundo anteojo con otro estilo",
+      "cuando": "receta and (\"eventos\" in actividades or importa == \"estetica\")",
+      "puntos": [
+        {
+          "si": "\"eventos\" in actividades",
+          "n": 2
+        },
+        {
+          "si": "importa == \"estetica\"",
+          "n": 2
+        },
+        {
+          "si": "tiene == \"varios\"",
+          "n": -2
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -1
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Segundo anteojo",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "mismas"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cerca_extra",
+      "momento": "cerca",
+      "nombre": "Anteojo de cerca para leer y hobbies",
+      "cuando": "necesita_lejos_y_cerca",
+      "puntos": [
+        {
+          "si": "\"precision\" in trabajo or \"manualidades\" in actividades",
+          "n": 4
+        },
+        {
+          "si": "\"lectura\" in actividades",
+          "n": 3
+        },
+        {
+          "si": "edad >= 60",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"precision\" in trabajo or \"manualidades\" in actividades",
+          "texto": "Hacés trabajos de precisión o manualidades: un anteojo solo de cerca da el campo más amplio."
+        },
+        {
+          "si": "\"lectura\" in actividades",
+          "texto": "Leés mucho: el campo de lectura más cómodo, en la cama o el sillón."
+        },
+        {
+          "texto": "Si elegiste dos anteojos, este ya está incluido."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Cerca",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "vision_cerca"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "repuesto",
+      "momento": "repuesto",
+      "nombre": "Anteojo de repuesto",
+      "cuando": "receta",
+      "puntos": [
+        {
+          "si": "potencia >= 3",
+          "n": 3
+        },
+        {
+          "si": "potencia >= 6",
+          "n": 2
+        },
+        {
+          "si": "tiene in [\"ninguno\",\"uno\",\"viejo\"]",
+          "n": 1
+        },
+        {
+          "si": "tiene == \"varios\"",
+          "n": -4
+        },
+        {
+          "si": "graduacion_baja",
+          "n": -5
+        }
+      ],
+      "motivos": [
+        {
+          "texto": "Sin anteojo no ves bien: si se rompe, te quedás sin ver."
+        },
+        {
+          "texto": "Puede ser tu marco actual con cristales nuevos."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Repuesto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "vision_simple"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
