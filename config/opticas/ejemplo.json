@@ -1,0 +1,10 @@
+{
+  "optica": {
+    "nombre": "Óptica Ejemplo",
+    "whatsapp": "5491100000000",
+    "saludo": "Este es tu plan visual de Óptica Ejemplo: un anteojo para cada momento 👓",
+    "legal": "Óptica Ejemplo no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y lo que nos contaste. Los productos exactos se eligen en la óptica según tu graduación.",
+    "noOfrece": ["control_miopia"],
+    "pinHash": "cambiar"
+  }
+}

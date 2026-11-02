@@ -25,6 +25,15 @@ Es un solo archivo: `index.html`. No necesita servidor ni base de datos.
 
 Los datos del paciente quedan solo en esa pestaña y vencen a las 2 horas: cada vez que se abre el link arranca en blanco. La configuración local del modo óptica se guarda en el navegador.
 
+## Varias ópticas en el mismo sitio
+
+Cada óptica tiene su propio link: `https://<tu-sitio>/?o=codigo` (por ejemplo `?o=lopez`). La app carga `config/optica.json` (las reglas y sugerencias comunes) y encima `config/opticas/codigo.json`, con lo propio de esa óptica: nombre, WhatsApp, textos, PIN (`pinHash`) y lo que no ofrece (`noOfrece`). Ver `config/opticas/ejemplo.json`.
+
+- Las mejoras a las reglas les llegan a todas a la vez.
+- Si el código no existe, la app dice "Óptica no encontrada" y no muestra ningún WhatsApp.
+- El modo óptica y la configuración local se guardan por separado para cada código.
+- La lectura de recetas usa el mismo intermediario de Cloudflare.
+
 ## Configurar tu óptica
 
 La configuración oficial es el archivo **`config/optica.json`**: es la que ven todos los pacientes. Para cambiarla para todos, editá ese archivo en GitHub (o pedíselo a quien te instaló la app).
