@@ -8,15 +8,15 @@
     "saludo": "Este es tu plan visual de Óptica Rodriguez: un anteojo para cada momento 👓",
     "legal": "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día. Los productos exactos se eligen en la óptica según tu graduación.",
     "maxSugerencias": 4,
+    "iaProxy": "https://receta.gab-rodriguez199806.workers.dev",
+    "pinHash": "a8f00ae3",
     "puntosMinimos": 3,
     "puntosRecomendado": 6,
     "porque": {
       "ess": "Es lo que te asegura ver bien en tu día a día.",
       "rec": "Por lo que nos contaste, te va a servir mucho.",
       "opt": "No es imprescindible, pero te suma según lo que nos contaste."
-    },
-    "iaProxy": "https://receta.gab-rodriguez199806.workers.dev",
-    "pinHash": "a8f00ae3"
+    }
   },
   "momentos": [
     {
@@ -414,6 +414,7 @@
     "menor_miope": "edad < 18 and miopia",
     "nino_miope": "edad <= 12 and miopia",
     "adolescente_miope": "menor_miope and edad > 12",
+    "lc_anisometropia": "dif_graduacion >= 3 and lc_edad_ok",
     "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)"
   },
   "especialidades": [
@@ -812,6 +813,52 @@
       ]
     },
     {
+      "id": "lc_aniso",
+      "momento": "dia",
+      "especialidad": "lc",
+      "prioridad": "ess",
+      "alElegir": [
+        {
+          "si": "receta_tipo == \"anteojos\"",
+          "texto": "Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.",
+          "mensaje": "Mi receta no indica lentes de contacto: me interesa hacer la prueba."
+        }
+      ],
+      "nombre": "Lentes de contacto por la diferencia entre ojos",
+      "cuando": "lc_anisometropia",
+      "motivos": [
+        {
+          "texto": "Tu receta tiene {dif_graduacion} dioptrías de diferencia entre un ojo y el otro."
+        },
+        {
+          "texto": "Con el anteojo vas a ver, pero cada ojo ve la imagen de distinto tamaño y eso puede dar mareos. Con lentes de contacto esa diferencia casi desaparece."
+        },
+        {
+          "texto": "El anteojo igual lo necesitás para los momentos sin lentes de contacto."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Lentes de contacto",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "lc_torica",
+                  "si": "astig_alto"
+                },
+                {
+                  "id": "lc_mensuales",
+                  "si": "not astig_alto"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "lc_diario",
       "momento": "dia",
       "especialidad": "lc",
@@ -823,7 +870,7 @@
         }
       ],
       "nombre": "Lentes de contacto de uso diario",
-      "cuando": "quiere_lc and lc == \"uso\"",
+      "cuando": "(quiere_lc and lc == \"uso\") and not lc_anisometropia",
       "puntos": [
         {
           "n": 7
@@ -871,7 +918,7 @@
         }
       ],
       "nombre": "Lentes de contacto como alternativa al anteojo",
-      "cuando": "lc_candidato and lc != \"no\" and lc != \"uso\"",
+      "cuando": "(lc_candidato and lc != \"no\" and lc != \"uso\") and not lc_anisometropia",
       "puntos": [
         {
           "n": 3
@@ -1458,7 +1505,7 @@
         }
       ],
       "nombre": "Lentes de contacto para hacer deporte",
-      "cuando": "deporte_activo and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
+      "cuando": "(deporte_activo and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")) and not lc_anisometropia",
       "puntos": [
         {
           "n": 1
@@ -1575,7 +1622,7 @@
         }
       ],
       "nombre": "Lentes de contacto para salir",
-      "cuando": "\"eventos\" in actividades and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")",
+      "cuando": "(\"eventos\" in actividades and lc_edad_ok and lc != \"no\" and not menor_miope and not (lc_candidato and lc != \"uso\")) and not lc_anisometropia",
       "puntos": [
         {
           "n": 2

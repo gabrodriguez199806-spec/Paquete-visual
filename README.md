@@ -10,7 +10,7 @@ App web para ópticas que arma el **plan visual completo** de cada paciente, com
 
    Cada ítem dice **por qué es esencial, muy recomendado u opcional**, con las respuestas del paciente ("Nos dijiste que manejás todos los días"). Recomienda **funciones y tecnologías, sin marcas** (visión simple, antirreflejo, polarizado, control de miopía…): el producto exacto lo elige la óptica según la graduación. Se marca "empezamos por este" y se manda a la óptica por WhatsApp.
 
-   **Recomendaciones con criterio:** las preguntas de frecuencia aparecen solo si corresponden; cada sugerencia opcional suma puntos según las respuestas y la receta, y se muestran las 4 de más puntaje (el resto en "Ver más opciones"). Reglas incluidas: lentes de contacto con más peso si la graduación supera ±0.75; menores de 18 con miopía sin filtro azul; control de miopía (cristal o lente de contacto) recomendado hasta los 12 años y opcional de 13 a 17; alto índice solo desde graduación 6.
+   **Recomendaciones con criterio:** las preguntas de frecuencia aparecen solo si corresponden; cada sugerencia opcional suma puntos según las respuestas y la receta, y se muestran las 4 de más puntaje (el resto en "Ver más opciones"). Reglas incluidas: lentes de contacto en lo esencial si hay 3 dioptrías o más de diferencia entre ojos (evita mareos); lentes de contacto con más peso si la graduación supera ±0.75; menores de 18 con miopía sin filtro azul; control de miopía (cristal o lente de contacto) recomendado hasta los 12 años y opcional de 13 a 17; alto índice solo desde graduación 6.
 
 Es una **orientación**: no calcula precios ni armazones, eso se resuelve en el mostrador. Sirve en el mostrador o como autogestión del paciente (los textos le hablan de vos).
 
