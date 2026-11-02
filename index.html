@@ -286,6 +286,11 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
       <label class="f">Inicio del mensaje del paciente a la óptica ({nombre}, {edad} y {optica} se completan solos)<textarea id="c-contacto" rows="2"></textarea></label>
       <label class="f">Saludo del mensaje de la óptica al paciente<input id="c-saludo"></label>
       <label class="f">Texto legal al pie del plan<textarea id="c-legal" rows="2"></textarea></label>
+      <div id="pubBox" hidden>
+        <p class="note" style="margin:0">Las frases y el texto legal se ven en este equipo mientras los editás. Para que los vean tus pacientes, poné tu PIN y tocá Publicar.</p>
+        <div class="actions"><input id="pubPin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="max-width:120px"><button class="btn primary" id="pubBtn" type="button">Publicar</button></div>
+        <div id="pubMsg" class="note"></div>
+      </div>
     </section>
 
     <section class="card">
@@ -931,6 +936,12 @@ function all(){ header(); renderRead(); renderPlan(); updateWa(); $("copyBtn").h
 function renderCfg(){
   $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-whatsapp").value=C.optica.whatsapp||""; $("c-contacto").value=C.optica.contacto||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
   $("c-iaProxy").value=C.optica.iaProxy||""; $("c-prov").value=AI.prov||"claude"; $("c-key").value=AI.key||""; $("c-model").value=AI.model||""; $("c-model").placeholder=AI_DEF[AI.prov||"claude"];
+  if(SLUG){
+    // sucursales: solo editan frases y texto legal; el resto lo maneja quien administra la app
+    document.querySelectorAll("#viewCfg section.card").forEach(s=>{ s.hidden = !s.contains($("c-legal")) && !s.contains($("staffOut")); });
+    $("c-pin").closest("label").hidden = true; $("c-nombre").readOnly = $("c-whatsapp").readOnly = true;
+    $("pubBox").hidden = false; updPub();
+  }
   $("espList").innerHTML = (C.especialidades||[]).map(e=>`<label><input type="checkbox" data-esp="${esc(e.id)}" ${ofrece(e.id)?"checked":""}> ${esc(e.nombre)}</label>`).join("");
   $("prodRows").innerHTML = C.productos.map((p,i)=>`<tr>
     <td style="width:120px"><input class="code" id="pr-id-${i}" data-pi="${i}" data-pf="id" value="${esc(p.id)}"></td>
@@ -948,6 +959,18 @@ function renderCfg(){
     <div class="note">Momento: ${esc(((C.momentos||[]).find(m=>m.id===s.momento)||{nombre:"sin momento"}).nombre)} · ${s.soluciones.length} solucion${s.soluciones.length>1?"es":""}: ${s.soluciones.map(x=>esc(x.nombre)).join(" / ")}</div>
   </div>`; }).join("");
   $("cfgJson").value = JSON.stringify(C,null,2); $("cfgJsonMsg").textContent="";
+}
+const textosUrl = () => { try{ return C.optica.iaProxy ? new URL("textos", C.optica.iaProxy.replace(/\/?$/,"/")).toString() : ""; }catch(_){ return ""; } };
+function updPub(){}
+async function publicar(){
+  const m=$("pubMsg"), u=textosUrl(); if(!u){ m.textContent="Falta el intermediario."; return; }
+  const o=C.optica; m.className="note"; m.textContent="Publicando…";
+  try{
+    const r = await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({o:SLUG, pin:$("pubPin").value.trim(), textos:{intro:o.intro||"", contacto:o.contacto||"", saludo:o.saludo||"", legal:o.legal||""}})});
+    const j = await r.json().catch(()=>({}));
+    if(r.ok){ m.className="ok"; m.textContent="Publicado ✓ Tus pacientes ya ven los textos nuevos."; $("pubPin").value=""; }
+    else { m.className="bad-txt"; m.textContent = r.status===401 ? "PIN incorrecto." : r.status===429 ? "Demasiados intentos. Probá en una hora." : "No se pudo publicar ("+(j.error||r.status)+")."; }
+  }catch(_){ m.className="bad-txt"; m.textContent="No se pudo publicar. Revisá la conexión."; }
 }
 function validateConfig(c){
   if(!c || typeof c!=="object") return "No es un objeto JSON.";
@@ -981,7 +1004,7 @@ document.addEventListener("input", e=>{
   if(id==="c-pin"){ const v=t.value.trim(); if(v.length>=4){ C.optica.pinHash=hashPin(v); saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); } return; }
   if(id.startsWith("c-")){ const f=id.slice(2);
     if(f==="key"||f==="model"||f==="prov"){ AI[f]=t.value.trim(); LS.set("pv-ai",AI); if(f==="prov") $("c-model").placeholder=AI_DEF[AI.prov]; return; }
-    C.optica[f] = t.value; saveCfg(); header(); return; }
+    C.optica[f] = t.value; saveCfg(); header(); updPub(); return; }
   if(id==="cfgJson") return;
   // atención
   if(id.startsWith("p-")) S.pac[id.slice(2)]=t.value;
@@ -1015,6 +1038,7 @@ document.addEventListener("change", e=>{
   else return;
   all();
 });
+$("pubBtn").onclick = publicar;
 $("addProd").onclick = ()=>{ let n=1; while(prod("nuevo"+n)) n++; C.productos.push({id:"nuevo"+n, nombre:"Nuevo", detalle:""}); saveCfg(); renderCfg(); };
 $("applyJson").onclick = ()=>{
   const m=$("cfgJsonMsg"); let c;
@@ -1152,6 +1176,13 @@ if(!hasLocal()){
       if(!own.optica || !("iaProxy" in own.optica)) j.optica.iaProxy = (base||DEFAULT_CONFIG).optica.iaProxy;
     }
     if(j && !validateConfig(j)){ C=j; CC.clear(); route(); aiUI(); }
+    if(SLUG && textosUrl()){
+      fetch(textosUrl()+"?o="+SLUG,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(t=>{
+        const x=(t&&t.textos)||{}; let ch=false;
+        ["intro","contacto","saludo","legal"].forEach(k=>{ if(typeof x[k]==="string" && x[k].trim()){ C.optica[k]=x[k]; ch=true; } });
+        if(ch){ route(); }
+      }).catch(()=>{});
+    }
   });
 }
 })();

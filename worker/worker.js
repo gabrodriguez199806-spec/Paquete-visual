@@ -22,13 +22,14 @@ export default {
   async fetch(request, env) {
     // acepta los nombres de variables sin importar mayúsculas (GEMINI_KEY, Gemini_key, ALLOWED_ORIGINS, Allowed_origins…)
     const pick = re => { const k = Object.keys(env || {}).find(k => re.test(k)); return k ? String(env[k]) : ""; };
-    env = { GEMINI_KEY: pick(/^gemini/i), ALLOWED_ORIGINS: pick(/origin/i), MODEL: pick(/^model$/i) };
+    const KV = env.TEXTOS || null;
+    env = { GEMINI_KEY: pick(/^gemini/i), ALLOWED_ORIGINS: pick(/origin/i), MODEL: pick(/^model$/i), PINES: pick(/^pines$/i) };
     const origin = request.headers.get("Origin") || "";
     const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim().replace(/\/+$/, "")).filter(Boolean);
     const ok = allowed.includes(origin);
     const cors = {
       "Access-Control-Allow-Origin": ok ? origin : "null",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "content-type",
       "Vary": "Origin"
     };
@@ -36,6 +37,8 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { status: ok ? 204 : 403, headers: cors });
     if (!ok) return out({ error: "origen no permitido" }, 403);
+    const path = new URL(request.url).pathname.replace(/\/+$/, "");
+    if (path === "/textos") return textos(request, env, KV, out);
     if (request.method !== "POST") return out({ error: "solo POST" }, 405);
     if (!env.GEMINI_KEY) return out({ error: "falta GEMINI_KEY" }, 500);
 
@@ -61,3 +64,34 @@ export default {
     return out({ text });
   }
 };
+
+/* Textos propios de cada sucursal (frases y texto legal), guardados en KV.
+   GET  /textos?o=codigo                      -> { textos }
+   POST /textos { o, pin, textos:{...} }      -> guarda; el PIN se compara con el secreto PINES
+   PINES: "codigo:pin,codigo2:pin2" (secreto del Worker). */
+const CAMPOS = ["intro", "contacto", "saludo", "legal"];
+async function textos(request, env, KV, out) {
+  if (!KV) return out({ error: "falta el almacenamiento TEXTOS" }, 500);
+  const slugOk = s => /^[a-z0-9-]{1,40}$/.test(s);
+  if (request.method === "GET") {
+    const o = new URL(request.url).searchParams.get("o") || "";
+    if (!slugOk(o)) return out({ error: "código inválido" }, 400);
+    return out({ textos: (await KV.get("textos:" + o, "json")) || {} });
+  }
+  if (request.method !== "POST") return out({ error: "método no permitido" }, 405);
+  let b; try { b = await request.json(); } catch { return out({ error: "JSON inválido" }, 400); }
+  const o = String(b.o || "");
+  if (!slugOk(o)) return out({ error: "código inválido" }, 400);
+  const failKey = "fallos:" + o;
+  const fallos = Number(await KV.get(failKey)) || 0;
+  if (fallos >= 5) return out({ error: "demasiados intentos, probá en una hora" }, 429);
+  const pines = Object.fromEntries(env.PINES.split(",").map(x => x.trim().split(":")).filter(x => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+  if (!pines[o] || String(b.pin || "") !== pines[o]) {
+    await KV.put(failKey, String(fallos + 1), { expirationTtl: 3600 });
+    return out({ error: "PIN incorrecto" }, 401);
+  }
+  const t = {};
+  for (const k of CAMPOS) if (typeof b.textos?.[k] === "string") t[k] = b.textos[k].slice(0, 800);
+  await KV.put("textos:" + o, JSON.stringify(t));
+  return out({ ok: true, textos: t });
+}
