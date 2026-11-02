@@ -338,6 +338,10 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
         <label class="f">Clave API<input id="c-key" type="password" autocomplete="off" placeholder="Clave del proveedor"></label>
         <label class="f">Modelo<input id="c-model" placeholder="claude-sonnet-5-5"></label>
       </div>
+      <p class="note" style="margin:0">Para los pacientes: la dirección de tu intermediario de Cloudflare (ver <code class="code">worker/</code> en el repositorio). Se guarda en la configuración oficial; la clave no, queda escondida en Cloudflare.</p>
+      <div class="row">
+        <label class="f">Intermediario para pacientes<input id="c-iaProxy" placeholder="https://receta.tu-cuenta.workers.dev"></label>
+      </div>
     </section>
   </div>
   <p class="foot"><a href="#config" id="staffLink">Acceso óptica</a></p>
@@ -913,7 +917,7 @@ function all(){ header(); renderRead(); renderPlan(); updateWa(); $("copyBtn").h
    ========================================================= */
 function renderCfg(){
   $("c-nombre").value=C.optica.nombre||""; $("c-saludo").value=C.optica.saludo||""; $("c-whatsapp").value=C.optica.whatsapp||""; $("c-contacto").value=C.optica.contacto||""; $("c-intro").value=C.optica.intro||""; $("c-legal").value=C.optica.legal||"";
-  $("c-prov").value=AI.prov||"claude"; $("c-key").value=AI.key||""; $("c-model").value=AI.model||""; $("c-model").placeholder=AI_DEF[AI.prov||"claude"];
+  $("c-iaProxy").value=C.optica.iaProxy||""; $("c-prov").value=AI.prov||"claude"; $("c-key").value=AI.key||""; $("c-model").value=AI.model||""; $("c-model").placeholder=AI_DEF[AI.prov||"claude"];
   $("espList").innerHTML = (C.especialidades||[]).map(e=>`<label><input type="checkbox" data-esp="${esc(e.id)}" ${ofrece(e.id)?"checked":""}> ${esc(e.nombre)}</label>`).join("");
   $("prodRows").innerHTML = C.productos.map((p,i)=>`<tr>
     <td style="width:120px"><input class="code" id="pr-id-${i}" data-pi="${i}" data-pf="id" value="${esc(p.id)}"></td>
@@ -1048,11 +1052,31 @@ Devolvé SOLO un JSON con esta forma:
  "indicaciones":[string],"dudas":[string]}
 Reglas: OD = ojo derecho, OI (u OS) = ojo izquierdo. "Neutro", "N" o "plano" en esférico = 0. Si hay filas separadas de Lejos y Cerca sin "ADD", la adición es esf de cerca menos esf de lejos. Si un valor no se lee con seguridad, poné null y explicá cuál en "dudas". Si dice lentes de contacto, tipo "lc". "indicaciones" son textos como "antirreflejo", "fotocromático", "uso permanente". Si la imagen no es una receta, "es_receta":false.`;
 let sampleFn=null, canImg=false;
+async function shrink(file){
+  // achica la foto (máx. 1600 px, JPG) para que viaje rápido y cueste menos
+  try{
+    const bmp = await createImageBitmap(file); const k = Math.min(1, 1600/Math.max(bmp.width,bmp.height));
+    const cv = document.createElement("canvas"); cv.width=Math.round(bmp.width*k); cv.height=Math.round(bmp.height*k);
+    cv.getContext("2d").drawImage(bmp,0,0,cv.width,cv.height);
+    const blob = await new Promise(r=>cv.toBlob(r,"image/jpeg",0.85)); return blob || file;
+  }catch(_){ return file; }
+}
+const aiOk = () => canImg || !!AI.key || !!C.optica.iaProxy;
+function aiUI(){
+  const ok = aiOk(); $("rxFileLbl").hidden = !ok;
+  $("dropTxt").textContent = ok ? "Sacale una foto a la receta y la leemos con IA. Después revisá los números contra el papel." : "La lectura con IA no está disponible acá. Cargá los valores a mano.";
+}
 async function readWithApi(file){
+  file = await shrink(file);
   const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
   const mime=file.type||"image/jpeg", prov=AI.prov||"claude", model=AI.model||AI_DEF[prov];
   let resp, txt="";
-  if(prov==="gemini"){
+  if(!AI.key && C.optica.iaProxy){
+    resp = await fetch(C.optica.iaProxy,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({mime,data:b64})});
+    if(resp.status===429) throw {code:"rate_limited"};
+    if(!resp.ok) throw {code:"proxy_"+resp.status};
+    txt = (await resp.json()).text||"";
+  } else if(prov==="gemini"){
     resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:"POST",headers:{"content-type":"application/json","x-goog-api-key":AI.key},
       body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mime,data:b64}},{text:PROMPT}]}],generationConfig:{responseMimeType:"application/json"}})});
     if(!resp.ok) throw {code:"api_"+resp.status};
@@ -1074,7 +1098,7 @@ async function readWithApi(file){
 (async()=>{
   try{ sampleFn = await window.claude?.use?.("sample"); }catch(_){ sampleFn=null; }
   if(sampleFn){ try{ const lim = await sampleFn.limits(); canImg = !!lim?.images; if(canImg){ $("rxFile").accept = $("rxCam").accept = lim.images.mediaTypes.join(","); } }catch(_){} }
-  if(!canImg && !AI.key){ $("rxFileLbl").hidden=true; $("dropTxt").textContent="La lectura con IA no está disponible acá. Cargá los valores a mano, o poné tu clave de API en Configuración."; }
+  aiUI();
 })();
 $("rxCam").onchange = $("rxFile").onchange = async e=>{
   const f=e.target.files[0]; if(!f) return;
@@ -1107,7 +1131,7 @@ fillForm(); route();
 /* configuración oficial publicada junto a la app (config/optica.json) */
 if(!hasLocal()){
   fetch("config/optica.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
-    if(j && !validateConfig(j)){ C=j; CC.clear(); route(); }
+    if(j && !validateConfig(j)){ C=j; CC.clear(); route(); aiUI(); }
   }).catch(()=>{});
 }
 })();

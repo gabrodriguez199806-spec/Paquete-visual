@@ -88,19 +88,18 @@ Ejemplo: `add > 0 and (lejos or "lejos" in dist)`
 - Cada par lista `tecnologias`; cada una puede tener `si` (por ejemplo `{"id":"blue","si":"filtro_azul"}`).
 - Una pregunta puede tener `si` para aparecer solo cuando corresponde (`"si": "maneja_si"`).
 
-## Probador y centrado (prototipo)
-
-`probador/index.html` es una página aparte, pensada para la tienda online:
-
-- **Probar armazón:** con la cámara frontal (en vivo) o una foto, dibuja el armazón sobre la cara a escala real según calibre, puente y alto de lente, y sigue la inclinación y el giro de la cabeza. También acepta la foto frontal de un armazón (PNG, se le puede quitar el fondo blanco) con su ancho total en mm.
-- **Medir DNP y altura:** detecta las pupilas y el centro de la nariz en una foto de frente. La escala sale de una tarjeta (DNI, SUBE o de crédito, 85,6 mm) apoyada en la frente, del ancho de un armazón puesto o, como estimación, del tamaño promedio del iris. Corrige la convergencia de mirar a la cámara para dar la DP de lejos. Con el armazón puesto, mide la altura de montaje.
-
-Usa MediaPipe Face Landmarker (de Google) dentro del navegador: las fotos no salen del dispositivo. La cámara solo funciona con https (GitHub Pages sirve). Margen esperado de 1 a 2 mm con tarjeta; para pedir lentes conviene confirmar en el mostrador.
-
 ## Lectura de recetas con IA
 
 - Dentro de Claude (claude.ai) funciona sin configurar nada.
-- Instalada en tu sitio: elegí el proveedor (Claude, Gemini o ChatGPT) y cargá su clave de API en Configuración. La opción más barata es Gemini Flash-Lite. Se guarda solo en ese navegador y nunca se exporta. Usala en computadoras de la óptica, no en equipos públicos.
+- **Para tus pacientes (link público):** la clave de IA no puede ir en el repositorio, porque es público. Se usa un intermediario gratis en Cloudflare que guarda la clave escondida y solo atiende pedidos de tu sitio:
+  1. Creá una cuenta gratis en dash.cloudflare.com.
+  2. Workers & Pages → Create → Worker ("Hello World") → nombralo, por ejemplo, `receta` → Deploy.
+  3. Edit code → pegá el contenido de `worker/worker.js` → Deploy.
+  4. Settings → Variables and Secrets: agregá `GEMINI_KEY` (tipo *Secret*, tu clave de Google AI Studio) y `ALLOWED_ORIGINS` (texto, la dirección de tu sitio, por ejemplo `https://gabrodriguez199806-spec.github.io`) → Deploy.
+  5. Copiá la dirección del Worker (`https://receta.….workers.dev`) en Configuración → "Intermediario para pacientes", y pasala a `config/optica.json` (campo `optica.iaProxy`).
+- **Solo en una compu de la óptica:** elegí el proveedor (Claude, Gemini o ChatGPT) y cargá su clave en Configuración. Se guarda solo en ese navegador y nunca se exporta. La opción más barata es Gemini Flash-Lite.
+
+La foto se achica a 1600 px antes de enviarse, así viaja rápido y cuesta menos.
 
 ## Licencia
 
