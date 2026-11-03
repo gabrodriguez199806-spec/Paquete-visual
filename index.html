@@ -949,7 +949,8 @@ function telWa(t){
   return d;
 }
 function updateSend(){
-  const has=!!lastItems.length; $("sendRow").hidden=!has; if(!has) return;
+  // en autogestión el paciente solo puede mandar el plan a la óptica (botón Contactar); enviar/compartir/copiar es solo para el mostrador
+  const has=!!lastItems.length && isStaff(); $("sendRow").hidden=!has; if(!has) return;
   const tel=telWa(S.pac.tel), staff=isStaff();
   $("sendBtn").textContent = staff ? (tel ? "Enviar plan al paciente por WhatsApp" : "Enviar plan por WhatsApp") : "Guardarme el plan en WhatsApp";
   $("sendBtn").href = "https://wa.me/"+(staff?tel:"")+"?text="+encodeURIComponent(waText());
