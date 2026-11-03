@@ -710,14 +710,14 @@ const EXAMPLE = {
   pac:{nombre:"Laura (ejemplo)", edad:"46", tel:""},
   rx:{od:{esf:"-1.50",cil:"-0.75",eje:"180",add:"+1.50"}, oi:{esf:"-1.25",cil:"-0.50",eje:"170",add:"+1.50"}, fecha:"2026-09-12", tipo:"anteojos", medico:""},
   a:{pantallas:"8+", trabajo:["pc"], dist:["lejos","inter","cerca"], maneja:"noche", luz:["noche","fatiga"], aire:"medio", osc:"no", deporte:["gym","run"], actividades:["eventos","lectura"], lc:"interes", tiene:"viejo", importa:"confort"},
-  sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{lejos_cerca:true}, example:true
+  sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{lejos_cerca:true}, hoyPar:{}, example:true
 };
-const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{}, example:false});
+const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{}, hoyPar:{}, example:false});
 // El paciente se guarda solo en esta pestaña (sessionStorage) y vence a las 2 horas: cada vez que se abre el link arranca en blanco.
 const SS = {get(k){try{return JSON.parse(sessionStorage.getItem(k)||"null")}catch(e){return null}}, set(k,v){try{sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 try{ localStorage.removeItem("pv-state2"); }catch(_){}
 let S = (()=>{ const s=SS.get("pv-state3"); return s && s.t && Date.now()-s.t < 2*3600e3 ? s.S : null; })() || BLANK();
-["sol","sel","own","off","hoy","a","force"].forEach(k=>S[k]=S[k]||{});
+["sol","sel","own","off","hoy","a","force","hoyPar"].forEach(k=>S[k]=S[k]||{});
 const save = () => SS.set("pv-state3", {t:Date.now(), S});
 
 /* =========================================================
@@ -808,13 +808,24 @@ function renderQs(){
 }
 let lastItems=[];
 const tecText = ps => ps.map(p=>`${p.nombre&&ps.length>1?p.nombre+": ":""}${p.tecs.map(t=>t.nombre).join(" + ")}`).join(" / ");
-function pairHtml(p, showName){
+/* Varios anteojos en una misma solución (ej. "Dos anteojos": lejos + cerca, o manejo de día + de noche):
+   se puede empezar por uno solo y hacer el otro después. */
+const multi = it => it.pares.length>1 && (it.alts.length===1 || !!it.picked);
+const hp = it => { const x=S.hoyPar[it.s.id]; return x && x.sol===it.sol.id ? (x.sel||{}) : {}; };
+const isHoy = it => multi(it) ? Object.values(hp(it)).some(Boolean) : !!S.hoy[it.s.id];
+const parTxt = (it, ps) => ps.map(p=>`${p.nombre?p.nombre+": ":""}${p.tecs.map(t=>t.nombre).join(" + ")}`).join(" / ");
+function partes(it){ // [empezar, después] en pares
+  if(!multi(it)) return isHoy(it) ? [it.pares,[]] : [[],it.pares];
+  const s=hp(it); return [it.pares.filter((p,k)=>s[k]), it.pares.filter((p,k)=>!s[k])];
+}
+function pairHtml(p, showName, chk){
   return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}
-    <div class="tecs">${p.tecs.map(t=>`<span class="tec" title="${esc(t.detalle||"")}"><b>${esc(t.nombre)}</b>${t.detalle?`<small>${esc(t.detalle)}</small>`:""}</span>`).join("")}</div></div>`;
+    <div class="tecs">${p.tecs.map(t=>`<span class="tec" title="${esc(t.detalle||"")}"><b>${esc(t.nombre)}</b>${t.detalle?`<small>${esc(t.detalle)}</small>`:""}</span>`).join("")}</div>${chk||""}</div>`;
 }
 const notas = it => (it.s.alElegir||[]).filter(n=>test(n.si,facts()));
 function itemHtml(it){
-  const id=it.s.id, off=!!S.off[id], hoy=!!S.hoy[id];
+  const id=it.s.id, off=!!S.off[id], hoy=isHoy(it), mp=multi(it), sp=hp(it);
+  const chk = (p,k) => mp && !off ? `<div class="toggles"><label><input type="checkbox" data-hoypar="${esc(id)}" data-psol="${esc(it.sol.id)}" data-k="${k}" ${sp[k]?"checked":""}> Empezamos por ${p.nombre?"el de "+esc(p.nombre.toLowerCase()):"este"}</label></div>` : "";
   let body;
   if(it.alts.length>1){
     body = `<div class="pair-name">Cualquiera de estas opciones lo resuelve:</div>` + it.alts.map((a,k)=>{
@@ -822,10 +833,10 @@ function itemHtml(it){
       return `${k?'<div class="or">o</div>':""}<div class="alt${sel?" sel":""}">
         <div class="alt-head"><b>${String.fromCharCode(65+k)}. ${esc(a.sol.nombre)}</b>${off?"":`<button type="button" class="btn small" data-sug="${esc(id)}" data-sol="${esc(a.sol.id)}" aria-pressed="${!!sel}">${sel?"Elegida ✓":"Elegir esta"}</button>`}</div>
         ${a.sol.explicacion?`<p class="sol-exp">${esc(a.sol.explicacion)}</p>`:""}
-        ${a.pares.map(p=>pairHtml(p, a.pares.length>1)).join("")}</div>`;
+        ${a.pares.map((p,k)=>pairHtml(p, a.pares.length>1, sel?chk(p,k):"")).join("")}</div>`;
     }).join("");
   } else {
-    body = off ? "" : it.pares.map(p=>pairHtml(p, it.pares.length>1)).join("");
+    body = off ? "" : it.pares.map((p,k)=>pairHtml(p, it.pares.length>1, chk(p,k))).join("");
   }
   const tag = it.pr==="ess" ? "Esencial" : it.pr==="rec" ? "Muy recomendado" : "Opcional";
   return `<div class="item ${it.pr}${off?" off":""}">
@@ -835,7 +846,7 @@ function itemHtml(it){
     ${body}
     ${hoy&&!off?notas(it).map(n=>`<p class="status">${esc(n.texto)}</p>`).join(""):""}
     <div class="toggles">
-      <label><input type="checkbox" data-hoy="${esc(id)}" ${hoy&&!off?"checked":""} ${off?"disabled":""}> Empezamos por este</label>
+      ${mp?"":`<label><input type="checkbox" data-hoy="${esc(id)}" ${hoy&&!off?"checked":""} ${off?"disabled":""}> Empezamos por este</label>`}
       ${it.pr==="ess"?"":`<label><input type="checkbox" data-off="${esc(id)}" ${off?"checked":""}> No me interesa</label>`}
     </div></div>`;
 }
@@ -866,7 +877,7 @@ function renderPlan(){
   }
   $("items").innerHTML = h;
   const act = items.filter(i=>!S.off[i.s.id]);
-  const hoyN = act.filter(i=>S.hoy[i.s.id]).length;
+  const hoyN = act.filter(isHoy).length;
   const ex = act.filter(i=>i.pr!=="ess");
   $("totals").innerHTML = `
     <div>Lo esencial</div><div class="v big">${ess.length}</div>
@@ -880,7 +891,7 @@ function waText(){
     let w;
     if(i.alts.length>1 && !i.picked) w = "\n  Opciones: " + i.alts.map(a=>`${a.sol.nombre} (${tecText(a.pares)})`).join(" / o / ");
     else w = (i.alts.length>1?` ${i.sol.nombre} – `:": ") + tecText(i.pares);
-    return `• ${i.s.nombre}${S.hoy[i.s.id]?" ⭐ empezamos por acá":""}${w}\n  _Por qué es ${PQ[i.pr]}:_ ${[porqueBase(i), ...i.motivos.slice(0,2)].filter(Boolean).join(" ")}`;
+    return `• ${i.s.nombre}${isHoy(i)?(multi(i)?" ⭐ empezamos por: "+partes(i)[0].map(p=>p.nombre).join(", "):" ⭐ empezamos por acá"):""}${w}\n  _Por qué es ${PQ[i.pr]}:_ ${[porqueBase(i), ...i.motivos.slice(0,2)].filter(Boolean).join(" ")}`;
   };
   const nombre = (S.pac.nombre||"").replace(/\s*\(ejemplo\)/,"");
   let t = `Hola${nombre?" "+nombre:""}! ${C.optica.saludo||""}\n\n`;
@@ -916,15 +927,21 @@ function contactText(){
   head = edad ? head.replace("{edad}", edad) : head.replace(/,?\s*tengo \{edad\} años/i,"").replace("{edad}","");
   head = head.replace(/!\s+y /,"! ").replace(/\s{2,}/g," ");
   const desc = i => (i.alts.length>1 ? (i.picked ? `${i.s.nombre}: ${i.sol.nombre} (${tecText(i.pares)})` : `${i.s.nombre} (${i.alts.map(a=>a.sol.nombre).join(", ")})`) : `${i.s.nombre}: ${tecText(i.pares)}`);
-  let start = act.filter(i=>S.hoy[i.s.id]);
-  if(!start.length) start = act.filter(i=>i.pr==="ess").slice(0,1);
-  const rest = act.filter(i=>!start.includes(i));
+  let start=[], rest=[];
+  act.forEach(i=>{
+    if(i.alts.length>1 && !i.picked){ (S.hoy[i.s.id]?start:rest).push(desc(i)); return; }
+    const [a,b]=partes(i);
+    const each = ps => ps.map(p=>`${i.s.nombre} – ${p.nombre||"anteojo"}: ${p.tecs.map(t=>t.nombre).join(" + ")}`);
+    if(multi(i)){ start.push(...each(a)); rest.push(...each(b)); }
+    else { if(a.length) start.push(desc(i)); if(b.length) rest.push(desc(i)); }
+  });
+  if(!start.length){ const e=act.find(i=>i.pr==="ess"); if(e){ const d=desc(e); start=[d]; rest=rest.filter(x=>!x.startsWith(e.s.nombre)); } }
   let t = head + "\n\n";
-  if(start.length) t += "*Quiero empezar con:*\n" + start.map(i=>"• "+desc(i)).join("\n") + "\n\n";
-  if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(i=>"• "+desc(i)).join("\n") + "\n\n";
+  if(start.length) t += "*Quiero empezar con:*\n" + start.map(x=>"• "+x).join("\n") + "\n\n";
+  if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(x=>"• "+x).join("\n") + "\n\n";
   const rx = rxLines();
   if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n\n";
-  const ms = [...new Set(start.flatMap(i=>notas(i).map(n=>n.mensaje).filter(Boolean)))];
+  const ms = [...new Set(act.filter(isHoy).flatMap(i=>notas(i).map(n=>n.mensaje).filter(Boolean)))];
   if(ms.length) t += ms.join("\n") + "\n\n";
   t += "*Envío la foto de la receta para revisión.*";
   return t.trim();
@@ -1084,8 +1101,9 @@ document.addEventListener("change", e=>{
   if(t.dataset.esp){ const s=new Set(C.optica.noOfrece||[]); t.checked?s.delete(t.dataset.esp):s.add(t.dataset.esp); C.optica.noOfrece=[...s]; saveCfg(); renderCfg(); renderQs(); all(); return; }
   if(t.dataset.sf==="activa"){ C.sugerencias[+t.dataset.si].activa=t.checked; saveCfg(); $("cfgJson").value=JSON.stringify(C,null,2); return; }
   if(t.dataset.sf==="prioridad"){ C.sugerencias[+t.dataset.si].prioridad=t.value; saveCfg(); renderCfg(); return; }
-  if(t.dataset.hoy) S.hoy[t.dataset.hoy]=t.checked;
-  else if(t.dataset.off){ S.off[t.dataset.off]=t.checked; if(t.checked) S.hoy[t.dataset.off]=false; }
+  if(t.dataset.hoypar){ const id=t.dataset.hoypar, so=t.dataset.psol; let x=S.hoyPar[id]; if(!x||x.sol!==so) x=S.hoyPar[id]={sol:so,sel:{}}; x.sel[t.dataset.k]=t.checked; }
+  else if(t.dataset.hoy) S.hoy[t.dataset.hoy]=t.checked;
+  else if(t.dataset.off){ S.off[t.dataset.off]=t.checked; if(t.checked){ S.hoy[t.dataset.off]=false; delete S.hoyPar[t.dataset.off]; } }
   else return;
   all();
 });
