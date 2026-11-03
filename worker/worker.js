@@ -30,7 +30,7 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": ok ? origin : "null",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Allow-Headers": "content-type, x-pin",
       "Vary": "Origin"
     };
     const out = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { ...cors, "content-type": "application/json" } });
@@ -39,6 +39,8 @@ export default {
     if (!ok) return out({ error: "origen no permitido" }, 403);
     const path = new URL(request.url).pathname.replace(/\/+$/, "");
     if (path === "/textos") return textos(request, env, KV, out);
+    if (path === "/evento") return evento(request, KV, out);
+    if (path === "/stats") return stats(request, env, KV, out);
     if (request.method !== "POST") return out({ error: "solo POST" }, 405);
     if (!env.GEMINI_KEY) return out({ error: "falta GEMINI_KEY" }, 500);
 
@@ -98,4 +100,47 @@ async function textos(request, env, KV, out) {
   for (const k of CAMPOS) if (typeof b.textos?.[k] === "string") t[k] = b.textos[k].slice(0, 800);
   await KV.put("textos:" + o, JSON.stringify(t));
   return out({ ok: true, textos: t });
+}
+
+/* Contador anónimo por sucursal y por día (sin datos del paciente).
+   POST /evento { o, tipo }   tipo: visita | plan | receta | whatsapp
+   GET  /stats?o=codigo  con header x-pin: el PIN de esa sucursal, o el PIN "admin" de PINES para ver todas. */
+const TIPOS = ["visita", "plan", "receta", "whatsapp"];
+const hoyAR = () => new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
+function leerPines(env) {
+  return Object.fromEntries(String(env.PINES || "").replace(/["'`{}]/g, "").split(/[,;\n]+/)
+    .map(x => x.split(/[:=]/).map(s => s.trim())).filter(x => x.length === 2 && x[0] && x[1]).map(([k, v]) => [k.toLowerCase(), v]));
+}
+async function evento(request, KV, out) {
+  if (!KV) return out({ ok: false }, 200);
+  if (request.method !== "POST") return out({ error: "solo POST" }, 405);
+  let b; try { b = await request.json(); } catch { return out({ error: "JSON inválido" }, 400); }
+  const o = /^[a-z0-9-]{1,40}$/.test(String(b.o || "")) ? b.o : "principal";
+  if (!TIPOS.includes(b.tipo)) return out({ error: "tipo inválido" }, 400);
+  const k = `stats:${o}:${hoyAR()}`;
+  const d = (await KV.get(k, "json")) || {};
+  d[b.tipo] = (d[b.tipo] || 0) + 1;
+  await KV.put(k, JSON.stringify(d), { expirationTtl: 400 * 86400 });
+  return out({ ok: true });
+}
+async function stats(request, env, KV, out) {
+  if (!KV) return out({ error: "falta el almacenamiento TEXTOS" }, 500);
+  const o = new URL(request.url).searchParams.get("o") || "principal";
+  const pin = (request.headers.get("x-pin") || "").trim();
+  const pines = leerPines(env);
+  const admin = pines.admin && pin === pines.admin;
+  if (!admin && !(pines[o] && pin === pines[o])) return out({ error: "PIN incorrecto" }, 401);
+  const prefix = admin ? "stats:" : `stats:${o}:`;
+  const filas = [];
+  let cursor;
+  do {
+    const l = await KV.list({ prefix, cursor });
+    for (const key of l.keys) {
+      const [, suc, dia] = key.name.split(":");
+      filas.push({ sucursal: suc, dia, ...((await KV.get(key.name, "json")) || {}) });
+    }
+    cursor = l.list_complete ? null : l.cursor;
+  } while (cursor);
+  filas.sort((a, b) => b.dia.localeCompare(a.dia) || a.sucursal.localeCompare(b.sucursal));
+  return out({ admin, filas });
 }

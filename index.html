@@ -274,6 +274,12 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
       <p class="note" style="margin:0">En modo óptica ves el botón Configuración y tus cambios se guardan en esta compu. Los pacientes usan la configuración oficial, la del archivo <code class="code">config/optica.json</code> del sitio.</p>
       <label class="f" style="max-width:260px">Cambiar PIN<input id="c-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Nuevo PIN"></label>
     </section>
+    <section class="card" id="statsCard">
+      <h2>Visitas</h2>
+      <p class="note" style="margin:0">Cuánta gente usó el link. Es anónimo: no guarda datos de los pacientes.</p>
+      <div class="actions"><input id="statsPin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="max-width:120px"><button class="btn" id="statsBtn" type="button">Ver visitas</button></div>
+      <div id="statsOut"></div>
+    </section>
     <section class="card">
       <h2>Tu óptica</h2>
       <div class="row">
@@ -839,6 +845,7 @@ const momentName = id => ((C.momentos||[]).find(m=>m.id===id)||{nombre:"Otros"})
 function renderPlan(){
   const all = build(); const items = all.filter(i=>i.pr!=="hid"); const hid = all.filter(i=>i.pr==="hid");
   lastItems = items;
+  if(items.length && S.rx && rxInfo().receta) evento("plan");
   $("planWho").textContent = (S.pac.nombre || "Paciente sin nombre") + (S.pac.edad? ` · ${S.pac.edad} años`:"");
   $("exTag").hidden = !S.example;
   if(!items.length){ $("items").innerHTML = '<p class="note">Cargá la receta y respondé la anamnesis: el plan se arma solo.</p>'; $("totals").innerHTML=""; return; }
@@ -939,7 +946,7 @@ function renderCfg(){
   $("c-iaProxy").value=C.optica.iaProxy||""; $("c-prov").value=AI.prov||"claude"; $("c-key").value=AI.key||""; $("c-model").value=AI.model||""; $("c-model").placeholder=AI_DEF[AI.prov||"claude"];
   if(SLUG){
     // sucursales: solo editan frases y texto legal; el resto lo maneja quien administra la app
-    document.querySelectorAll("#viewCfg section.card").forEach(s=>{ s.hidden = !s.contains($("c-legal")) && !s.contains($("staffOut")); });
+    document.querySelectorAll("#viewCfg section.card").forEach(s=>{ s.hidden = !s.contains($("c-legal")) && !s.contains($("staffOut")) && s.id!=="statsCard"; });
     $("c-pin").closest("label").hidden = true; $("c-nombre").readOnly = $("c-whatsapp").readOnly = true;
     $("pubBox").hidden = false; updPub();
   }
@@ -963,6 +970,29 @@ function renderCfg(){
 }
 const textosUrl = () => { const b=C.optica.textosApi||C.optica.iaProxy; try{ return b ? new URL("textos", b.replace(/\/?$/,"/")).toString() : ""; }catch(_){ return ""; } };
 function updPub(){}
+/* contador anónimo: una vez por pestaña por tipo (sin datos del paciente) */
+const API = () => (C.optica.textosApi||"").replace(/\/?$/,"/");
+function evento(tipo){
+  try{
+    if(isStaff() || !C.optica.textosApi) return;
+    const k="pv-ev:"+tipo; if(sessionStorage.getItem(k)) return; sessionStorage.setItem(k,"1");
+    fetch(API()+"evento",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({o:SLUG||"principal",tipo}),keepalive:true}).catch(()=>{});
+  }catch(_){}
+}
+async function verStats(){
+  const m=$("statsOut"); m.innerHTML='<p class="note">Cargando…</p>';
+  try{
+    const r=await fetch(API()+"stats?o="+(SLUG||"principal"),{headers:{"x-pin":$("statsPin").value.trim()}});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){ m.innerHTML=`<p class="bad-txt">${r.status===401?"PIN incorrecto.":"No se pudo cargar ("+esc(j.error||r.status)+")."}</p>`; return; }
+    const f=j.filas||[]; if(!f.length){ m.innerHTML='<p class="note">Todavía no hay datos.</p>'; return; }
+    const tot={}; f.forEach(x=>{ const s=x.sucursal; tot[s]=tot[s]||{visita:0,plan:0,receta:0,whatsapp:0}; ["visita","plan","receta","whatsapp"].forEach(t=>tot[s][t]+=x[t]||0); });
+    const row=(a,x)=>`<tr><td>${esc(a)}</td><td>${x.visita||0}</td><td>${x.plan||0}</td><td>${x.receta||0}</td><td>${x.whatsapp||0}</td></tr>`;
+    const head='<tr><th></th><th>Entraron</th><th>Armaron plan</th><th>Leyeron receta</th><th>Tocaron WhatsApp</th></tr>';
+    m.innerHTML = `<h3>Total</h3><div class="tbl-wrap"><table class="cfg">${head}${Object.entries(tot).map(([s,x])=>row(s,x)).join("")}</table></div>
+      <h3>Por día</h3><div class="tbl-wrap"><table class="cfg">${head}${f.slice(0,90).map(x=>row((j.admin?x.sucursal+" · ":"")+x.dia.split("-").reverse().join("/"),x)).join("")}</table></div>`;
+  }catch(_){ m.innerHTML='<p class="bad-txt">No se pudo cargar. Revisá la conexión.</p>'; }
+}
 async function publicar(){
   const m=$("pubMsg"), u=textosUrl(); if(!u){ m.textContent="Falta el intermediario."; return; }
   const o=C.optica; m.className="note"; m.textContent="Publicando…";
@@ -1040,6 +1070,8 @@ document.addEventListener("change", e=>{
   all();
 });
 $("pubBtn").onclick = publicar;
+$("statsBtn").onclick = verStats;
+$("waBtn").addEventListener("click", ()=>evento("whatsapp"));
 $("addProd").onclick = ()=>{ let n=1; while(prod("nuevo"+n)) n++; C.productos.push({id:"nuevo"+n, nombre:"Nuevo", detalle:""}); saveCfg(); renderCfg(); };
 $("applyJson").onclick = ()=>{
   const m=$("cfgJsonMsg"); let c;
@@ -1150,6 +1182,7 @@ $("rxCam").onchange = $("rxFile").onchange = async e=>{
     if(d.fecha) S.rx.fecha=d.fecha; if(d.medico) S.rx.medico=d.medico; if(d.tipo) S.rx.tipo=d.tipo;
     S.example=false; fillForm(); all();
     const dudas=(d.dudas||[]).filter(Boolean), ind=(d.indicaciones||[]).filter(Boolean);
+    evento("receta");
     st.innerHTML = `Listo. <b>Revisá cada número contra el papel</b> antes de seguir.` + (ind.length?`<br>Indicaciones: ${ind.map(esc).join(", ")}.`:"") + (dudas.length?`<br>Dudas: ${dudas.map(esc).join("; ")}.`:"");
   }catch(err){
     st.className="status err";
@@ -1177,6 +1210,7 @@ if(!hasLocal()){
       if(!own.optica || !("iaProxy" in own.optica)) j.optica.iaProxy = (base||DEFAULT_CONFIG).optica.iaProxy;
     }
     if(j && !validateConfig(j)){ C=j; CC.clear(); route(); aiUI(); }
+    evento("visita");
     if(SLUG && textosUrl()){
       fetch(textosUrl()+"?o="+SLUG,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(t=>{
         const x=(t&&t.textos)||{}; let ch=false;
