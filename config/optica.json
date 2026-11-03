@@ -9,6 +9,7 @@
     "legal": "Óptica Rodriguez no realiza exámenes visuales. Este plan se arma con la receta indicada por tu oftalmólogo y con lo que nos contaste de tu día a día. Los productos exactos se eligen en la óptica según tu graduación.",
     "maxSugerencias": 4,
     "iaProxy": "https://receta.gab-rodriguez199806.workers.dev",
+    "textosApi": "https://paquete-visual.gab-rodriguez199806.workers.dev",
     "pinHash": "a8f00ae3",
     "puntosMinimos": 3,
     "puntosRecomendado": 6,
@@ -16,8 +17,7 @@
       "ess": "Es lo que te asegura ver bien en tu día a día.",
       "rec": "Por lo que nos contaste, te va a servir mucho.",
       "opt": "No es imprescindible, pero te suma según lo que nos contaste."
-    },
-    "textosApi": "https://paquete-visual.gab-rodriguez199806.workers.dev"
+    }
   },
   "momentos": [
     {
@@ -656,6 +656,7 @@
           "pares": [
             {
               "nombre": "Lejos",
+              "para": "Para el día a día: caminar, ver la tele, reconocer caras y manejar.",
               "tecnologias": [
                 {
                   "id": "vision_simple"
@@ -679,6 +680,7 @@
             },
             {
               "nombre": "Cerca",
+              "para": "Para leer, el celular, coser y todo lo que mirás a menos de 40 cm.",
               "tecnologias": [
                 {
                   "id": "vision_cerca"
@@ -1278,6 +1280,7 @@
           "pares": [
             {
               "nombre": "De día",
+              "para": "Corta el reflejo del sol en el asfalto y el parabrisas.",
               "tecnologias": [
                 {
                   "id": "polar"
@@ -1291,6 +1294,7 @@
             {
               "nombre": "De noche",
               "si": "maneja_noche",
+              "para": "Menos encandilamiento con las luces de los otros autos.",
               "tecnologias": [
                 {
                   "id": "ar"

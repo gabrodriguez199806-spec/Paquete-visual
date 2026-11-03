@@ -489,8 +489,8 @@ const DEFAULT_CONFIG = {
           pares:[{nombre:"Bifocal", tecnologias:[{id:"bifocal"},{id:"ar"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]}]},
         {id:"dos", nombre:"Dos anteojos (lejos + cerca)", explicacion:"Uno para lejos y otro para cerca. Campo amplio en cada uno, pero hay que cambiarlos según lo que hagas.",
           pares:[
-            {nombre:"Lejos", tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]},
-            {nombre:"Cerca", tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}
+            {nombre:"Lejos", para:"Para el día a día: caminar, ver la tele, reconocer caras y manejar.", tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"}]},
+            {nombre:"Cerca", para:"Para leer, el celular, coser y todo lo que mirás a menos de 40 cm.", tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}
           ]}
       ]},
     {id:"principal", momento:"dia", nombre:"Anteojo para todo el día", prioridad:"ess", cuando:"receta and lejos and not add > 0",
@@ -567,8 +567,8 @@ const DEFAULT_CONFIG = {
         {si:"oscurece", texto:"Los fotocromáticos se oscurecen poco dentro del auto, porque el parabrisas filtra el UV."}
       ],
       soluciones:[{id:"uno", nombre:"Manejo", pares:[
-        {nombre:"De día", tecnologias:[{id:"polar"},{id:"alto_indice",si:"potencia >= 6"}]},
-        {nombre:"De noche", si:"maneja_noche", tecnologias:[{id:"ar"},{id:"contraste"}]}
+        {nombre:"De día", para:"Corta el reflejo del sol en el asfalto y el parabrisas.", tecnologias:[{id:"polar"},{id:"alto_indice",si:"potencia >= 6"}]},
+        {nombre:"De noche", si:"maneja_noche", para:"Menos encandilamiento con las luces de los otros autos.", tecnologias:[{id:"ar"},{id:"contraste"}]}
       ]}]},
 
     {id:"sol", momento:"sol", nombre:"Anteojo de sol graduado", cuando:'receta and not maneja_si',
@@ -819,7 +819,7 @@ function partes(it){ // [empezar, después] en pares
   const s=hp(it); return [it.pares.filter((p,k)=>s[k]), it.pares.filter((p,k)=>!s[k])];
 }
 function pairHtml(p, showName, chk){
-  return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}
+  return `<div class="pair">${showName&&p.nombre?`<div class="pair-name"><span>${esc(p.nombre)}</span></div>`:""}${p.para?`<p class="sol-exp" style="margin:2px 0 4px">${esc(p.para)}</p>`:""}
     <div class="tecs">${p.tecs.map(t=>`<span class="tec" title="${esc(t.detalle||"")}"><b>${esc(t.nombre)}</b>${t.detalle?`<small>${esc(t.detalle)}</small>`:""}</span>`).join("")}</div>${chk||""}</div>`;
 }
 const notas = it => (it.s.alElegir||[]).filter(n=>test(n.si,facts()));
