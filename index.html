@@ -248,7 +248,11 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
         <div class="actions">
           <a class="btn primary" id="waBtn" href="#" target="_blank" rel="noopener">Contactar a la óptica por WhatsApp</a>
           <span class="note" id="waNote" style="flex-basis:100%">Al abrirse WhatsApp, adjuntá la foto de tu receta antes de enviar.</span>
-          <button class="btn" id="copyBtn" type="button">Copiar plan para enviar al paciente</button>
+        </div>
+        <div class="actions" id="sendRow">
+          <a class="btn" id="sendBtn" href="#" target="_blank" rel="noopener">Enviar plan por WhatsApp</a>
+          <button class="btn" id="shareBtn" type="button" hidden>Compartir plan</button>
+          <button class="btn" id="copyBtn" type="button">Copiar plan</button>
         </div>
         <textarea class="out" id="outTxt" readonly hidden></textarea>
         <div class="legal" id="legal"></div>
@@ -936,7 +940,22 @@ function fillForm(){
   $("rx-fecha").value=S.rx.fecha||""; $("rx-tipo").value=S.rx.tipo||"anteojos"; $("rx-medico").value=S.rx.medico||"";
 }
 function header(){ $("opName").textContent = C.optica.nombre||"Óptica"; $("planIntro").textContent = C.optica.intro||""; $("planIntro").hidden=!C.optica.intro; $("legal").textContent = C.optica.legal||""; }
-function all(){ header(); renderRead(); renderPlan(); updateWa(); $("copyBtn").hidden = !isStaff(); save(); }
+function telWa(t){
+  let d=String(t||"").replace(/\D/g,""); if(!d) return "";
+  d=d.replace(/^0+/,"");
+  if(d.startsWith("549")) return d;
+  if(d.startsWith("54")) return "549"+d.slice(2);
+  if(d.length===10) return "549"+d;
+  return d;
+}
+function updateSend(){
+  const has=!!lastItems.length; $("sendRow").hidden=!has; if(!has) return;
+  const tel=telWa(S.pac.tel), staff=isStaff();
+  $("sendBtn").textContent = staff ? (tel ? "Enviar plan al paciente por WhatsApp" : "Enviar plan por WhatsApp") : "Guardarme el plan en WhatsApp";
+  $("sendBtn").href = "https://wa.me/"+(staff?tel:"")+"?text="+encodeURIComponent(waText());
+  $("shareBtn").hidden = !navigator.share;
+}
+function all(){ header(); renderRead(); renderPlan(); updateWa(); updateSend(); save(); }
 
 /* =========================================================
    RENDER: CONFIGURACIÓN
@@ -1085,11 +1104,12 @@ $("resetCfg").onclick = ()=>{ $("resetConfirm").hidden=false; };
 $("resetNo").onclick = ()=>{ $("resetConfirm").hidden=true; };
 $("resetYes").onclick = ()=>{ C=clone(DEFAULT_CONFIG); saveCfg(); $("resetConfirm").hidden=true; renderCfg(); renderQs(); };
 $("newBtn").onclick = ()=>{ S=BLANK(); fillForm(); renderQs(); $("rxImg").hidden=true; $("aiStatus").hidden=true; $("outTxt").hidden=true; location.hash=""; route(); };
+$("shareBtn").onclick = async ()=>{ try{ await navigator.share({title:"Mi plan visual", text:waText()}); }catch(_){} };
 $("copyBtn").onclick = async ()=>{
   const t = waText(), ta=$("outTxt"); ta.value=t; ta.hidden=false;
   try{ await navigator.clipboard.writeText(t); $("copyBtn").textContent="Copiado ✓"; }
   catch(_){ ta.focus(); ta.select(); $("copyBtn").textContent="Seleccioná y copiá el texto"; }
-  setTimeout(()=>$("copyBtn").textContent="Copiar plan para WhatsApp",2500);
+  setTimeout(()=>$("copyBtn").textContent="Copiar plan",2500);
 };
 function route(){
   const want = location.hash==="#config", staff = isStaff();
