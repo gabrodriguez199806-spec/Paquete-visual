@@ -160,6 +160,52 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
 .more summary{cursor:pointer;font-weight:600}
 .more-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
 .hid{--pc:var(--opt);--ps:var(--opt-soft)}
+/* ===== cuestionario de autogestión: una pregunta por pantalla ===== */
+.self #viewPlan{grid-template-columns:minmax(0,1fr);max-width:760px;margin:0 auto}
+.self #viewPlan > .col:first-child{display:none}
+#viewWiz{max-width:520px;margin:0 auto;min-height:calc(100dvh - 90px);display:flex;flex-direction:column}
+.wz-bar{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:6px}
+.wz-back{font:inherit;font-size:1.4rem;line-height:1;width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.wz-back:disabled{visibility:hidden}
+.wz-brand{text-align:center;font-family:var(--f-display);font-weight:700;font-size:1.05rem;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wz-cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);text-align:right}
+.wz-prog{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 0}
+.wz-prog i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.wz-body{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:22px}
+.wz-q{font-family:var(--f-display);font-weight:700;font-size:1.65rem;line-height:1.15;margin:0;text-wrap:balance}
+.wz-help{color:var(--muted);font-size:.92rem;margin:0 0 6px}
+.wz-opts{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.wz-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;text-align:left;font:inherit;font-weight:600;font-size:1rem;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;position:relative;overflow:hidden}
+.wz-opt small{display:block;font-weight:400;color:var(--muted);font-size:.83rem;margin-top:2px}
+.wz-opt .ic{margin-left:auto;font-size:1.35rem;letter-spacing:-2px;flex:none}
+.wz-opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.wz-opt[aria-pressed="true"]::after{content:"✓";position:absolute;top:0;right:0;width:24px;height:24px;background:var(--accent);color:var(--accent-ink);font-size:.75rem;font-weight:700;display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 5px 0 0;clip-path:polygon(0 0,100% 0,100% 100%)}
+.wz-opt:focus-visible,.wz-go:focus-visible,.wz-back:focus-visible,.wz-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wz-in{font-size:1.15rem;padding:14px;border-radius:12px;background:var(--surface)}
+.wz-foot{position:sticky;bottom:0;padding:14px 0 calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 35%);display:flex;flex-direction:column;gap:6px;align-items:center}
+.wz-go{width:100%;font:inherit;font-weight:700;font-size:1.05rem;padding:15px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.wz-go:disabled{opacity:.4;cursor:default}
+.wz-link{font:inherit;font-size:.88rem;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px}
+.wz-hero{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding-top:8vh}
+.wz-hero .big{font-size:3.2rem;line-height:1}
+.wz-hero ul{margin:0;padding-left:20px;color:var(--muted)}
+.wz-rx{width:100%;border-collapse:collapse;font-family:var(--f-mono)}
+.wz-rx th{font-family:var(--f-body);font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:2px 3px;text-align:center}
+.wz-rx td{padding:3px}
+.wz-rx td:first-child{font-weight:700;width:34px}
+.wz-rx input{text-align:center;padding:10px 2px;font-family:var(--f-mono);background:var(--surface)}
+.wz-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.wz-card ul.read li{font-size:.98rem;margin-bottom:4px}
+.wz-load{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:30px 0}
+.wz-ring{--p:0;width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+.wz-ring b{width:122px;height:122px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-family:var(--f-display);font-size:2rem}
+.wz-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;text-align:left}
+.wz-steps li{color:var(--muted);display:flex;gap:10px;align-items:center}
+.wz-steps li::before{content:"";width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none}
+.wz-steps li.on{color:var(--ink);font-weight:600}
+.wz-steps li.on::before{content:"✓";border-color:var(--opt);background:var(--opt);color:#fff;font-size:.7rem;display:grid;place-items:center}
+@media (prefers-reduced-motion:no-preference){.wz-anim{animation:wzIn .28s ease both}@keyframes wzIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}}
+.self-bar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 </style>
 
 <div class="wrap">
@@ -171,6 +217,17 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
       <a class="btn" id="viewBtn" href="#config">Configuración</a>
     </div>
   </header>
+
+  <!-- ===================== AUTOGESTIÓN: CUESTIONARIO ===================== -->
+  <div id="viewWiz" hidden>
+    <div class="wz-bar">
+      <button class="wz-back" id="wzBack" type="button" aria-label="Volver">&#8249;</button>
+      <div class="wz-brand" id="wzBrand">Óptica</div>
+      <div class="wz-cnt" id="wzCnt"></div>
+    </div>
+    <div class="wz-prog"><i id="wzProg"></i></div>
+    <div class="wz-body" id="wzBody"></div>
+  </div>
 
   <!-- ===================== ATENCIÓN ===================== -->
   <div class="grid" id="viewPlan">
@@ -255,6 +312,10 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
           <button class="btn" id="copyBtn" type="button">Copiar plan</button>
         </div>
         <textarea class="out" id="outTxt" readonly hidden></textarea>
+        <div class="self-bar" id="selfBar" hidden>
+          <button class="btn small" id="wzEdit" type="button">Cambiar mis respuestas</button>
+          <button class="btn small" id="wzNew" type="button">Empezar de nuevo</button>
+        </div>
         <div class="legal" id="legal"></div>
       </section>
     </div>
@@ -742,9 +803,10 @@ function facts(){
   for(let i=0;i<2;i++) Object.entries(C.derivados||{}).forEach(([k,ex])=>{ F[k]=test(ex,F); });
   return F;
 }
-function renderRead(){
+function renderRead(){ $("rxRead").innerHTML = rxReadHtml(); }
+function rxReadHtml(){
   const r = rxInfo(), L=[];
-  if(!r.receta){ $("rxRead").innerHTML = '<li class="note">Cargá la receta para ver la explicación.</li>'; return; }
+  if(!r.receta) return '<li class="note">Cargá la receta para ver la explicación.</li>';
   if(r.miopia) L.push(["Corrige <b>miopía</b>: lo de lejos se ve borroso sin anteojos."]);
   if(r.hipermetropia && !r.add) L.push(["Corrige <b>hipermetropía</b>: el esfuerzo es mayor de cerca y al final del día."]);
   if(r.hipermetropia && r.add) L.push(["Tiene graduación positiva de lejos además de la de cerca."]);
@@ -753,7 +815,7 @@ function renderRead(){
   if(r.potencia>=6) L.push(["Graduación alta: conviene un cristal adelgazado (alto índice) para que no quede grueso ni pesado.","warn"]);
   if(r.anisometropia) L.push(["Hay bastante diferencia entre un ojo y el otro: hay que cuidar mucho el centrado del cristal.","warn"]);
   if(r.receta_meses!=null && r.receta_meses>12) L.push(["La receta tiene más de un año. Conviene revisarla con tu oftalmólogo antes de hacer cristales nuevos.","warn"]);
-  $("rxRead").innerHTML = L.map(([t,c])=>`<li${c?` class="${c}"`:""}>${t}</li>`).join("");
+  return L.map(([t,c])=>`<li${c?` class="${c}"`:""}>${t}</li>`).join("");
 }
 
 /* =========================================================
@@ -1133,6 +1195,10 @@ $("copyBtn").onclick = async ()=>{
 function route(){
   const want = location.hash==="#config", staff = isStaff();
   const cfg = want && staff, pin = want && !staff;
+  const wiz = !want && !staff && !WZ().done;
+  document.body.classList.toggle("self", !staff);
+  $("viewWiz").hidden = !wiz; document.querySelector("header.top").hidden = wiz; $("selfBar").hidden = staff;
+  if(wiz){ $("viewPlan").hidden = true; $("viewCfg").hidden = true; $("viewPin").hidden = true; wzRender(); return; }
   $("viewPlan").hidden = want; $("viewCfg").hidden = !cfg; $("viewPin").hidden = !pin;
   $("newBtn").hidden = want; $("exTag").hidden = want || !S.example;
   $("viewBtn").hidden = !staff; $("staffLink").hidden = staff;
@@ -1141,6 +1207,162 @@ function route(){
   if(pin){ $("pinIn").value=""; $("pinMsg").hidden=true; }
   if(cfg) renderCfg(); else if(!want){ renderQs(); all(); }
 }
+
+/* =========================================================
+   AUTOGESTIÓN: CUESTIONARIO (una pregunta por pantalla)
+   El paciente responde paso a paso y al final ve "Estamos armando tu plan".
+   En el mostrador (modo óptica) se sigue usando el formulario completo.
+   ========================================================= */
+const WZ = () => (S.wiz = S.wiz || {at:"hola", done:false});
+// Íconos de las opciones. Cada pregunta de la configuración puede traer los suyos en "iconos": {"valor":"emoji"}.
+const ICONOS = {
+  pantallas:{"0-2":"📱","2-5":"📱📱","5-8":"📱📱📱","8+":"📱📱📱📱"},
+  trabajo:{pc:"💻",aire:"☀️",chofer:"🚚",taller:"🔧",publico:"🗣️",precision:"🪡",estudio:"📚",casa:"🏠"},
+  dist:{lejos:"🛣️",inter:"🖥️",cerca:"📖"},
+  maneja:{no:"🚶",dia:"🚗",noche:"🌙",trabajo:"🚚"},
+  maneja_frec:{ocasional:"🚗",semanal:"🚗🚗",diario:"🚗🚗🚗"},
+  luz:{sol:"☀️",noche:"💡",fatiga:"😩",nada:"👌"},
+  aire:{poco:"🏠",medio:"🌤️",mucho:"☀️"},
+  osc:{si:"🕶️",no:"👓",nose:"🤔"},
+  deporte:{no:"❌",gym:"🏋️",run:"🏃",bici:"🚴",pelota:"⚽",agua:"🏊",nieve:"⛷️",pesca:"🎣"},
+  deporte_frec:{ocasional:"🏃",semanal:"🏃🏃",seguido:"🏃🏃🏃"},
+  actividades:{eventos:"🎉",playa:"🏖️",lectura:"📚",manualidades:"🧵",gaming:"🎮",nada:"❌"},
+  lc:{uso:"👁️",interes:"✨",no:"👓"},
+  tiene:{ninguno:"🚫",uno:"👓",viejo:"🩹",varios:"👓👓"},
+  importa:{estetica:"✨",confort:"😌",dura:"💪",precio:"💰"}
+};
+const icono = (q,v) => ((q.iconos||{})[v]) || ((ICONOS[q.id]||{})[v]) || "";
+function wzSteps(){
+  const F = facts(), st = ["hola","nombre","edad","receta","rxrev","rxread"];
+  C.preguntas.filter(q=>test(q.si,F)).forEach(q=>st.push("q:"+q.id));
+  st.push("armando");
+  return st;
+}
+function wzGo(id){ WZ().at = id; save(); wzRender(); window.scrollTo(0,0); }
+function wzNext(){ const st=wzSteps(), i=st.indexOf(WZ().at); wzGo(st[Math.min(st.length-1, i+1)]); }
+function wzPrev(){ const st=wzSteps(), i=st.indexOf(WZ().at); if(i>0) wzGo(st[i-1]); }
+const foot = (label, ok, extra) => `<div class="wz-foot"><button class="wz-go" type="button" data-wz="next" ${ok?"":"disabled"}>${label}</button>${extra||""}</div>`;
+const hasRx = () => rxInfo().receta;
+let wzTimer = null;
+function wzRender(){
+  clearTimeout(wzTimer);
+  const w = WZ(), st = wzSteps(); if(!st.includes(w.at)) w.at = "hola";
+  const at = w.at, i = st.indexOf(at), total = st.length - 2; // sin contar bienvenida ni "armando"
+  $("wzBrand").textContent = C.optica.nombre || "Óptica";
+  $("wzBack").disabled = i<=0 || at==="armando";
+  $("wzCnt").textContent = at==="hola"||at==="armando" ? "" : `${i}/${total}`;
+  $("wzProg").style.width = (at==="armando" ? 100 : Math.round(100*i/(total+1))) + "%";
+  const B = $("wzBody"); let h = "";
+  if(at==="hola"){
+    h = `<div class="wz-hero"><div class="big">👓</div>
+      <h2 class="wz-q">Armemos tu plan visual</h2>
+      <p class="wz-help">Un anteojo para cada momento de tu día. Te hacemos unas preguntas cortas y te armamos un plan a tu medida.</p>
+      <ul><li>Tené a mano tu receta del oftalmólogo</li><li>Tarda unos 2 minutos</li><li>No te pedimos datos de contacto</li></ul></div>
+      ${foot("Empezar", true)}`;
+  } else if(at==="nombre"){
+    h = `<h2 class="wz-q">¿Cómo te llamás?</h2><p class="wz-help">Así personalizamos tu plan.</p>
+      <input class="wz-in" id="wzNombre" autocomplete="given-name" placeholder="Tu nombre" value="${esc(S.pac.nombre||"")}">
+      ${foot("Continuar", true)}`;
+  } else if(at==="edad"){
+    h = `<h2 class="wz-q">¿Cuántos años tenés?</h2><p class="wz-help">La edad cambia qué anteojos te convienen.</p>
+      <input class="wz-in" id="wzEdad" type="number" min="0" max="110" inputmode="numeric" placeholder="Edad" value="${esc(S.pac.edad||"")}">
+      ${foot("Continuar", num(S.pac.edad)!=null)}`;
+  } else if(at==="receta"){
+    const ia = aiOk();
+    h = `<h2 class="wz-q">Cargá tu receta</h2><p class="wz-help">La receta que te dio tu oftalmólogo. ${ia?"Le sacás una foto y la leemos por vos.":"Copiá los números del papel."}</p>
+      <div class="wz-opts">
+        ${ia?`<label class="wz-opt" for="wzCam">Sacar una foto de la receta<span class="ic">📷</span></label>
+        <label class="wz-opt" for="wzFile">Elegir una foto de la galería<span class="ic">🖼️</span></label>`:""}
+        <button class="wz-opt" type="button" data-wz="manual">Cargar los números a mano<span class="ic">✍️</span></button>
+      </div>
+      <input id="wzCam" type="file" accept="image/*" capture="environment" hidden>
+      <input id="wzFile" type="file" accept="image/*" hidden>
+      ${hasRx()?foot("Seguir con la receta cargada", true):""}`;
+  } else if(at==="rxrev"){
+    const cell = (e,f,mode) => `<td><input data-wrx="${e}-${f}" inputmode="${mode}" value="${esc(S.rx[e][f]??"")}"></td>`;
+    h = `<h2 class="wz-q">Revisá tu receta</h2><p class="wz-help" id="wzRxMsg">${w.msg||"Fijate que cada número sea igual al del papel. Si un casillero está vacío en tu receta, dejalo vacío."}</p>
+      <div class="wz-card"><table class="wz-rx"><thead><tr><th></th><th>Esférico</th><th>Cilindro</th><th>Eje</th><th>Adición</th></tr></thead><tbody>
+        ${["od","oi"].map(e=>`<tr><td>${e==="od"?"OD":"OI"}</td>${cell(e,"esf","decimal")}${cell(e,"cil","decimal")}${cell(e,"eje","numeric")}${cell(e,"add","decimal")}</tr>`).join("")}
+      </tbody></table><p class="note" style="margin:8px 0 0">OD es el ojo derecho y OI el izquierdo. Si dice "neutro" o "N", poné 0.</p></div>
+      <div class="row">
+        <label class="f">Fecha de la receta<input type="date" data-wrx="fecha" value="${esc(S.rx.fecha||"")}"></label>
+        <label class="f">Es para<select data-wrx="tipo">${[["anteojos","Anteojos"],["lc","Lentes de contacto"],["ambos","Anteojos y lentes de contacto"]].map(([v,l])=>`<option value="${v}" ${S.rx.tipo===v?"selected":""}>${l}</option>`).join("")}</select></label>
+      </div>
+      ${foot("Continuar", hasRx(), `<span class="note" id="wzRxNeed" ${hasRx()?"hidden":""}>Cargá al menos un número de la receta.</span>`)}`;
+  } else if(at==="rxread"){
+    h = `<h2 class="wz-q">Tu receta, en simple</h2><p class="wz-help">Esto es lo que indica tu oftalmólogo. No reemplaza su consulta.</p>
+      <div class="wz-card"><ul class="read">${rxReadHtml()}</ul></div>
+      ${foot("Entendido", true)}`;
+  } else if(at.startsWith("q:")){
+    const q = C.preguntas.find(x=>"q:"+x.id===at), cur = S.a[q.id];
+    const on = v => q.multiple ? (cur||[]).includes(v) : cur===v;
+    h = `<h2 class="wz-q">${esc(q.texto)}</h2>${q.ayuda||q.multiple?`<p class="wz-help">${[q.ayuda, q.multiple?"Elegí todas las que correspondan":""].filter(Boolean).map(esc).join(". ")}</p>`:""}
+      <div class="wz-opts">${q.opciones.map(([v,l])=>`<button class="wz-opt" type="button" data-wq="${esc(q.id)}" data-v="${esc(v)}" aria-pressed="${on(v)}">${esc(l)}<span class="ic" aria-hidden="true">${icono(q,v)}</span></button>`).join("")}</div>
+      ${q.multiple ? foot("Continuar", (cur||[]).length>0) : (cur!=null ? foot("Continuar", true) : "")}`;
+  } else if(at==="armando"){
+    const pasos = ["Leyendo tu receta","Analizando tu día","Eligiendo un anteojo para cada momento","Armando tu plan"];
+    h = `<div class="wz-load"><div class="wz-ring" id="wzRing"><b id="wzPct">0%</b></div>
+      <h2 class="wz-q">Estamos armando tu plan${S.pac.nombre?", "+esc(S.pac.nombre.split(" ")[0]):""}</h2>
+      <ul class="wz-steps">${pasos.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>`;
+    B.innerHTML = `<div class="wz-anim" style="display:flex;flex-direction:column;flex:1">${h}</div>`;
+    const lis = B.querySelectorAll(".wz-steps li"), dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1200 : 4200, t0 = performance.now();
+    const tick = () => {
+      if(WZ().at!=="armando") return;
+      const k = Math.min(1,(performance.now()-t0)/dur), p = Math.round(100*(1-Math.pow(1-k,2)));
+      $("wzRing").style.setProperty("--p",p); $("wzPct").textContent = p+"%";
+      lis.forEach((li,j)=>li.classList.toggle("on", k >= (j+1)/(lis.length+0.3)));
+      if(k<1) requestAnimationFrame(tick);
+      else wzTimer = setTimeout(()=>{ WZ().done = true; save(); route(); window.scrollTo(0,0); }, 500);
+    };
+    requestAnimationFrame(tick); return;
+  }
+  B.innerHTML = `<div class="wz-anim" style="display:flex;flex-direction:column;gap:10px;flex:1">${h}</div>`;
+  const inp = B.querySelector(".wz-in"); if(inp && matchMedia("(pointer:fine)").matches) inp.focus();
+  ["wzCam","wzFile"].forEach(id=>{ const el=$(id); if(el) el.onchange = wzFoto; });
+}
+async function wzFoto(e){
+  const f = e.target.files[0]; if(!f) return;
+  WZ().msg = "Leyendo tu receta…"; wzGo("rxrev");
+  ["wzCam","wzFile"].forEach(id=>{ const el=$(id); if(el) el.onchange=null; });
+  $("wzBody").querySelectorAll("input,select,.wz-go").forEach(x=>x.disabled=true);
+  const r = await leerReceta(f);
+  WZ().msg = r.ok ? "Listo. Revisá que cada número sea igual al del papel antes de seguir." : r.msg;
+  if(WZ().at==="rxrev") wzRender();
+  WZ().msg = "";
+}
+function wzRxCheck(){ const ok=hasRx(), b=$("wzBody").querySelector(".wz-go"), n=$("wzRxNeed"); if(b) b.disabled=!ok; if(n) n.hidden=ok; }
+document.addEventListener("input", e=>{
+  const t=e.target; if(!t.closest || !t.closest("#viewWiz")) return;
+  if(t.id==="wzNombre"){ S.pac.nombre=t.value; }
+  else if(t.id==="wzEdad"){ S.pac.edad=t.value; const b=$("wzBody").querySelector(".wz-go"); if(b) b.disabled = num(t.value)==null; }
+  else if(t.dataset.wrx){ const k=t.dataset.wrx; if(k.includes("-")){ const [e2,f]=k.split("-"); S.rx[e2][f]=t.value; } else S.rx[k]=t.value; wzRxCheck(); }
+  else return;
+  S.example=false; fillForm(); save();
+});
+document.addEventListener("change", e=>{ const t=e.target; if(t.dataset && t.dataset.wrx==="tipo"){ S.rx.tipo=t.value; fillForm(); save(); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.classList && e.target.classList.contains("wz-in")){ const b=$("wzBody").querySelector(".wz-go"); if(b && !b.disabled) b.click(); } });
+document.addEventListener("click", e=>{
+  if(!e.target.closest || !e.target.closest("#viewWiz")) return;
+  const o = e.target.closest("[data-wq]");
+  if(o){ const q=C.preguntas.find(x=>x.id===o.dataset.wq), v=o.dataset.v;
+    if(q.multiple){ const ex=q.exclusivas||[]; let arr=S.a[q.id]||[];
+      if(ex.includes(v)) arr = arr.includes(v)?[]:[v];
+      else { arr=arr.filter(x=>!ex.includes(x)); arr = arr.includes(v)?arr.filter(x=>x!==v):[...arr,v]; }
+      S.a[q.id]=arr; save(); wzRenderOpts(q);
+    } else { S.a[q.id]=v; save(); wzRenderOpts(q); wzTimer = setTimeout(wzNext, 280); }
+    S.example=false; return; }
+  const b = e.target.closest("[data-wz]"); if(!b || b.disabled) return;
+  if(b.dataset.wz==="next") wzNext();
+  else if(b.dataset.wz==="manual") wzGo("rxrev");
+});
+function wzRenderOpts(q){ // marca la selección sin redibujar toda la pantalla
+  const cur=S.a[q.id];
+  $("wzBody").querySelectorAll("[data-wq]").forEach(x=>x.setAttribute("aria-pressed", q.multiple ? String((cur||[]).includes(x.dataset.v)) : String(cur===x.dataset.v)));
+  const b=$("wzBody").querySelector(".wz-go"); if(b) b.disabled = q.multiple && !(cur||[]).length;
+}
+$("wzBack").onclick = wzPrev;
+$("wzEdit").onclick = ()=>{ const st=wzSteps(); WZ().done=false; WZ().at = st.find(x=>x.startsWith("q:")) || "hola"; save(); route(); window.scrollTo(0,0); };
+$("wzNew").onclick = ()=>{ $("newBtn").click(); };
 $("pinBtn").onclick = ()=>{
   const ok = hashPin($("pinIn").value.trim()) === (C.optica.pinHash || hashPin("1234"));
   if(!ok){ $("pinMsg").hidden=false; return; }
@@ -1209,29 +1431,33 @@ async function readWithApi(file){
   if(sampleFn){ try{ const lim = await sampleFn.limits(); canImg = !!lim?.images; if(canImg){ $("rxFile").accept = $("rxCam").accept = lim.images.mediaTypes.join(","); } }catch(_){} }
   aiUI();
 })();
+/* Lee la foto y carga los valores en S.rx. Devuelve {ok, html} o {ok:false, msg}. La usan el mostrador y el cuestionario. */
+async function leerReceta(f){
+  try{
+    const d = canImg ? await sampleFn.json(PROMPT, {images:[f], modelTier:"complex"}) : await readWithApi(f);
+    if(!d || d.es_receta===false) return {ok:false, msg:"No parece una receta. Probá con otra foto, derecha y con buena luz."};
+    const show = v => v==null ? "" : (typeof v==="number" ? (v>0?"+":"")+v.toFixed(2) : String(v));
+    ["od","oi"].forEach(k=>{ const x=d[k]||{}; S.rx[k]={esf:show(x.esf), cil:show(x.cil), eje:x.eje==null?"":String(x.eje), add:show(x.add)}; });
+    if(d.fecha) S.rx.fecha=d.fecha; if(d.medico) S.rx.medico=d.medico; if(d.tipo) S.rx.tipo=d.tipo;
+    S.example=false; fillForm(); save();
+    const dudas=(d.dudas||[]).filter(Boolean), ind=(d.indicaciones||[]).filter(Boolean);
+    evento("receta");
+    return {ok:true, html:`Listo. <b>Revisá cada número contra el papel</b> antes de seguir.` + (ind.length?`<br>Indicaciones: ${ind.map(esc).join(", ")}.`:"") + (dudas.length?`<br>Dudas: ${dudas.map(esc).join("; ")}.`:"")};
+  }catch(err){
+    const c=err?.code||"";
+    return {ok:false, msg: c==="not_granted" ? "Sin permiso para usar Claude en esta página. Cargá los valores a mano."
+      : c==="rate_limited" ? "Demasiados pedidos seguidos. Esperá un minuto y probá de nuevo."
+      : c==="image_rejected" ? "La imagen no se pudo leer (formato o tamaño). Probá con una foto JPG."
+      : c==="api_401" ? "La clave de API no es válida. Revisala en Configuración."
+      : "No pude leer la receta. Cargá los valores a mano."};
+  }
+}
 $("rxCam").onchange = $("rxFile").onchange = async e=>{
   const f=e.target.files[0]; if(!f) return;
   const img=$("rxImg"); img.src=URL.createObjectURL(f); img.hidden=false;
   const st=$("aiStatus"); st.hidden=false; st.className="status"; st.textContent="Leyendo la receta…";
-  try{
-    const d = canImg ? await sampleFn.json(PROMPT, {images:[f], modelTier:"complex"}) : await readWithApi(f);
-    if(!d || d.es_receta===false){ st.className="status err"; st.textContent="No parece una receta. Probá con otra foto, derecha y con buena luz."; return; }
-    const show = v => v==null ? "" : (typeof v==="number" ? (v>0?"+":"")+v.toFixed(2) : String(v));
-    ["od","oi"].forEach(k=>{ const x=d[k]||{}; S.rx[k]={esf:show(x.esf), cil:show(x.cil), eje:x.eje==null?"":String(x.eje), add:show(x.add)}; });
-    if(d.fecha) S.rx.fecha=d.fecha; if(d.medico) S.rx.medico=d.medico; if(d.tipo) S.rx.tipo=d.tipo;
-    S.example=false; fillForm(); all();
-    const dudas=(d.dudas||[]).filter(Boolean), ind=(d.indicaciones||[]).filter(Boolean);
-    evento("receta");
-    st.innerHTML = `Listo. <b>Revisá cada número contra el papel</b> antes de seguir.` + (ind.length?`<br>Indicaciones: ${ind.map(esc).join(", ")}.`:"") + (dudas.length?`<br>Dudas: ${dudas.map(esc).join("; ")}.`:"");
-  }catch(err){
-    st.className="status err";
-    const c=err?.code||"";
-    st.textContent = c==="not_granted" ? "Sin permiso para usar Claude en esta página. Cargá los valores a mano."
-      : c==="rate_limited" ? "Demasiados pedidos seguidos. Esperá un minuto y probá de nuevo."
-      : c==="image_rejected" ? "La imagen no se pudo leer (formato o tamaño). Probá con una foto JPG."
-      : c==="api_401" ? "La clave de API no es válida. Revisala en Configuración."
-      : "No pude leer la receta. Cargá los valores a mano.";
-  }finally{ e.target.value=""; }
+  const r = await leerReceta(f); e.target.value="";
+  if(r.ok){ st.innerHTML=r.html; all(); } else { st.className="status err"; st.textContent=r.msg; }
 };
 
 /* downloads (solo dentro de Claude) */
