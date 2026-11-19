@@ -205,6 +205,8 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
 .wz-steps li.on{color:var(--ink);font-weight:600}
 .wz-steps li.on::before{content:"✓";border-color:var(--opt);background:var(--opt);color:#fff;font-size:.7rem;display:grid;place-items:center}
 @media (prefers-reduced-motion:no-preference){.wz-anim{animation:wzIn .28s ease both}@keyframes wzIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}}
+.rx-note{border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.rx-note b{font-family:var(--f-display);font-size:1.05rem}.rx-note p{margin:0;font-size:.92rem}
 .self-bar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 </style>
 
@@ -300,6 +302,7 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
             <span><span class="dot" style="background:var(--opt)"></span>Opcional</span>
           </div>
         </div>
+        <div class="rx-note" id="rxNote" hidden></div>
         <div class="items" id="items"></div>
         <div class="totals" id="totals"></div>
         <div class="actions">
@@ -383,7 +386,7 @@ textarea.json{min-height:360px;font-family:var(--f-mono);font-size:.8rem}
       <details class="help">
         <summary style="cursor:pointer;font-weight:600">Cómo se escriben las condiciones</summary>
         <ul>
-          <li>Datos de la receta: <code>add</code>, <code>lejos</code> (tiene graduación de lejos), <code>miopia</code>, <code>hipermetropia</code>, <code>astigmatismo</code>, <code>potencia</code>, <code>anisometropia</code>, <code>receta</code> (cargada), <code>receta_meses</code>, <code>receta_tipo</code>, <code>edad</code>.</li>
+          <li>Datos de la receta: <code>add</code>, <code>lejos</code> (tiene graduación de lejos), <code>miopia</code>, <code>hipermetropia</code>, <code>astigmatismo</code>, <code>potencia</code>, <code>anisometropia</code>, <code>receta</code> (cargada), <code>sin_receta</code> (eligió "No tengo la receta a mano"), <code>ve_bien</code> (eligió "Veo bien"), <code>receta_meses</code>, <code>receta_tipo</code>, <code>edad</code>.</li>
           <li>Respuestas: el código de cada pregunta, por ejemplo <code>maneja == "noche"</code>, <code>"pc" in trabajo</code>, <code>pantallas in ["5-8","8+"]</code>.</li>
           <li>Unir: <code>and</code> / <code>y</code>, <code>or</code> / <code>o</code>, <code>not</code> / <code>no</code>, paréntesis. Comparar: <code>== != &gt; &gt;= &lt; &lt;=</code>.</li>
           <li>Ejemplo: <code>add &gt; 0 and (lejos or "lejos" in dist)</code></li>
@@ -469,17 +472,17 @@ const DEFAULT_CONFIG = {
   preguntas: [
     {id:"pantallas", texto:"¿Cuántas horas por día mirás pantallas?", ayuda:"PC, celular, tablet, consola", opciones:[["0-2","Menos de 2"],["2-5","2 a 5"],["5-8","5 a 8"],["8+","Más de 8"]]},
     {id:"trabajo", multiple:true, texto:"¿Qué hacés la mayor parte del día?", opciones:[["pc","Oficina / PC"],["aire","Trabajo al aire libre"],["chofer","Manejo (chofer, reparto)"],["taller","Taller, obra o laboratorio"],["publico","Docencia / atención al público"],["precision","Oficio de precisión (costura, electrónica)"],["estudio","Estudio"],["casa","Casa / jubilado"]]},
-    {id:"dist", multiple:true, texto:"¿Dónde necesitás ver bien sí o sí?", opciones:[["lejos","Lejos (calle, tele, pizarrón)"],["inter","Intermedia (PC, tablero, cocina)"],["cerca","Cerca (celular, leer, coser)"]]},
+    {id:"dist", si:"not sin_receta and not ve_bien", multiple:true, texto:"¿Dónde necesitás ver bien sí o sí?", opciones:[["lejos","Lejos (calle, tele, pizarrón)"],["inter","Intermedia (PC, tablero, cocina)"],["cerca","Cerca (celular, leer, coser)"]]},
     {id:"maneja", texto:"¿Manejás?", opciones:[["no","No"],["dia","Sí, de día"],["noche","También de noche"],["trabajo","Por trabajo"]]},
     {id:"maneja_frec", si:"maneja_si", texto:"¿Cada cuánto manejás?", opciones:[["ocasional","De vez en cuando"],["semanal","Varias veces por semana"],["diario","Todos los días"]]},
     {id:"luz", multiple:true, texto:"¿Algo de la luz te molesta?", opciones:[["sol","El sol, me achino"],["noche","Las luces de noche me encandilan"],["fatiga","Termino el día con la vista cansada"],["nada","Nada"]], exclusivas:["nada"]},
     {id:"aire", texto:"¿Cuánto tiempo pasás al aire libre?", opciones:[["poco","Poco"],["medio","1 a 3 horas"],["mucho","Más de 3 horas"]]},
-    {id:"osc", texto:"¿Te gustaría que tu anteojo de todos los días se oscurezca al sol?", opciones:[["si","Sí"],["no","No"],["nose","No sé"]]},
+    {id:"osc", si:"not sin_receta and not ve_bien", texto:"¿Te gustaría que tu anteojo de todos los días se oscurezca al sol?", opciones:[["si","Sí"],["no","No"],["nose","No sé"]]},
     {id:"deporte", multiple:true, texto:"¿Hacés deporte?", opciones:[["no","No"],["gym","Gimnasio"],["run","Running / caminata"],["bici","Bici"],["pelota","Fútbol / pádel / tenis"],["agua","Natación"],["nieve","Esquí / nieve"],["pesca","Pesca / náutica"]], exclusivas:["no"]},
     {id:"deporte_frec", si:'deporte_activo or "agua" in deporte', texto:"¿Cada cuánto hacés deporte?", opciones:[["ocasional","De vez en cuando"],["semanal","1 o 2 veces por semana"],["seguido","3 veces o más por semana"]]},
     {id:"actividades", multiple:true, texto:"¿Qué más hacés en tu tiempo libre?", opciones:[["eventos","Salidas y eventos"],["playa","Playa, pileta y vacaciones"],["lectura","Leer mucho"],["manualidades","Manualidades, costura, maquetas"],["gaming","Videojuegos"],["nada","Nada en especial"]], exclusivas:["nada"]},
-    {id:"lc", si:"lc_edad_ok and ofrece_lc", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
-    {id:"tiene", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
+    {id:"lc", si:"lc_edad_ok and ofrece_lc and not ve_bien", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
+    {id:"tiene", si:"not ve_bien", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
     {id:"importa", texto:"¿Qué es lo que más te importa?", opciones:[["estetica","Verme bien"],["confort","Comodidad todo el día"],["dura","Que dure"],["precio","Cuidar el presupuesto"]]}
   ],
   derivados: {
@@ -530,6 +533,9 @@ const DEFAULT_CONFIG = {
     {id:"proteccion_lateral", especialidad:"seguridad", nombre:"Protecciones laterales", detalle:"Anteojo de seguridad con norma"},
     {id:"clip", especialidad:"deportivo", nombre:"Clip óptico", detalle:"Tu graduación adentro de la máscara o antiparra"},
     {id:"antiparra", especialidad:"antiparras", nombre:"Antiparra graduada", detalle:"Para ver bien en la pileta"},
+    {"id": "plano", "nombre": "Sin aumento", "detalle": "Para quien ve bien: protege sin cambiar cómo ves"},
+    {"id": "polar_auto", "nombre": "Polarizado que se adapta al auto", "detalle": "Se oscurece y aclara solo, también detrás del parabrisas. Corta el deslumbramiento"},
+    {"id": "antiparra_nieve", "especialidad": "deportivo", "nombre": "Antiparra de nieve", "detalle": "Cubre todo el ojo del viento, el frío y el reflejo de la nieve"},
     {id:"mismas", nombre:"Mismas tecnologías que tu anteojo principal", detalle:"Otro estilo de armazón para combinar"},
     {id:"lc_diarias", especialidad:"lc", nombre:"Lentes de contacto diarias", detalle:"Se usan un día y se descartan"},
     {id:"lc_mensuales", especialidad:"lc", nombre:"Lentes de contacto mensuales", detalle:"Para uso diario, con solución"},
@@ -684,6 +690,13 @@ const DEFAULT_CONFIG = {
       motivos:[{si:'"precision" in trabajo or "manualidades" in actividades', texto:"Hacés trabajos de precisión o manualidades: un anteojo solo de cerca da el campo más amplio."},{si:'"lectura" in actividades', texto:"Leés mucho: el campo de lectura más cómodo, en la cama o el sillón."},{texto:"Si elegiste dos anteojos, este ya está incluido."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"}]}]}]},
 
+    // Sin receta o "veo bien": solo productos sin aumento
+    {"id": "plano_pantallas", "momento": "trabajo", "nombre": "Anteojo para pantallas", "cuando": "not receta and usa_pc", "puntos": [{"n": 3}, {"si": "pantallas in [\"5-8\",\"8+\"]", "n": 2}, {"si": "\"fatiga\" in luz", "n": 2}, {"si": "\"gaming\" in actividades", "n": 1}], "motivos": [{"si": "pantallas in [\"5-8\",\"8+\"]", "texto": "Mirás pantallas {pantallas} horas por día."}, {"si": "\"fatiga\" in luz", "texto": "Terminás el día con la vista cansada."}, {"si": "\"gaming\" in actividades", "texto": "Jugás videojuegos: muchas horas de pantalla seguidas."}], "soluciones": [{"id": "uno", "nombre": "Pantallas", "pares": [{"para": "Sin aumento, solo con filtro: lo usás para la compu y el celular.", "tecnologias": [{"id": "plano"}, {"id": "blue"}, {"id": "ar"}]}]}]},
+    {"id": "plano_manejo", "momento": "manejo", "nombre": "Anteojo para manejar", "cuando": "not receta and maneja_si", "puntos": [{"n": 3}, {"si": "maneja_mucho", "n": 2}, {"si": "\"sol\" in luz", "n": 2}], "motivos": [{"si": "maneja_si", "texto": "Manejás: el polarizado corta el reflejo del asfalto y del parabrisas."}, {"si": "\"sol\" in luz", "texto": "Nos dijiste que el sol te molesta."}, {"si": "maneja_noche", "texto": "Manejás de noche: un cristal claro con antirreflejo reduce el encandilamiento. Los cristales oscuros no sirven de noche."}], "soluciones": [{"id": "uno", "nombre": "Manejo", "pares": [{"nombre": "De día", "para": "Corta el reflejo del sol en el asfalto y el parabrisas.", "tecnologias": [{"id": "plano"}, {"id": "polar_auto"}]}, {"nombre": "De noche", "si": "maneja_noche", "para": "Cristal claro: menos encandilamiento con las luces de los otros autos.", "tecnologias": [{"id": "plano"}, {"id": "ar"}, {"id": "contraste"}]}]}]},
+    {"id": "plano_sol", "momento": "sol", "nombre": "Anteojo de sol", "cuando": "not receta and not maneja_si", "puntos": [{"n": 1}, {"si": "\"sol\" in luz", "n": 2}, {"si": "aire == \"mucho\"", "n": 3}, {"si": "aire == \"medio\"", "n": 1}, {"si": "\"playa\" in actividades", "n": 2}, {"si": "\"aire\" in trabajo", "n": 3}], "motivos": [{"si": "\"sol\" in luz", "texto": "Nos dijiste que el sol te molesta."}, {"si": "aire in [\"medio\",\"mucho\"]", "texto": "Pasás {aire} al aire libre por día."}, {"si": "\"playa\" in actividades", "texto": "Playa, pileta y vacaciones: proteger los ojos del sol."}, {"si": "\"aire\" in trabajo", "texto": "Trabajás al aire libre."}], "soluciones": [{"id": "uno", "nombre": "Sol", "pares": [{"tecnologias": [{"id": "plano"}, {"id": "polar"}, {"id": "espejado", "si": "\"playa\" in actividades"}]}]}]},
+    {"id": "plano_deporte", "momento": "deporte", "especialidad": "deportivo", "nombre": "Anteojo deportivo", "cuando": "not receta and deporte in [\"run\",\"bici\",\"pelota\",\"pesca\"]", "puntos": [{"n": 2}, {"si": "deporte_seguido", "n": 3}, {"si": "\"pelota\" in deporte", "n": 2}], "motivos": [{"si": "deporte_frec", "texto": "Nos dijiste que hacés deporte {deporte_frec}."}, {"si": "deporte in [\"run\",\"bici\"]", "texto": "Corrés, caminás o andás en bici: envolvente, liviano y que no se mueva."}, {"si": "\"pelota\" in deporte", "texto": "Jugás con pelota o raqueta: un protector evita golpes en los ojos."}, {"si": "\"pesca\" in deporte", "texto": "Pesca o náutica: el polarizado deja ver a través del reflejo del agua."}], "soluciones": [{"id": "uno", "nombre": "Deportivo", "pares": [{"nombre": "Correr / bici", "si": "deporte in [\"run\",\"bici\"]", "tecnologias": [{"id": "plano"}, {"id": "envolvente"}, {"id": "policarbonato"}, {"id": "polar"}]}, {"nombre": "Deportes con pelota", "si": "\"pelota\" in deporte", "tecnologias": [{"id": "plano"}, {"id": "policarbonato"}, {"id": "envolvente"}]}, {"nombre": "Agua", "si": "\"pesca\" in deporte", "tecnologias": [{"id": "plano"}, {"id": "polar"}, {"id": "envolvente"}]}]}]},
+    {"id": "plano_nieve", "momento": "deporte", "especialidad": "deportivo", "nombre": "Antiparra de nieve", "cuando": "not receta and \"nieve\" in deporte", "puntos": [{"n": 5}], "motivos": [{"si": "\"nieve\" in deporte", "texto": "En la nieve la luz es muy fuerte y rebota desde abajo: el espejado la corta."}], "soluciones": [{"id": "uno", "nombre": "Nieve", "pares": [{"tecnologias": [{"id": "antiparra_nieve"}, {"id": "espejado"}, {"id": "policarbonato"}]}]}]},
+    {"id": "plano_seguridad", "momento": "trabajo", "especialidad": "seguridad", "nombre": "Anteojo de seguridad", "cuando": "not receta and \"taller\" in trabajo", "puntos": [{"n": 4}], "motivos": [{"si": "\"taller\" in trabajo", "texto": "Trabajás en taller, obra o laboratorio: protege de partículas y salpicaduras."}], "soluciones": [{"id": "uno", "nombre": "Seguridad", "pares": [{"tecnologias": [{"id": "plano"}, {"id": "policarbonato"}, {"id": "proteccion_lateral"}]}]}]},
     {id:"repuesto", momento:"repuesto", nombre:"Anteojo de repuesto", cuando:'receta',
       puntos:[{si:"potencia >= 3", n:3},{si:"potencia >= 6", n:2},{si:'tiene in ["ninguno","uno","viejo"]', n:1},{si:'tiene == "varios"', n:-4},{si:"graduacion_baja", n:-5}],
       motivos:[{texto:"Sin anteojo no ves bien: si se rompe, te quedás sin ver."},{texto:"Puede ser tu marco actual con cristales nuevos."}],
@@ -797,6 +810,7 @@ function rxInfo(){
 }
 function facts(){
   const F = {...rxInfo(), receta_tipo:S.rx.tipo||"anteojos", edad:num(S.pac.edad)};
+  F.ve_bien = S.rx.estado==="veo_bien"; F.sin_receta = S.rx.estado==="no_tengo"; // autogestión sin receta
   (C.especialidades||[]).forEach(e=>{ F["ofrece_"+e.id]=ofrece(e.id); });
   C.preguntas.forEach(q=>{ const v=S.a[q.id]; F[q.id] = q.multiple ? (Array.isArray(v)?v:[]) : (v??null); });
   // dos pasadas: un derivado puede usar otro definido más abajo
@@ -922,15 +936,16 @@ const momentName = id => ((C.momentos||[]).find(m=>m.id===id)||{nombre:"Otros"})
 function renderPlan(){
   const all = build(); const items = all.filter(i=>i.pr!=="hid"); const hid = all.filter(i=>i.pr==="hid");
   lastItems = items;
-  if(items.length && S.rx && rxInfo().receta) evento("plan");
+  if(items.length && (rxInfo().receta || S.rx.estado)) evento("plan");
+  const nota = rxNota(); $("rxNote").hidden = !nota; $("rxNote").innerHTML = nota;
   $("planWho").textContent = (S.pac.nombre || "Paciente sin nombre") + (S.pac.edad? ` · ${S.pac.edad} años`:"");
   $("exTag").hidden = !S.example;
-  if(!items.length){ $("items").innerHTML = '<p class="note">Cargá la receta y respondé la anamnesis: el plan se arma solo.</p>'; $("totals").innerHTML=""; return; }
+  if(!items.length){ $("items").innerHTML = S.rx.estado && !rxInfo().receta ? '<p class="note">Con lo que nos contaste no hace falta ningún anteojo especial por ahora.</p>' : '<p class="note">Cargá la receta y respondé la anamnesis: el plan se arma solo.</p>'; $("totals").innerHTML=""; return; }
   const ess = items.filter(i=>i.pr==="ess"), extra = items.filter(i=>i.pr!=="ess");
   let h = "";
   if(ess.length) h += `<div class="section"><h3>Lo esencial: ver bien todo el día</h3><p class="note">Es la prioridad. Esto te garantiza ver bien en tu día a día.</p></div>` + ess.map(itemHtml).join("");
   if(extra.length){
-    h += `<div class="section"><h3>Opcional y de especialidad</h3><p class="note">Como el calzado: un par para cada actividad. Te mostramos lo que más te sirve según lo que nos contaste.</p></div>`;
+    h += !ess.length && !rxInfo().receta ? `<div class="section"><h3>Lo que te sirve según tu día</h3><p class="note">Anteojos sin aumento: protegen tus ojos sin cambiar cómo ves.</p></div>` : `<div class="section"><h3>Opcional y de especialidad</h3><p class="note">Como el calzado: un par para cada actividad. Te mostramos lo que más te sirve según lo que nos contaste.</p></div>`;
     let cm=null; extra.forEach(it=>{ if(it.s.momento!==cm){ cm=it.s.momento; h += `<div class="moment">${esc(momentName(cm))}</div>`; } h += itemHtml(it); });
   }
   if(hid.length){
@@ -945,6 +960,14 @@ function renderPlan(){
     <div>Lo esencial</div><div class="v big">${ess.length}</div>
     <div class="note">Opcional y de especialidad</div><div class="v note">${ex.length} en ${new Set(ex.map(i=>i.s.momento)).size} momentos</div>
     <div class="note">Para empezar</div><div class="v note">${hoyN?hoyN+" elegida"+(hoyN>1?"s":""):"sin elegir"}</div>`;
+}
+/* Sin receta o "veo bien": recomendar el control con el oftalmólogo (la óptica no hace controles de la vista). */
+function rxNota(){
+  if(rxInfo().receta) return "";
+  const e = S.rx.estado, edad = num(S.pac.edad);
+  if(e==="veo_bien") return `<b>Te recomendamos un control con tu oftalmólogo</b><p>Aunque veas bien, conviene hacerlo una vez por año, o antes si notás algún cambio. Si te indica anteojos, traé la receta y armamos tu plan completo.</p>${edad>=40?"<p>Desde los 40 años es común empezar a notar que cuesta ver de cerca, como el celular o la letra chica.</p>":""}`;
+  if(e==="no_tengo") return `<b>Pedí turno con tu oftalmólogo</b><p>Para hacer anteojos con aumento necesitamos la receta de tu oftalmólogo. Si ya la tenés, traela o mandala por WhatsApp. Si no la tenés o tiene más de un año, te recomendamos hacer un control.</p><p>Mientras tanto, esto es lo que te sirve sin aumento:</p>`;
+  return "";
 }
 const TAGW = {ess:"Esencial", rec:"Muy recomendado", opt:"Opcional"};
 function waText(){
@@ -1000,17 +1023,19 @@ function contactText(){
   if(!start.length){ const e=act.find(i=>i.pr==="ess"); if(e){ const d=desc(e); start=[d]; rest=rest.filter(x=>!x.startsWith(e.s.nombre)); } }
   let t = head + "\n\n";
   if(start.length) t += "*Quiero empezar con:*\n" + start.map(x=>"• "+x).join("\n") + "\n\n";
-  if(rest.length) t += "*El resto de mi plan es:*\n" + rest.map(x=>"• "+x).join("\n") + "\n\n";
+  if(rest.length) t += (start.length ? "*El resto de mi plan es:*\n" : "*Mi plan es:*\n") + rest.map(x=>"• "+x).join("\n") + "\n\n";
   const rx = rxLines();
   if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n\n";
   const ms = [...new Set(act.filter(isHoy).flatMap(i=>notas(i).map(n=>n.mensaje).filter(Boolean)))];
   if(ms.length) t += ms.join("\n") + "\n\n";
-  t += "*Envío la foto de la receta para revisión.*";
+  if(rxInfo().receta) t += "*Envío la foto de la receta para revisión.*";
+  else if(S.rx.estado==="no_tengo") t += "No tengo la receta a mano.";
+  else if(S.rx.estado==="veo_bien") t += "Veo bien, no uso anteojos con aumento.";
   return t.trim();
 }
 function updateWa(){
   const n = String(C.optica.whatsapp||"").replace(/\D/g,""), a=$("waBtn");
-  a.hidden = !n || !lastItems.length; $("waNote").hidden = a.hidden;
+  a.hidden = !n || (!lastItems.length && !S.rx.estado); $("waNote").hidden = a.hidden || !rxInfo().receta;
   a.href = n ? "https://wa.me/"+n+"?text="+encodeURIComponent(contactText()) : "#";
 }
 function fillForm(){
@@ -1233,7 +1258,7 @@ const ICONOS = {
 };
 const icono = (q,v) => ((q.iconos||{})[v]) || ((ICONOS[q.id]||{})[v]) || "";
 function wzSteps(){
-  const F = facts(), st = ["hola","nombre","edad","receta","rxrev","rxread"];
+  const F = facts(), st = ["hola","nombre","edad","receta"].concat(S.rx.estado ? [] : ["rxrev","rxread"]);
   C.preguntas.filter(q=>test(q.si,F)).forEach(q=>st.push("q:"+q.id));
   st.push("armando");
   return st;
@@ -1269,15 +1294,17 @@ function wzRender(){
       ${foot("Continuar", num(S.pac.edad)!=null)}`;
   } else if(at==="receta"){
     const ia = aiOk();
-    h = `<h2 class="wz-q">Cargá tu receta</h2><p class="wz-help">La receta que te dio tu oftalmólogo. ${ia?"Le sacás una foto y la leemos por vos.":"Copiá los números del papel."}</p>
+    h = `<h2 class="wz-q">¿Tenés receta de tu oftalmólogo?</h2><p class="wz-help">${ia?"Le sacás una foto y la leemos por vos. Si no tenés, también te armamos el plan.":"Copiá los números del papel. Si no tenés, también te armamos el plan."}</p>
       <div class="wz-opts">
         ${ia?`<label class="wz-opt" for="wzCam">Sacar una foto de la receta<span class="ic">📷</span></label>
         <label class="wz-opt" for="wzFile">Elegir una foto de la galería<span class="ic">🖼️</span></label>`:""}
         <button class="wz-opt" type="button" data-wz="manual">Cargar los números a mano<span class="ic">✍️</span></button>
+        <button class="wz-opt" type="button" data-wz="no_tengo" aria-pressed="${S.rx.estado==="no_tengo"}">No tengo la receta a mano<span class="ic">🤷</span></button>
+        <button class="wz-opt" type="button" data-wz="veo_bien" aria-pressed="${S.rx.estado==="veo_bien"}">Veo bien, no uso anteojos<span class="ic">😎</span></button>
       </div>
       <input id="wzCam" type="file" accept="image/*" capture="environment" hidden>
       <input id="wzFile" type="file" accept="image/*" hidden>
-      ${hasRx()?foot("Seguir con la receta cargada", true):""}`;
+      ${hasRx()&&!S.rx.estado?foot("Seguir con la receta cargada", true):""}`;
   } else if(at==="rxrev"){
     const cell = (e,f,mode) => `<td><input data-wrx="${e}-${f}" inputmode="${mode}" value="${esc(S.rx[e][f]??"")}"></td>`;
     h = `<h2 class="wz-q">Revisá tu receta</h2><p class="wz-help" id="wzRxMsg">${w.msg||"Fijate que cada número sea igual al del papel. Si un casillero está vacío en tu receta, dejalo vacío."}</p>
@@ -1300,7 +1327,7 @@ function wzRender(){
       <div class="wz-opts">${q.opciones.map(([v,l])=>`<button class="wz-opt" type="button" data-wq="${esc(q.id)}" data-v="${esc(v)}" aria-pressed="${on(v)}">${esc(l)}<span class="ic" aria-hidden="true">${icono(q,v)}</span></button>`).join("")}</div>
       ${q.multiple ? foot("Continuar", (cur||[]).length>0) : (cur!=null ? foot("Continuar", true) : "")}`;
   } else if(at==="armando"){
-    const pasos = ["Leyendo tu receta","Analizando tu día","Eligiendo un anteojo para cada momento","Armando tu plan"];
+    const pasos = [hasRx() ? "Leyendo tu receta" : "Revisando lo que nos contaste","Analizando tu día","Eligiendo un anteojo para cada momento","Armando tu plan"];
     h = `<div class="wz-load"><div class="wz-ring" id="wzRing"><b id="wzPct">0%</b></div>
       <h2 class="wz-q">Estamos armando tu plan${S.pac.nombre?", "+esc(S.pac.nombre.split(" ")[0]):""}</h2>
       <ul class="wz-steps">${pasos.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>`;
@@ -1322,7 +1349,7 @@ function wzRender(){
 }
 async function wzFoto(e){
   const f = e.target.files[0]; if(!f) return;
-  WZ().msg = "Leyendo tu receta…"; wzGo("rxrev");
+  S.rx.estado = ""; WZ().msg = "Leyendo tu receta…"; wzGo("rxrev");
   ["wzCam","wzFile"].forEach(id=>{ const el=$(id); if(el) el.onchange=null; });
   $("wzBody").querySelectorAll("input,select,.wz-go").forEach(x=>x.disabled=true);
   const r = await leerReceta(f);
@@ -1353,7 +1380,12 @@ document.addEventListener("click", e=>{
     S.example=false; return; }
   const b = e.target.closest("[data-wz]"); if(!b || b.disabled) return;
   if(b.dataset.wz==="next") wzNext();
-  else if(b.dataset.wz==="manual") wzGo("rxrev");
+  else if(b.dataset.wz==="manual"){ S.rx.estado=""; wzGo("rxrev"); }
+  else if(b.dataset.wz==="no_tengo" || b.dataset.wz==="veo_bien"){
+    // sin receta: se borran los números que hubiera y se pasa a las preguntas
+    S.rx = {...BLANK().rx, estado:b.dataset.wz}; fillForm(); save();
+    b.setAttribute("aria-pressed","true"); wzTimer = setTimeout(wzNext, 280);
+  }
 });
 function wzRenderOpts(q){ // marca la selección sin redibujar toda la pantalla
   const cur=S.a[q.id];
