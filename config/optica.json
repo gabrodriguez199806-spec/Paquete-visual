@@ -133,7 +133,8 @@
           "cerca",
           "Cerca (celular, leer, coser)"
         ]
-      ]
+      ],
+      "si": "not sin_receta and not ve_bien"
     },
     {
       "id": "maneja",
@@ -236,7 +237,8 @@
           "nose",
           "No sé"
         ]
-      ]
+      ],
+      "si": "not sin_receta and not ve_bien"
     },
     {
       "id": "deporte",
@@ -335,7 +337,7 @@
     },
     {
       "id": "lc",
-      "si": "lc_edad_ok and ofrece_lc",
+      "si": "lc_edad_ok and ofrece_lc and not ve_bien",
       "texto": "¿Usás o te interesan los lentes de contacto?",
       "opciones": [
         [
@@ -372,7 +374,8 @@
           "varios",
           "Varios"
         ]
-      ]
+      ],
+      "si": "not ve_bien"
     },
     {
       "id": "importa",
@@ -543,6 +546,22 @@
       "especialidad": "antiparras",
       "nombre": "Antiparra graduada",
       "detalle": "Para ver bien en la pileta"
+    },
+    {
+      "id": "plano",
+      "nombre": "Sin aumento",
+      "detalle": "Para quien ve bien: protege sin cambiar cómo ves"
+    },
+    {
+      "id": "polar_auto",
+      "nombre": "Polarizado que se adapta al auto",
+      "detalle": "Se oscurece y aclara solo, también detrás del parabrisas. Corta el deslumbramiento"
+    },
+    {
+      "id": "antiparra_nieve",
+      "especialidad": "deportivo",
+      "nombre": "Antiparra de nieve",
+      "detalle": "Cubre todo el ojo del viento, el frío y el reflejo de la nieve"
     },
     {
       "id": "mismas",
@@ -1758,6 +1777,377 @@
                 },
                 {
                   "id": "ar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_pantallas",
+      "momento": "trabajo",
+      "nombre": "Anteojo para pantallas",
+      "cuando": "not receta and usa_pc",
+      "puntos": [
+        {
+          "n": 3
+        },
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "n": 2
+        },
+        {
+          "si": "\"fatiga\" in luz",
+          "n": 2
+        },
+        {
+          "si": "\"gaming\" in actividades",
+          "n": 1
+        }
+      ],
+      "motivos": [
+        {
+          "si": "pantallas in [\"5-8\",\"8+\"]",
+          "texto": "Mirás pantallas {pantallas} horas por día."
+        },
+        {
+          "si": "\"fatiga\" in luz",
+          "texto": "Terminás el día con la vista cansada."
+        },
+        {
+          "si": "\"gaming\" in actividades",
+          "texto": "Jugás videojuegos: muchas horas de pantalla seguidas."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Pantallas",
+          "pares": [
+            {
+              "para": "Sin aumento, solo con filtro: lo usás para la compu y el celular.",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "blue"
+                },
+                {
+                  "id": "ar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_manejo",
+      "momento": "manejo",
+      "nombre": "Anteojo para manejar",
+      "cuando": "not receta and maneja_si",
+      "puntos": [
+        {
+          "n": 3
+        },
+        {
+          "si": "maneja_mucho",
+          "n": 2
+        },
+        {
+          "si": "\"sol\" in luz",
+          "n": 2
+        }
+      ],
+      "motivos": [
+        {
+          "si": "maneja_si",
+          "texto": "Manejás: el polarizado corta el reflejo del asfalto y del parabrisas."
+        },
+        {
+          "si": "\"sol\" in luz",
+          "texto": "Nos dijiste que el sol te molesta."
+        },
+        {
+          "si": "maneja_noche",
+          "texto": "Manejás de noche: un cristal claro con antirreflejo reduce el encandilamiento. Los cristales oscuros no sirven de noche."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Manejo",
+          "pares": [
+            {
+              "nombre": "De día",
+              "para": "Corta el reflejo del sol en el asfalto y el parabrisas.",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "polar_auto"
+                }
+              ]
+            },
+            {
+              "nombre": "De noche",
+              "si": "maneja_noche",
+              "para": "Cristal claro: menos encandilamiento con las luces de los otros autos.",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "ar"
+                },
+                {
+                  "id": "contraste"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_sol",
+      "momento": "sol",
+      "nombre": "Anteojo de sol",
+      "cuando": "not receta and not maneja_si",
+      "puntos": [
+        {
+          "n": 1
+        },
+        {
+          "si": "\"sol\" in luz",
+          "n": 2
+        },
+        {
+          "si": "aire == \"mucho\"",
+          "n": 3
+        },
+        {
+          "si": "aire == \"medio\"",
+          "n": 1
+        },
+        {
+          "si": "\"playa\" in actividades",
+          "n": 2
+        },
+        {
+          "si": "\"aire\" in trabajo",
+          "n": 3
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"sol\" in luz",
+          "texto": "Nos dijiste que el sol te molesta."
+        },
+        {
+          "si": "aire in [\"medio\",\"mucho\"]",
+          "texto": "Pasás {aire} al aire libre por día."
+        },
+        {
+          "si": "\"playa\" in actividades",
+          "texto": "Playa, pileta y vacaciones: proteger los ojos del sol."
+        },
+        {
+          "si": "\"aire\" in trabajo",
+          "texto": "Trabajás al aire libre."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Sol",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "polar"
+                },
+                {
+                  "id": "espejado",
+                  "si": "\"playa\" in actividades"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_deporte",
+      "momento": "deporte",
+      "especialidad": "deportivo",
+      "nombre": "Anteojo deportivo",
+      "cuando": "not receta and deporte in [\"run\",\"bici\",\"pelota\",\"pesca\"]",
+      "puntos": [
+        {
+          "n": 2
+        },
+        {
+          "si": "deporte_seguido",
+          "n": 3
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "n": 2
+        }
+      ],
+      "motivos": [
+        {
+          "si": "deporte_frec",
+          "texto": "Nos dijiste que hacés deporte {deporte_frec}."
+        },
+        {
+          "si": "deporte in [\"run\",\"bici\"]",
+          "texto": "Corrés, caminás o andás en bici: envolvente, liviano y que no se mueva."
+        },
+        {
+          "si": "\"pelota\" in deporte",
+          "texto": "Jugás con pelota o raqueta: un protector evita golpes en los ojos."
+        },
+        {
+          "si": "\"pesca\" in deporte",
+          "texto": "Pesca o náutica: el polarizado deja ver a través del reflejo del agua."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Deportivo",
+          "pares": [
+            {
+              "nombre": "Correr / bici",
+              "si": "deporte in [\"run\",\"bici\"]",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "envolvente"
+                },
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "polar"
+                }
+              ]
+            },
+            {
+              "nombre": "Deportes con pelota",
+              "si": "\"pelota\" in deporte",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "envolvente"
+                }
+              ]
+            },
+            {
+              "nombre": "Agua",
+              "si": "\"pesca\" in deporte",
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "polar"
+                },
+                {
+                  "id": "envolvente"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_nieve",
+      "momento": "deporte",
+      "especialidad": "deportivo",
+      "nombre": "Antiparra de nieve",
+      "cuando": "not receta and \"nieve\" in deporte",
+      "puntos": [
+        {
+          "n": 5
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"nieve\" in deporte",
+          "texto": "En la nieve la luz es muy fuerte y rebota desde abajo: el espejado la corta."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Nieve",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "antiparra_nieve"
+                },
+                {
+                  "id": "espejado"
+                },
+                {
+                  "id": "policarbonato"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plano_seguridad",
+      "momento": "trabajo",
+      "especialidad": "seguridad",
+      "nombre": "Anteojo de seguridad",
+      "cuando": "not receta and \"taller\" in trabajo",
+      "puntos": [
+        {
+          "n": 4
+        }
+      ],
+      "motivos": [
+        {
+          "si": "\"taller\" in trabajo",
+          "texto": "Trabajás en taller, obra o laboratorio: protege de partículas y salpicaduras."
+        }
+      ],
+      "soluciones": [
+        {
+          "id": "uno",
+          "nombre": "Seguridad",
+          "pares": [
+            {
+              "tecnologias": [
+                {
+                  "id": "plano"
+                },
+                {
+                  "id": "policarbonato"
+                },
+                {
+                  "id": "proteccion_lateral"
                 }
               ]
             }
