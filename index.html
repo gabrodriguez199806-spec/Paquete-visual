@@ -1302,7 +1302,9 @@ function wzRender(){
   const at = w.at, i = st.indexOf(at), total = st.length - 2; // sin contar bienvenida ni "armando"
   $("wzBrand").textContent = C.optica.nombre || "Óptica";
   $("wzBack").disabled = i<=0 || at==="armando";
-  $("wzCnt").textContent = at==="hola"||at==="armando" ? "" : `${i}/${total}`;
+  // sin números (la cantidad cambia según las respuestas): solo un mensaje de ánimo
+  const av = total ? i/total : 0;
+  $("wzCnt").textContent = at==="hola"||at==="armando" ? "" : av >= .75 ? "¡Falta poco!" : av >= .4 ? "Vas bien" : "";
   $("wzProg").style.width = (at==="armando" ? 100 : Math.round(100*i/(total+1))) + "%";
   const B = $("wzBody"); let h = "";
   if(at==="hola"){
