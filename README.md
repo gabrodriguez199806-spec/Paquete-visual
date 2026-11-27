@@ -3,7 +3,7 @@
 App web para ópticas que arma el **plan visual completo** de cada paciente, como un plan de tratamiento de dentista: "necesitás esto, esto y esto, ¿con cuál empezamos?".
 
 1. **Receta:** se carga a mano o con una foto que lee la IA. La app la explica en palabras simples.
-2. **Anamnesis:** preguntas de hábitos y uso (pantallas, trabajo, manejo, luz, deporte, lentes de contacto…).
+2. **Anamnesis dirigida:** preguntas de estilo de vida (pantallas, trabajo, manejo de día o de noche, deporte, viajes), necesidades visuales (distancias, si pasa seguido de lejos a cerca, sol y aire libre) y corrección actual (qué anteojos tiene, cuándo los usa, si usó lentes de contacto y si está conforme con lo que usa hoy).
 3. **Plan, "un anteojo para cada momento":** así como nadie usa el mismo calzado para una fiesta, para correr y para caminar, el plan se arma en dos partes:
    - **Lo esencial: ver bien todo el día.** La prioridad. Si hay varias formas de resolverlo (por ejemplo multifocal, bifocal o dos anteojos), se muestran todas como alternativas válidas.
    - **Opcional y de especialidad,** agrupado por momento: estudiar y pantallas, manejar (día y noche), sol, deporte (deportivo graduado, protector, lentes de contacto, antiparras), salidas y eventos, lectura y hobbies, repuesto.
@@ -96,6 +96,7 @@ Ejemplo: `add > 0 and (lejos or "lejos" in dist)`
 - Si hay varias `soluciones` se muestran como alternativas A, B, C (por ejemplo multifocal, bifocal o dos anteojos).
 - Cada par lista `tecnologias`; cada una puede tener `si` (por ejemplo `{"id":"blue","si":"filtro_azul"}`).
 - Una pregunta puede tener `si` para aparecer solo cuando corresponde (`"si": "maneja_si"`).
+- Una pregunta con `enMensaje` (por ejemplo `"enMensaje": "Uso mis anteojos"`) manda su respuesta en el WhatsApp a la óptica, en "Sobre lo que uso hoy".
 
 ## Lectura de recetas con IA
 

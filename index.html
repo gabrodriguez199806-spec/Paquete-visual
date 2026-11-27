@@ -475,6 +475,7 @@ const DEFAULT_CONFIG = {
     {id:"pantallas", texto:"¿Cuántas horas por día mirás pantallas?", ayuda:"PC, celular, tablet, consola", opciones:[["0-2","Menos de 2"],["2-5","2 a 5"],["5-8","5 a 8"],["8+","Más de 8"]]},
     {id:"trabajo", multiple:true, texto:"¿Qué hacés la mayor parte del día?", opciones:[["pc","Oficina / PC"],["aire","Trabajo al aire libre"],["chofer","Manejo (chofer, reparto)"],["taller","Taller, obra o laboratorio"],["publico","Docencia / atención al público"],["precision","Oficio de precisión (costura, electrónica)"],["estudio","Estudio"],["casa","Casa / jubilado"]]},
     {id:"dist", si:"not sin_receta and not ve_bien", multiple:true, texto:"¿Dónde necesitás ver bien sí o sí?", opciones:[["lejos","Lejos (calle, tele, pizarrón)"],["inter","Intermedia (PC, tablero, cocina)"],["cerca","Cerca (celular, leer, coser)"]]},
+    {id:"enfoque", si:"not ve_bien", texto:"¿Pasás seguido la vista de lejos a cerca?", ayuda:"Por ejemplo: de la compu a una persona, del tablero al celular, del pizarrón al cuaderno", opciones:[["mucho","Todo el tiempo"],["aveces","A veces"],["poco","Casi nunca"]]},
     {id:"maneja", texto:"¿Manejás?", opciones:[["no","No"],["dia","Sí, de día"],["noche","También de noche"],["trabajo","Por trabajo"]]},
     {id:"maneja_frec", si:"maneja_si", texto:"¿Cada cuánto manejás?", opciones:[["ocasional","De vez en cuando"],["semanal","Varias veces por semana"],["diario","Todos los días"]]},
     {id:"luz", multiple:true, texto:"¿Algo de la luz te molesta?", opciones:[["sol","El sol, me achino"],["noche","Las luces de noche me encandilan"],["fatiga","Termino el día con la vista cansada"],["nada","Nada"]], exclusivas:["nada"]},
@@ -483,8 +484,12 @@ const DEFAULT_CONFIG = {
     {id:"deporte", multiple:true, texto:"¿Hacés deporte?", opciones:[["no","No"],["gym","Gimnasio"],["run","Running / caminata"],["bici","Bici"],["pelota","Fútbol / pádel / tenis"],["agua","Natación"],["nieve","Esquí / nieve"],["pesca","Pesca / náutica"]], exclusivas:["no"]},
     {id:"deporte_frec", si:'deporte_activo or "agua" in deporte', texto:"¿Cada cuánto hacés deporte?", opciones:[["ocasional","De vez en cuando"],["semanal","1 o 2 veces por semana"],["seguido","3 veces o más por semana"]]},
     {id:"actividades", multiple:true, texto:"¿Qué más hacés en tu tiempo libre?", opciones:[["eventos","Salidas y eventos"],["playa","Playa, pileta y vacaciones"],["lectura","Leer mucho"],["manualidades","Manualidades, costura, maquetas"],["gaming","Videojuegos"],["nada","Nada en especial"]], exclusivas:["nada"]},
-    {id:"lc", si:"lc_edad_ok and ofrece_lc and not ve_bien", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["interes","Me interesan"],["no","No"]]},
+    {id:"viaja", texto:"¿Viajás seguido?", ayuda:"Por trabajo o de vacaciones", opciones:[["no","Casi nunca"],["aveces","Algunas veces al año"],["seguido","Seguido"]]},
+    {id:"lc", si:"lc_edad_ok and ofrece_lc and not ve_bien", texto:"¿Usás o te interesan los lentes de contacto?", opciones:[["uso","Ya uso"],["antes","Usé y dejé"],["interes","Me interesan"],["no","No"]]},
     {id:"tiene", si:"not ve_bien", texto:"¿Qué anteojos tenés hoy?", opciones:[["ninguno","Ninguno"],["uno","Uno solo"],["viejo","Uno viejo o rayado"],["varios","Varios"]]},
+    {id:"uso", si:"tiene_anteojos", multiple:true, enMensaje:"Uso mis anteojos", texto:"¿Cuándo usás tus anteojos?", opciones:[["siempre","Todo el día"],["lejos","Para ver de lejos o manejar"],["cerca","Para leer o el celular"],["pc","Para la compu"],["actividad","Solo para alguna actividad"]], exclusivas:["siempre"]},
+    {id:"satisf", si:'tiene_anteojos or lc == "uso"', enMensaje:"Conforme con lo que uso hoy", texto:"¿Estás conforme con tus anteojos o lentes de contacto actuales?", opciones:[["si","Sí"],["masomenos","Más o menos"],["no","No"]]},
+    {id:"satisf_que", si:"no_conforme", multiple:true, enMensaje:"Lo que no me convence", texto:"¿Qué no te convence?", opciones:[["no_veo","No veo del todo bien con ellos"],["cambiar","Los saco y pongo todo el tiempo"],["pesan","Pesan o se resbalan"],["rayados","Están rayados o gastados"],["estetica","No me gusta cómo me quedan"],["lc_molestan","Los lentes de contacto me molestan"]]},
     {id:"importa", texto:"¿Qué es lo que más te importa?", opciones:[["estetica","Verme bien"],["confort","Comodidad todo el día"],["dura","Que dure"],["precio","Cuidar el presupuesto"]]}
   ],
   derivados: {
@@ -506,7 +511,11 @@ const DEFAULT_CONFIG = {
     nino_miope: 'edad <= 12 and miopia',
     adolescente_miope: 'menor_miope and edad > 12',
     lc_anisometropia: 'dif_graduacion >= 3 and lc_edad_ok',
-    lc_candidato: 'lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)'
+    lc_candidato: 'lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)',
+    tiene_anteojos: 'tiene in ["uno","viejo","varios"]',
+    viaja_seguido: 'viaja == "seguido"',
+    no_conforme: 'satisf in ["masomenos","no"]',
+    no_ve_actuales: '"no_veo" in satisf_que'
   },
   especialidades: [
     {id:"lc", nombre:"Lentes de contacto"},
@@ -549,7 +558,11 @@ const DEFAULT_CONFIG = {
         {texto:"Tu receta tiene adición: necesitás una corrección para lejos y otra para cerca."},
         {si:'maneja == "noche" or "noche" in luz', texto:"Manejás de noche o te encandilan las luces: el antirreflejo es imprescindible."},
         {si:'pantallas in ["5-8","8+"]', texto:"Nos dijiste que pasás {pantallas} h por día frente a pantallas."},
-        {si:'tiene in ["viejo","ninguno"]', texto:"Hoy no tenés un anteojo en buen estado."}
+        {si:'tiene in ["viejo","ninguno"]', texto:"Hoy no tenés un anteojo en buen estado."},
+        {si:'enfoque == "mucho" or "cambiar" in satisf_que', texto:"Pasás de lejos a cerca todo el tiempo: con un multifocal no tenés que andar cambiando de anteojo."},
+        {si:'"pesan" in satisf_que', texto:"Te pesan o se resbalan: lo tenemos en cuenta al elegir el cristal y el armazón."},
+        {si:"no_conforme and not no_ve_actuales", texto:"Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."},
+        {si:"no_ve_actuales", texto:"Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."}
       ],
       soluciones:[
         {id:"multi", nombre:"Multifocal", explicacion:"Un solo anteojo para lejos, intermedio y cerca, sin línea. Es lo más cómodo; lleva unos días de adaptación.",
@@ -572,11 +585,14 @@ const DEFAULT_CONFIG = {
         {si:"potencia >= 6", texto:"Tu graduación es alta: conviene un cristal de alto índice, más fino y liviano."},
         {si:"nino_miope and ofrece_control_miopia", texto:"Hasta los 12 años con miopía recomendamos cristal de control de miopía y sin filtro azul. Consultalo con tu oftalmólogo."},
         {si:"nino_miope and not ofrece_control_miopia", texto:"Con miopía y menos de 18 años, va sin filtro azul."},
-        {si:"adolescente_miope", texto:"Con miopía y menos de 18 años, va sin filtro azul."}
+        {si:"adolescente_miope", texto:"Con miopía y menos de 18 años, va sin filtro azul."},
+        {si:'"pesan" in satisf_que', texto:"Te pesan o se resbalan: lo tenemos en cuenta al elegir el cristal y el armazón."},
+        {si:"no_conforme and not no_ve_actuales", texto:"Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."},
+        {si:"no_ve_actuales", texto:"Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."}
       ],
       soluciones:[{id:"uno", nombre:"Anteojo", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"},{id:"blue",si:"filtro_azul"},{id:"foto",si:"oscurece"},{id:"alto_indice",si:"potencia >= 6"},{id:"control_miopia",si:"nino_miope"},{id:"policarbonato",si:"edad < 12"}]}]}]},
     {id:"solo_cerca", momento:"dia", nombre:"Anteojo de cerca", prioridad:"ess", cuando:'add > 0 and not lejos and not "lejos" in dist',
-      motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."}],
+      motivos:[{texto:"Tu receta es para cerca: leer, celular, coser."},{si:"no_conforme and not no_ve_actuales", texto:"Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."},{si:"no_ve_actuales", texto:"Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."}],
       soluciones:[{id:"uno", nombre:"Cerca", pares:[{tecnologias:[{id:"vision_cerca"},{id:"ar"},{id:"blue",si:"filtro_azul"}]}]}]},
     {id:"lc_aniso", momento:"dia", especialidad:"lc", prioridad:"ess", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto por la diferencia entre ojos", cuando:"lc_anisometropia",
       motivos:[
@@ -586,7 +602,7 @@ const DEFAULT_CONFIG = {
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"}]}]}]},
     {id:"lc_diario", momento:"dia", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto de uso diario", cuando:'(quiere_lc and lc == "uso") and not lc_anisometropia',
       puntos:[{n:7}],
-      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}],
+      motivos:[{texto:"Ya usás lentes de contacto: reposición y solución."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},{si:'"lc_molestan" in satisf_que', texto:"Nos dijiste que te molestan: hay materiales y reemplazos más cómodos, lo vemos en la óptica."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"}]}]}]},
 
     {id:"lc_alternativa", momento:"dia", especialidad:"lc", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Lentes de contacto como alternativa al anteojo", cuando:'(lc_candidato and lc != "no" and lc != "uso") and not lc_anisometropia',
@@ -595,7 +611,8 @@ const DEFAULT_CONFIG = {
         {texto:"Tu graduación supera 0.75: con lentes de contacto ves completo, sin el marco y sin que se empañen."},
         {si:"deporte_activo", texto:"Ideales para hacer deporte sin anteojo."},
         {si:'"eventos" in actividades', texto:"Para salidas y eventos, sin anteojo."},
-        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}
+        {si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."},
+        {si:'lc == "antes"', texto:"Ya usaste lentes de contacto: hoy hay materiales y reemplazos más cómodos."}
       ],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_torica",si:"astig_alto"},{id:"lc_mensuales",si:"not astig_alto"},{id:"lc_diarias"}]}]}]},
     {id:"lc_miopia", momento:"dia", especialidad:"control_miopia", alElegir:[{si:'receta_tipo == "anteojos"', texto:"Tu receta no indica lentes de contacto, pero podemos hacerte una prueba en la óptica.", mensaje:"Mi receta no indica lentes de contacto: me interesa hacer la prueba."}], nombre:"Control de miopía", cuando:'menor_miope and edad >= 8',
@@ -627,7 +644,7 @@ const DEFAULT_CONFIG = {
       soluciones:[{id:"uno", nombre:"Seguridad", pares:[{tecnologias:[{id:"policarbonato"},{id:"proteccion_lateral"},{id:"ar"}]}]}]},
 
     {id:"manejo", momento:"manejo", nombre:"Anteojos para manejar", cuando:"receta and maneja_si",
-      puntos:[{n:1},{si:"maneja_mucho", n:3},{si:'maneja == "trabajo" or maneja_frec == "diario"', n:2},{si:"maneja_noche", n:2},{si:'"noche" in luz or "sol" in luz', n:1},{si:"oscurece", n:1},{si:"graduacion_baja", n:-3}],
+      puntos:[{n:1},{si:"maneja_mucho", n:3},{si:'maneja == "trabajo" or maneja_frec == "diario"', n:2},{si:"maneja_noche", n:2},{si:'"noche" in luz or "sol" in luz', n:1},{si:"oscurece", n:1},{si:"graduacion_baja", n:-3},{si:"viaja_seguido", n:1}],
       motivos:[
         {si:"maneja_frec", texto:"Nos dijiste que manejás {maneja_frec}."},
         {si:'maneja == "trabajo"', texto:"Manejás por trabajo: muchas horas al volante."},
@@ -641,12 +658,13 @@ const DEFAULT_CONFIG = {
       ]}]},
 
     {id:"sol", momento:"sol", nombre:"Anteojo de sol graduado", cuando:'receta and not maneja_si',
-      puntos:[{si:'"sol" in luz', n:2},{si:'aire == "mucho"', n:3},{si:'aire == "medio"', n:1},{si:'"playa" in actividades', n:2},{si:'"aire" in trabajo', n:3},{si:"oscurece", n:-3},{si:"graduacion_baja", n:-2}],
+      puntos:[{si:'"sol" in luz', n:2},{si:'aire == "mucho"', n:3},{si:'aire == "medio"', n:1},{si:'"playa" in actividades', n:2},{si:'"aire" in trabajo', n:3},{si:"oscurece", n:-3},{si:"graduacion_baja", n:-2},{si:'viaja in ["aveces","seguido"]', n:1}],
       motivos:[
         {si:'"sol" in luz', texto:"Nos dijiste que el sol te molesta."},
         {si:'aire in ["medio","mucho"]', texto:"Pasás {aire} al aire libre por día."},
         {si:'"playa" in actividades', texto:"Playa, pileta y vacaciones: ver bien y proteger los ojos del sol."},
-        {si:'"aire" in trabajo', texto:"Trabajás al aire libre."}
+        {si:'"aire" in trabajo', texto:"Trabajás al aire libre."},
+        {si:"viaja_seguido", texto:"Viajás seguido: ver bien y proteger los ojos en la ruta, la playa o la montaña."}
       ],
       soluciones:[{id:"uno", nombre:"Sol", pares:[{tecnologias:[{id:"polar"},{id:"espejado",si:'"playa" in actividades'}]}]}]},
 
@@ -682,9 +700,9 @@ const DEFAULT_CONFIG = {
       puntos:[{n:2},{si:"quiere_lc", n:2},{si:'importa == "estetica"', n:1}],
       motivos:[{texto:"Para un casamiento, una fiesta o una foto, sin anteojo."},{si:"astig_alto", texto:"Tu astigmatismo es alto: tienen que ser tóricas."}],
       soluciones:[{id:"uno", nombre:"Lentes de contacto", pares:[{tecnologias:[{id:"lc_diarias"},{id:"lc_torica",si:"astig_alto"}]}]}]},
-    {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", cuando:'receta and ("eventos" in actividades or importa == "estetica")',
-      puntos:[{si:'"eventos" in actividades', n:2},{si:'importa == "estetica"', n:2},{si:'tiene == "varios"', n:-2},{si:"graduacion_baja", n:-1}],
-      motivos:[{texto:"Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."}],
+    {id:"vestir", momento:"salidas", nombre:"Un segundo anteojo con otro estilo", cuando:'receta and ("eventos" in actividades or importa == "estetica" or "estetica" in satisf_que)',
+      puntos:[{si:'"eventos" in actividades', n:2},{si:'importa == "estetica"', n:2},{si:'tiene == "varios"', n:-2},{si:"graduacion_baja", n:-1},{si:'"estetica" in satisf_que', n:2}],
+      motivos:[{texto:"Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."},{si:'"estetica" in satisf_que', texto:"Nos dijiste que no te gusta cómo te quedan tus anteojos actuales."}],
       soluciones:[{id:"uno", nombre:"Segundo anteojo", pares:[{tecnologias:[{id:"mismas"}]}]}]},
 
     {id:"cerca_extra", momento:"cerca", nombre:"Anteojo de cerca para leer y hobbies", cuando:'necesita_lejos_y_cerca',
@@ -700,8 +718,8 @@ const DEFAULT_CONFIG = {
     {"id": "plano_nieve", "momento": "deporte", "especialidad": "deportivo", "nombre": "Antiparra de nieve", "cuando": "not receta and \"nieve\" in deporte", "puntos": [{"n": 5}], "motivos": [{"si": "\"nieve\" in deporte", "texto": "En la nieve la luz es muy fuerte y rebota desde abajo: el espejado la corta."}], "soluciones": [{"id": "uno", "nombre": "Nieve", "pares": [{"tecnologias": [{"id": "antiparra_nieve"}, {"id": "espejado"}, {"id": "policarbonato"}]}]}]},
     {"id": "plano_seguridad", "momento": "trabajo", "especialidad": "seguridad", "nombre": "Anteojo de seguridad", "cuando": "not receta and \"taller\" in trabajo", "puntos": [{"n": 4}], "motivos": [{"si": "\"taller\" in trabajo", "texto": "Trabajás en taller, obra o laboratorio: protege de partículas y salpicaduras."}], "soluciones": [{"id": "uno", "nombre": "Seguridad", "pares": [{"tecnologias": [{"id": "plano"}, {"id": "policarbonato"}, {"id": "proteccion_lateral"}]}]}]},
     {id:"repuesto", momento:"repuesto", nombre:"Anteojo de repuesto", cuando:'receta',
-      puntos:[{si:"potencia >= 3", n:3},{si:"potencia >= 6", n:2},{si:'tiene in ["ninguno","uno","viejo"]', n:1},{si:'tiene == "varios"', n:-4},{si:"graduacion_baja", n:-5}],
-      motivos:[{texto:"Sin anteojo no ves bien: si se rompe, te quedás sin ver."},{texto:"Puede ser tu marco actual con cristales nuevos."}],
+      puntos:[{si:"potencia >= 3", n:3},{si:"potencia >= 6", n:2},{si:'tiene in ["ninguno","uno","viejo"]', n:1},{si:'tiene == "varios"', n:-4},{si:"graduacion_baja", n:-5},{si:"viaja_seguido", n:2},{si:'viaja == "aveces"', n:1}],
+      motivos:[{texto:"Sin anteojo no ves bien: si se rompe, te quedás sin ver."},{texto:"Puede ser tu marco actual con cristales nuevos."},{si:"viaja_seguido", texto:"Viajás seguido: si se rompe o se pierde lejos de casa, tenés otro a mano."}],
       soluciones:[{id:"uno", nombre:"Repuesto", pares:[{tecnologias:[{id:"vision_simple"},{id:"ar"}]}]}]}
   ]
 };
@@ -785,7 +803,7 @@ const AI_DEF = {claude:"claude-sonnet-5-5", gemini:"gemini-flash-lite-latest", o
 const EXAMPLE = {
   pac:{nombre:"Laura (ejemplo)", edad:"46", tel:""},
   rx:{od:{esf:"-1.50",cil:"-0.75",eje:"180",add:"+1.50"}, oi:{esf:"-1.25",cil:"-0.50",eje:"170",add:"+1.50"}, fecha:"2026-09-12", tipo:"anteojos", medico:""},
-  a:{pantallas:"8+", trabajo:["pc"], dist:["lejos","inter","cerca"], maneja:"noche", luz:["noche","fatiga"], aire:"medio", osc:"no", deporte:["gym","run"], actividades:["eventos","lectura"], lc:"interes", tiene:"viejo", importa:"confort"},
+  a:{pantallas:"8+", trabajo:["pc"], dist:["lejos","inter","cerca"], maneja:"noche", luz:["noche","fatiga"], aire:"medio", osc:"no", deporte:["gym","run"], actividades:["eventos","lectura"], enfoque:"mucho", viaja:"aveces", lc:"interes", tiene:"viejo", uso:["lejos"], satisf:"masomenos", satisf_que:["cambiar"], importa:"confort"},
   sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{lejos_cerca:true}, hoyPar:{}, example:true
 };
 const BLANK = () => ({pac:{nombre:"",edad:"",tel:""}, rx:{od:{esf:"",cil:"",eje:"",add:""},oi:{esf:"",cil:"",eje:"",add:""},fecha:"",tipo:"anteojos",medico:""}, a:{}, sol:{}, sel:{}, own:{}, off:{}, force:{}, hoy:{}, hoyPar:{}, example:false});
@@ -1027,6 +1045,8 @@ function contactText(){
   if(start.length) t += "*Quiero empezar con:*\n" + start.map(x=>"• "+x).join("\n") + "\n\n";
   if(rest.length) t += (start.length ? "*El resto de mi plan es:*\n" : "*Mi plan es:*\n") + rest.map(x=>"• "+x).join("\n") + "\n\n";
   const rx = rxLines();
+  const F = facts(), hoyUso = C.preguntas.filter(q=>q.enMensaje && test(q.si,F) && [].concat(F[q.id]??[]).length).map(q=>`• ${q.enMensaje}: ${fill("{"+q.id+"}",F)}`);
+  if(hoyUso.length) t += "*Sobre lo que uso hoy:*\n" + hoyUso.join("\n") + "\n\n";
   if(rx.length) t += "*Mi receta" + (S.rx.fecha?` (${S.rx.fecha.split("-").reverse().join("/")})`:"") + ":*\n" + rx.join("\n") + "\n\n";
   const ms = [...new Set(act.filter(isHoy).flatMap(i=>notas(i).map(n=>n.mensaje).filter(Boolean)))];
   if(ms.length) t += ms.join("\n") + "\n\n";
@@ -1254,8 +1274,13 @@ const ICONOS = {
   deporte:{no:"❌",gym:"🏋️",run:"🏃",bici:"🚴",pelota:"⚽",agua:"🏊",nieve:"⛷️",pesca:"🎣"},
   deporte_frec:{ocasional:"🏃",semanal:"🏃🏃",seguido:"🏃🏃🏃"},
   actividades:{eventos:"🎉",playa:"🏖️",lectura:"📚",manualidades:"🧵",gaming:"🎮",nada:"❌"},
-  lc:{uso:"👁️",interes:"✨",no:"👓"},
+  lc:{uso:"👁️",antes:"↩️",interes:"✨",no:"👓"},
+  enfoque:{mucho:"🔄",aveces:"↔️",poco:"🎯"},
+  viaja:{no:"🏠",aveces:"🧳",seguido:"✈️"},
   tiene:{ninguno:"🚫",uno:"👓",viejo:"🩹",varios:"👓👓"},
+  uso:{siempre:"🕐",lejos:"🚗",cerca:"📖",pc:"💻",actividad:"🎯"},
+  satisf:{si:"😊",masomenos:"😐",no:"😕"},
+  satisf_que:{no_veo:"🌫️",cambiar:"🔁",pesan:"⚖️",rayados:"🩹",estetica:"🪞",lc_molestan:"👁️"},
   importa:{estetica:"✨",confort:"😌",dura:"💪",precio:"💰"}
 };
 const icono = (q,v) => ((q.iconos||{})[v]) || ((ICONOS[q.id]||{})[v]) || "";
