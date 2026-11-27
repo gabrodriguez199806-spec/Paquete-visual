@@ -137,6 +137,26 @@
       "si": "not sin_receta and not ve_bien"
     },
     {
+      "id": "enfoque",
+      "si": "not ve_bien",
+      "texto": "¿Pasás seguido la vista de lejos a cerca?",
+      "ayuda": "Por ejemplo: de la compu a una persona, del tablero al celular, del pizarrón al cuaderno",
+      "opciones": [
+        [
+          "mucho",
+          "Todo el tiempo"
+        ],
+        [
+          "aveces",
+          "A veces"
+        ],
+        [
+          "poco",
+          "Casi nunca"
+        ]
+      ]
+    },
+    {
       "id": "maneja",
       "texto": "¿Manejás?",
       "opciones": [
@@ -336,6 +356,25 @@
       ]
     },
     {
+      "id": "viaja",
+      "texto": "¿Viajás seguido?",
+      "ayuda": "Por trabajo o de vacaciones",
+      "opciones": [
+        [
+          "no",
+          "Casi nunca"
+        ],
+        [
+          "aveces",
+          "Algunas veces al año"
+        ],
+        [
+          "seguido",
+          "Seguido"
+        ]
+      ]
+    },
+    {
       "id": "lc",
       "si": "lc_edad_ok and ofrece_lc and not ve_bien",
       "texto": "¿Usás o te interesan los lentes de contacto?",
@@ -343,6 +382,10 @@
         [
           "uso",
           "Ya uso"
+        ],
+        [
+          "antes",
+          "Usé y dejé"
         ],
         [
           "interes",
@@ -376,6 +419,91 @@
         ]
       ],
       "si": "not ve_bien"
+    },
+    {
+      "id": "uso",
+      "si": "tiene_anteojos",
+      "multiple": true,
+      "enMensaje": "Uso mis anteojos",
+      "texto": "¿Cuándo usás tus anteojos?",
+      "opciones": [
+        [
+          "siempre",
+          "Todo el día"
+        ],
+        [
+          "lejos",
+          "Para ver de lejos o manejar"
+        ],
+        [
+          "cerca",
+          "Para leer o el celular"
+        ],
+        [
+          "pc",
+          "Para la compu"
+        ],
+        [
+          "actividad",
+          "Solo para alguna actividad"
+        ]
+      ],
+      "exclusivas": [
+        "siempre"
+      ]
+    },
+    {
+      "id": "satisf",
+      "si": "tiene_anteojos or lc == \"uso\"",
+      "enMensaje": "Conforme con lo que uso hoy",
+      "texto": "¿Estás conforme con tus anteojos o lentes de contacto actuales?",
+      "opciones": [
+        [
+          "si",
+          "Sí"
+        ],
+        [
+          "masomenos",
+          "Más o menos"
+        ],
+        [
+          "no",
+          "No"
+        ]
+      ]
+    },
+    {
+      "id": "satisf_que",
+      "si": "no_conforme",
+      "multiple": true,
+      "enMensaje": "Lo que no me convence",
+      "texto": "¿Qué no te convence?",
+      "opciones": [
+        [
+          "no_veo",
+          "No veo del todo bien con ellos"
+        ],
+        [
+          "cambiar",
+          "Los saco y pongo todo el tiempo"
+        ],
+        [
+          "pesan",
+          "Pesan o se resbalan"
+        ],
+        [
+          "rayados",
+          "Están rayados o gastados"
+        ],
+        [
+          "estetica",
+          "No me gusta cómo me quedan"
+        ],
+        [
+          "lc_molestan",
+          "Los lentes de contacto me molestan"
+        ]
+      ]
     },
     {
       "id": "importa",
@@ -419,7 +547,11 @@
     "nino_miope": "edad <= 12 and miopia",
     "adolescente_miope": "menor_miope and edad > 12",
     "lc_anisometropia": "dif_graduacion >= 3 and lc_edad_ok",
-    "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)"
+    "lc_candidato": "lc_edad_ok and not menor_miope and (esf_max > 0.75 or cil_max > 0.75)",
+    "tiene_anteojos": "tiene in [\"uno\",\"viejo\",\"varios\"]",
+    "viaja_seguido": "viaja == \"seguido\"",
+    "no_conforme": "satisf in [\"masomenos\",\"no\"]",
+    "no_ve_actuales": "\"no_veo\" in satisf_que"
   },
   "especialidades": [
     {
@@ -609,6 +741,22 @@
         {
           "si": "tiene in [\"viejo\",\"ninguno\"]",
           "texto": "Hoy no tenés un anteojo en buen estado."
+        },
+        {
+          "si": "enfoque == \"mucho\" or \"cambiar\" in satisf_que",
+          "texto": "Pasás de lejos a cerca todo el tiempo: con un multifocal no tenés que andar cambiando de anteojo."
+        },
+        {
+          "si": "\"pesan\" in satisf_que",
+          "texto": "Te pesan o se resbalan: lo tenemos en cuenta al elegir el cristal y el armazón."
+        },
+        {
+          "si": "no_conforme and not no_ve_actuales",
+          "texto": "Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."
+        },
+        {
+          "si": "no_ve_actuales",
+          "texto": "Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."
         }
       ],
       "soluciones": [
@@ -759,6 +907,18 @@
         {
           "si": "adolescente_miope",
           "texto": "Con miopía y menos de 18 años, va sin filtro azul."
+        },
+        {
+          "si": "\"pesan\" in satisf_que",
+          "texto": "Te pesan o se resbalan: lo tenemos en cuenta al elegir el cristal y el armazón."
+        },
+        {
+          "si": "no_conforme and not no_ve_actuales",
+          "texto": "Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."
+        },
+        {
+          "si": "no_ve_actuales",
+          "texto": "Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."
         }
       ],
       "soluciones": [
@@ -809,6 +969,14 @@
       "motivos": [
         {
           "texto": "Tu receta es para cerca: leer, celular, coser."
+        },
+        {
+          "si": "no_conforme and not no_ve_actuales",
+          "texto": "Nos dijiste que no estás del todo conforme con lo que usás hoy: lo tenemos en cuenta para el nuevo."
+        },
+        {
+          "si": "no_ve_actuales",
+          "texto": "Nos dijiste que no ves del todo bien con lo que usás hoy: si tu receta no es reciente, revisala con tu oftalmólogo antes de hacer cristales nuevos."
         }
       ],
       "soluciones": [
@@ -905,6 +1073,10 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        },
+        {
+          "si": "\"lc_molestan\" in satisf_que",
+          "texto": "Nos dijiste que te molestan: hay materiales y reemplazos más cómodos, lo vemos en la óptica."
         }
       ],
       "soluciones": [
@@ -981,6 +1153,10 @@
         {
           "si": "astig_alto",
           "texto": "Tu astigmatismo es alto: tienen que ser tóricas."
+        },
+        {
+          "si": "lc == \"antes\"",
+          "texto": "Ya usaste lentes de contacto: hoy hay materiales y reemplazos más cómodos."
         }
       ],
       "soluciones": [
@@ -1269,6 +1445,10 @@
         {
           "si": "graduacion_baja",
           "n": -3
+        },
+        {
+          "si": "viaja_seguido",
+          "n": 1
         }
       ],
       "motivos": [
@@ -1360,6 +1540,10 @@
         {
           "si": "graduacion_baja",
           "n": -2
+        },
+        {
+          "si": "viaja in [\"aveces\",\"seguido\"]",
+          "n": 1
         }
       ],
       "motivos": [
@@ -1378,6 +1562,10 @@
         {
           "si": "\"aire\" in trabajo",
           "texto": "Trabajás al aire libre."
+        },
+        {
+          "si": "viaja_seguido",
+          "texto": "Viajás seguido: ver bien y proteger los ojos en la ruta, la playa o la montaña."
         }
       ],
       "soluciones": [
@@ -1693,7 +1881,7 @@
       "id": "vestir",
       "momento": "salidas",
       "nombre": "Un segundo anteojo con otro estilo",
-      "cuando": "receta and (\"eventos\" in actividades or importa == \"estetica\")",
+      "cuando": "receta and (\"eventos\" in actividades or importa == \"estetica\" or \"estetica\" in satisf_que)",
       "puntos": [
         {
           "si": "\"eventos\" in actividades",
@@ -1710,11 +1898,19 @@
         {
           "si": "graduacion_baja",
           "n": -1
+        },
+        {
+          "si": "\"estetica\" in satisf_que",
+          "n": 2
         }
       ],
       "motivos": [
         {
           "texto": "Igual que con la ropa o los zapatos: uno para todos los días y otro para combinar en una salida."
+        },
+        {
+          "si": "\"estetica\" in satisf_que",
+          "texto": "Nos dijiste que no te gusta cómo te quedan tus anteojos actuales."
         }
       ],
       "soluciones": [
@@ -2180,6 +2376,14 @@
         {
           "si": "graduacion_baja",
           "n": -5
+        },
+        {
+          "si": "viaja_seguido",
+          "n": 2
+        },
+        {
+          "si": "viaja == \"aveces\"",
+          "n": 1
         }
       ],
       "motivos": [
@@ -2188,6 +2392,10 @@
         },
         {
           "texto": "Puede ser tu marco actual con cristales nuevos."
+        },
+        {
+          "si": "viaja_seguido",
+          "texto": "Viajás seguido: si se rompe o se pierde lejos de casa, tenés otro a mano."
         }
       ],
       "soluciones": [
